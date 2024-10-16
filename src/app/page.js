@@ -5,9 +5,10 @@ import { useAuth } from '../components/AuthProvider'
 import { Button } from "../components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/card"
 import { supabase } from '@/lib/supabaseClient'
+import { useRequireAuth } from '@/components/useRequireAuth'
 
 export default function Home() {
-  const { user } = useAuth()
+  const { user } = useRequireAuth()
   const router = useRouter()
   const [groups, setGroups] = useState([])
 
