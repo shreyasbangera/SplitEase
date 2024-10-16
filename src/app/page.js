@@ -8,7 +8,7 @@ import { supabase } from '@/lib/supabaseClient'
 import { useRequireAuth } from '@/components/useRequireAuth'
 
 export default function Home() {
-  const { user } = useRequireAuth()
+  const user = useRequireAuth()
   const router = useRouter()
   const [groups, setGroups] = useState([])
 
