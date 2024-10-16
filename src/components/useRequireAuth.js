@@ -12,10 +12,9 @@ export function useRequireAuth(){
     useEffect(() => {
         const timer = setTimeout(() => {
               if (!user) {
-                setIsAuthorized(false);
                 router.push(`/login?returnUrl=${encodeURIComponent(pathname)}`);
               }
-          }, 5000); // 5 seconds timeout
+          }, 3000); // 5 seconds timeout
       
           return () => clearTimeout(timer);
     },[user])
