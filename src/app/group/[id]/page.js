@@ -15,7 +15,6 @@ export default function GroupDetails({ params }) {
 
   useEffect(() => {
       if (user && params.id) {
-        console.log('trigger')
       fetchGroup()
       fetchExpenses()
     }
@@ -34,8 +33,6 @@ export default function GroupDetails({ params }) {
     }
     setGroup(data)
 }
-
-console.log(group)
 
 async function fetchExpenses() {
     const { data, error } = await supabase
@@ -59,8 +56,7 @@ async function fetchExpenses() {
 
   function calculateTotalPending(expenses) {
     const total = expenses.reduce((acc, expense) => {
-      if (expense.paidBy !== user.id) {
-        console.log(group?.members)
+      if (expense.paid_by !== user.id) {
         return acc + (expense.amount / group?.members.length+1)
       }
       return acc
@@ -89,7 +85,7 @@ async function fetchExpenses() {
       
       <Card className="mb-4">
         <CardHeader>
-          <CardTitle>Total Pending: ${totalPending.toFixed(2)}</CardTitle>
+          <CardTitle>Total Pending: Rs.{totalPending.toFixed(2)}</CardTitle>
         </CardHeader>
         <CardContent>
           <Button onClick={handleSettleUp}>Settle Up</Button>
@@ -103,8 +99,8 @@ async function fetchExpenses() {
         <CardContent>
           {expenses.map((expense) => (
             <div key={expense.id} className="mb-2">
-              <strong>{expense.description}</strong> - ${expense.amount} 
-              (Paid by: {expense.paidBy === user.id ? 'You' : expense.paidBy})
+              <strong>{expense.description}</strong> - Rs.{expense.amount} 
+              (Paid by: {expense.paid_by === user.id ? 'You' : expense.paid_by})
             </div>
           ))}
         </CardContent>

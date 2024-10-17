@@ -1,67 +1,91 @@
-'use client'
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAuth } from '../components/AuthProvider'
-import { Button } from "../components/ui/button"
-import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/card"
-import { supabase } from '@/lib/supabaseClient'
-import { useRequireAuth } from '@/components/useRequireAuth'
+"use client";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../components/AuthProvider";
+import { Button } from "../components/ui/button";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "../components/ui/card";
+import { supabase } from "@/lib/supabaseClient";
+import { useRequireAuth } from "@/components/useRequireAuth";
+import Image from "next/image";
 
 export default function Home() {
-  const user = useRequireAuth()
-  const router = useRouter()
-  const [groups, setGroups] = useState([])
-
-  console.log(user)
+  const user = useRequireAuth();
+  const router = useRouter();
+  const [groups, setGroups] = useState([]);
 
   useEffect(() => {
-    if (user) fetchGroups()
-  }, [user])
+    if (user) fetchGroups();
+  }, [user]);
 
   async function fetchGroups() {
     const { data, error } = await supabase
-    .from('groups')  
-    .select('*')
-    .or(`created_by.eq.${user.id},members.cs.{${user.email}}`);
+      .from("groups")
+      .select("*")
+      .or(`created_by.eq.${user.id},members.cs.{${user.email}}`);
 
-  if (error) {
-    console.error('Error fetching groups:', error)
-  } else {
-    setGroups(data)  // Assuming `setGroups` is a state setter to store the fetched data
-  }
+    if (error) {
+      console.error("Error fetching groups:", error);
+    } else {
+      setGroups(data);
+    }
   }
 
   async function handleAddExpense() {
     if (groups.length > 0) {
-      router.push('/add_expense')
+      router.push("/add_expense");
     } else {
-      alert('Please create a group first before adding an expense.')
+      alert("Please create a group first before adding an expense.");
     }
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Splitwise Clone</h1>
-      
-      <div className="mb-4">
-        <Button onClick={() => router.push('/add_group')} className="mr-2">Add Group</Button>
-        <Button onClick={handleAddExpense}>Add Expense</Button>
+    <div className="flex justify-center w-full">
+    <div className="py-5 lg:max-w-[70%] max-w-[85%] w-full">
+      <div className="flex lg:flex-row flex-col justify-end gap-3">
+        <Button
+          onClick={() => router.push("/add_group")}
+          className="font-bold bg-[#e7eef4] text-[#0d151c] text-sm hover:bg-[#e7eef4]/80 px-4 rounded-xl"
+        >
+          Create new group
+        </Button>
+        <Button
+          className="font-bold text-sm px-4 rounded-xl"
+          onClick={handleAddExpense}
+        >
+          Add new expense
+        </Button>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Your Groups</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <h1 className="p-4 font-extrabold lg:text-4xl text-3xl tracking-tighter">Groups</h1>
+      {groups?.length ? (
+        <div>
           {groups.map((group) => (
-            <div key={group.id} className="mb-2">
-              <Button variant="link" onClick={() => router.push(`/group/${group.id}`)}>
-                {group.name}
-              </Button>
+            <div key={group.id} onClick={() => router.push(`/group/${group.id}`)} className="flex items-center py-2 justify-between cursor-pointer">
+              <div
+                className="py-2 px-4 font-medium flex items-center gap-4 cursor-pointer"
+              >
+                <Image src="https://www.svgrepo.com/show/86044/group.svg" width={56} height={56} alt='group' />
+                <span>{group.name}</span>
+              </div>
+              <Button className='rounded-xl text-sm font-medium h-8 bg-[#E7EEF4] text-[#0d151c] hover:bg-[#E7EEF4]/80'>Settle</Button>
             </div>
           ))}
-        </CardContent>
-      </Card>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-2 justify-center items-center custom-height">
+          <span className="font-bold text-lg">
+            You haven't created any group yet
+          </span>
+          <span className="text-[#0d151c] text-sm">
+            Create a group to share expenses with friends, family or roommates
+          </span>
+        </div>
+      )}
     </div>
-  )
+    </div>
+  );
 }

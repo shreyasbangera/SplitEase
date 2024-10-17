@@ -20,7 +20,6 @@ export default function AddGroup() {
       .insert([{ name: groupName, invite_emails: inviteEmails.split(',') }])
       .select()
 
-      console.log(data)
 
     if (data && data[0]) {
       await sendInvites(data[0]?.id)
@@ -35,8 +34,6 @@ export default function AddGroup() {
     const validateEmail = (email) => {
       return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     };
-
-    console.log(user)
 
     const sendInvites = async (groupId) => {
       console.log(inviteEmails)
@@ -69,29 +66,33 @@ export default function AddGroup() {
 
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Create New Group</h1>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Group Details</CardTitle>
-        </CardHeader>
-        <CardContent>
+    <div className="flex justify-center">
+    <div className="py-10 flex-1 justify-center lg:max-w-[50%] max-w-[85%]">
+      <h1 className="lg:text-3xl text-2xl font-extrabold py-4">Create a group</h1>
+        <>
+        <div className="py-3">
+        <p className="pb-2 font-medium text-base">Name your group</p>
           <Input
             placeholder="Group Name"
             value={groupName}
             onChange={(e) => setGroupName(e.target.value)}
-            className="mb-2"
+            className="p-[15px] h-14 rounded-xl"
           />
+          </div>
+          <div className="py-3">
+          <p className="pb-2 font-medium text-base">Invite friends</p>
           <Input
             placeholder="Invite Member (Email)"
             value={inviteEmails}
             onChange={(e) => setInviteEmails(e.target.value)}
-            className="mb-2"
+            className="p-[15px] h-14 rounded-xl"
           />
-          <Button onClick={handleCreateGroup}>Create Group</Button>
-        </CardContent>
-      </Card>
+          </div>
+          <div className="py-3">
+          <Button className='w-full' onClick={handleCreateGroup}>Create</Button>
+          </div>
+        </>
+    </div>
     </div>
   );
 }

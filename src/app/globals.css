@@ -11,6 +11,9 @@ body {
     text-wrap: balance;
   }
 }
+.custom-height {
+  height: calc(100vh - 218px);
+}
 
 @layer base {
   :root {
