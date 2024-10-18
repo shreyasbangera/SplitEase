@@ -14,7 +14,6 @@ export default function JoinGroup({ params }) {
 
   useEffect(() => {
     if (user) {
-      console.log(user)
       fetchGroup()
     }
   }, [user])
@@ -47,7 +46,6 @@ export default function JoinGroup({ params }) {
       .from('groups')
       .update({ 
         members: [...group.members, user.id],
-        invite_emails: group.invite_emails.filter(email => email !== user.email)
       })
       .eq('id', group.id)
 

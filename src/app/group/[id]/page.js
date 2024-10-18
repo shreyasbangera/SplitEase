@@ -1,110 +1,159 @@
-'use client'
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAuth } from '../../../components/AuthProvider'
-import { Button } from "@/components/ui/button"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { supabase } from '@/lib/supabaseClient'
+"use client";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../../../components/AuthProvider";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function GroupDetails({ params }) {
-  const { user } = useAuth()
-  const router = useRouter()
-  const [group, setGroup] = useState(null)
-  const [expenses, setExpenses] = useState([])
-  const [totalPending, setTotalPending] = useState(0)
+  const { user } = useAuth();
+  const router = useRouter();
+  const [group, setGroup] = useState(null);
+  const [expenses, setExpenses] = useState([]);
+  const [totalPending, setTotalPending] = useState(0);
+  const [settlements, setSettlements] = useState([]);
+  const [splits, setSplits] = useState([]);
 
   useEffect(() => {
-      if (user && params.id) {
-      fetchGroup()
-      fetchExpenses()
+    if (user && params.id) {
+      fetchGroup();
+      fetchExpensesAndSplits();
     }
-  }, [user, params.id])
+  }, [user, params.id]);
 
   async function fetchGroup() {
     const { data, error } = await supabase
-      .from('groups')
-      .select('*')
-      .eq('id', params.id)
-      .single() // Assuming only one group needs to be fetched by `id`
-  
-    if (error) {
-      console.error('Error fetching group:', error)
-      return
-    }
-    setGroup(data)
-}
+      .from("groups")
+      .select("*")
+      .eq("id", params.id)
+      .single();
 
-async function fetchExpenses() {
+    if (error) {
+      console.error("Error fetching group:", error);
+      return;
+    }
+    setGroup(data);
+  }
+
+  const fetchExpensesAndSplits = async () => {
+    try {
+      // Fetch expenses
+      const { data: expensesData, error: expensesError } = await supabase
+        .from("expenses")
+        .select(`*`)
+        .eq("group_id", params.id)
+        .order("created_at", { ascending: false });
+
+      if (expensesError) throw expensesError;
+
+      // Fetch splits for current user
+      const { data: splitsData, error: splitsError } = await supabase
+        .from("expense_splits")
+        .select("*")
+        .eq("user_email", user.email)
+        .eq("is_settled", false);
+
+      if (splitsError) throw splitsError;
+
+      setExpenses(expensesData);
+      setSplits(splitsData);
+
+      console.log(splitsData);
+
+      // Calculate total pending amount
+      const pending = splitsData.reduce(
+        (sum, split) => sum + split.share_amount,
+        0
+      );
+      setTotalPending(pending);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const fetchSettlements = async () => {
     const { data, error } = await supabase
-      .from('expenses')
-      .select('*')
-      .eq('group_id', params.id) // Filter by groupId
-  
-    if (error) {
-      console.error('Error fetching expenses:', error)
-      return
-    }
-  
-    setExpenses(data)
-  }
-  
-  useEffect(() => {
-    if (group && expenses.length > 0 && user) {
-      calculateTotalPending(expenses)
-    }
-  }, [group, expenses, user])
+      .from("settlements")
+      .select("*")
+      .eq("group_id", params.id)
+      .order("settled_at", { ascending: false });
 
-  function calculateTotalPending(expenses) {
-    const total = expenses.reduce((acc, expense) => {
-      if (expense.paid_by !== user.id) {
-        return acc + (expense.amount / group?.members.length+1)
-      }
-      return acc
-    }, 0)
-    setTotalPending(total)
-  }
+    if (error) {
+      console.error("Error fetching settlements:", error);
+      return;
+    }
+
+    setSettlements(data);
+  };
 
   async function handleSettleUp() {
-    const response = await fetch(`/api/settle-up`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ groupId: params.id })
-    })
-    if (response.ok) {
-      fetchExpenses()
-    } else {
-      console.error('Error settling up')
+    // First, upsert the settlement
+    const { error: settlementError } = await supabase
+      .from("settlements")
+      .insert({
+        group_id: params.id,
+        paid_by: user.id,
+        amount: totalPending,
+      });
+
+    if (settlementError) {
+      console.error("Error settling up:", settlementError);
+      return;
     }
+
+    const { data, error: splitUpdateError } = await supabase
+      .from("expense_splits")
+      .update({
+        is_settled: true,
+        settled_at: new Date().toISOString(),
+      })
+      .eq("user_email", user.email)
+      .eq("is_settled", false);
+
+    if (splitUpdateError) {
+      console.error(
+        "Error updating settled amounts in expenses:",
+        splitUpdateError
+      );
+      return;
+    }
+    await fetchExpensesAndSplits();
+    await fetchSettlements();
   }
 
-  if (!group) return <div>Loading...</div>
+  if (!group) return <div>Loading...</div>;
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">{group.name}</h1>
-      
-      <Card className="mb-4">
-        <CardHeader>
-          <CardTitle>Total Pending: Rs.{totalPending.toFixed(2)}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Button onClick={handleSettleUp}>Settle Up</Button>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Expenses</CardTitle>
-        </CardHeader>
-        <CardContent>
+    <div className="flex justify-center">
+      <div className="py-10 flex-1 justify-center lg:max-w-[50%] max-w-[85%]">
+        <h1 className="lg:text-3xl text-2xl font-extrabold py-4">
+          {group.name}
+        </h1>
+        <div className="flex my-3 justify-between py-5 bg-gray-100 px-4 rounded-xl">
+        <div>
+          <p className="font-medium text-sm">Total balance</p>
+          <p className="font-bold text-xl">Rs.{totalPending.toFixed(2)}</p>
+          </div>
+          <Button className='font-bold text-sm px-4 rounded-xl' onClick={handleSettleUp} disabled={totalPending === 0}>
+            Settle Up
+          </Button>
+        </div>
+        <div className="py-3">
+        <p className="text-lg font-bold py-3">Expenses</p>
+        <div>
           {expenses.map((expense) => (
             <div key={expense.id} className="mb-2">
-              <strong>{expense.description}</strong> - Rs.{expense.amount} 
-              (Paid by: {expense.paid_by === user.id ? 'You' : expense.paid_by})
+              <div className=" flex justify-between">
+              <span className="font-medium">{expense.description}</span> 
+              <p>Rs.{expense.amount}</p>
+              </div>
+              <p>Paid by: {expense.paid_by === user.id ? "You" : expense.paid_by}</p>
             </div>
           ))}
-        </CardContent>
-      </Card>
+        </div>
+        </div>
+      </div>
     </div>
-  )
+  );
 }

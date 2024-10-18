@@ -26,7 +26,7 @@ export default function Home() {
     const { data, error } = await supabase
       .from("groups")
       .select("*")
-      .or(`created_by.eq.${user.id},members.cs.{${user.email}}`);
+      .or(`created_by.eq.${user.id},invited_emails.cs.{${user.email}}`);
 
     if (error) {
       console.error("Error fetching groups:", error);
@@ -60,15 +60,15 @@ export default function Home() {
           Add new expense
         </Button>
       </div>
-      <h1 className="p-4 font-extrabold lg:text-4xl text-3xl tracking-tighter">Groups</h1>
+      <h1 className="lg:p-4 mt-8 lg:mt-0 p-0 font-extrabold lg:text-4xl text-2xl tracking-tighter">Groups</h1>
       {groups?.length ? (
         <div>
           {groups.map((group) => (
             <div key={group.id} onClick={() => router.push(`/group/${group.id}`)} className="flex items-center py-2 justify-between cursor-pointer">
               <div
-                className="py-2 px-4 font-medium flex items-center gap-4 cursor-pointer"
+                className="py-2 px-0 lg:px-4 font-medium flex items-center gap-4 cursor-pointer"
               >
-                <Image src="https://www.svgrepo.com/show/86044/group.svg" width={56} height={56} alt='group' />
+                <Image className="w-9 lg:w-14" src="https://www.svgrepo.com/show/86044/group.svg" width={56} height={56} alt='group' />
                 <span>{group.name}</span>
               </div>
               <Button className='rounded-xl text-sm font-medium h-8 bg-[#E7EEF4] text-[#0d151c] hover:bg-[#E7EEF4]/80'>Settle</Button>

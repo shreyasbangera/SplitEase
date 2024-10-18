@@ -17,7 +17,7 @@ export default function AddGroup() {
   async function handleCreateGroup() { 
     const { data, error } = await supabase
       .from("groups")
-      .insert([{ name: groupName, invite_emails: inviteEmails.split(',') }])
+      .insert([{ name: groupName, invited_emails: inviteEmails.split(','), created_by: user.id }])
       .select()
 
 
@@ -36,12 +36,11 @@ export default function AddGroup() {
     };
 
     const sendInvites = async (groupId) => {
-      console.log(inviteEmails)
       const emails = inviteEmails.split(',')
         .map((email) => email.trim())
         .filter((email) => validateEmail(email));
         const groupLink = process.env.NODE_ENV === 'production'
-        ? `https://yourdomain.com/join_group/${groupId}`  
+        ? `https://splitwise-clone.vercel.app/join_group/${groupId}`  
         : `http://localhost:3000/join_group/${groupId}`;
 
       if (emails.length > 0) {

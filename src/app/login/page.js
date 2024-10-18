@@ -20,8 +20,6 @@ const Page = () => {
   const returnUrl = searchParams.get('returnUrl') || '/';
   const user = useAuth();
 
-  console.log(user);
-
   const handleSignUp = async (e) => {
     e.preventDefault();
     const { error } = await supabase.auth.signUp({ email, password });
@@ -38,7 +36,7 @@ const Page = () => {
     if (error) {
       alert(error.message);
     } else {
-      console.log(returnUrl);
+      g(returnUrl);
       router.push(returnUrl);
     }
   };

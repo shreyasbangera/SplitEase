@@ -23,61 +23,86 @@ export default function AddExpensePage() {
   async function fetchGroups() {
     const { data, error } = await supabase
       .from('groups')
-      .select('id, name')
+      .select('*')
     
     if (error) {
       console.error('Error fetching groups:', error)
     } else if (data) {
+      console.log(data)
       setGroups(data)
     }
   }
 
-  async function handleSubmit(e) {
-    e.preventDefault()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      alert('You must be logged in to add an expense')
-      return
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      // 1. Create the expense
+      const { data: expense, error: expenseError } = await supabase
+        .from('expenses')
+        .insert({
+          group_id: groupId,
+          description,
+          amount: parseFloat(amount),
+          paid_by: user.id
+        })
+        .select()
+        .single();
+
+      if (expenseError) throw expenseError;
+
+      // 2. Create splits for all group members
+      const splits = groups[0]?.invited_emails?.map(email => ({
+        expense_id: expense.id,
+        user_email: email,
+        share_amount: expense.amount / (groups[0].invited_emails.length+1),
+        is_settled: email === user.email // automatically settled for the payer
+      }));
+
+      const { error: splitsError } = await supabase
+        .from('expense_splits')
+        .insert(splits);
+
+      if (splitsError) throw splitsError;
+
+      // 3. Clear form and close modal
+      setDescription('');
+      setAmount('');
+
+    } catch (error) {
+      console.error('Error adding expense:', error);
     }
-    
-    const { data, error } = await supabase
-      .from('expenses')
-      .insert({
-        description,
-        amount: parseFloat(amount),
-        group_id: groupId,
-        paid_by: user.id,
-        created_at: new Date().toISOString()
-      })
-    
-    if (error) {
-      alert('Error adding expense: ' + error.message)
-    } else {
-      router.push('/')
-    }
-  }
+  };
+
 
   return (
-    <div className="container mx-auto p-4">
-      <Card className="max-w-md mx-auto">
-        <CardHeader>
-          <CardTitle>Add New Expense</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="flex justify-center">
+    <div className="py-10 flex-1 justify-center lg:max-w-[50%] max-w-[85%]">
+      <h1 className="lg:text-3xl text-2xl font-extrabold py-4">Add new expense</h1>
+          <form onSubmit={handleSubmit}>
+          <div className='py-3'>
+          <p className='pb-2 font-medium text-base'>Description</p>
             <Input
-              placeholder="Description"
+              placeholder="Ex: Dinner at Pizzeria"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              className="p-[15px] h-14 rounded-xl"
             />
+            </div>
+            <div className='py-3'>
+            <p className='pb-2 font-medium text-base'>Amount</p>
             <Input
               type="number"
               placeholder="Amount"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
+              className="p-[15px] h-14 rounded-xl"
             />
-            <Select value={groupId} onValueChange={setGroupId}>
-              <SelectTrigger>
+            </div>
+            <div className='py-3'>
+            <p className='pb-2 font-medium text-base'>Group</p>
+            <Select value={groupId} onValueChange={setGroupId} >
+              <SelectTrigger className="p-[15px] h-14 rounded-xl">
               <SelectValue placeholder="Select a group" />
               </SelectTrigger>
               <SelectContent>
@@ -86,10 +111,10 @@ export default function AddExpensePage() {
                 ))}
               </SelectContent>
             </Select>
-            <Button type="submit" className="w-full">Add Expense</Button>
+            </div>
+            <Button type="submit" className="w-full mt-3">Add Expense</Button>
           </form>
-        </CardContent>
-      </Card>
+          </div>
     </div>
   )
 }

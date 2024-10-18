@@ -7,14 +7,12 @@ export function useRequireAuth(){
     const router = useRouter()
     const pathname = usePathname()
 
-    console.log('use', isLoading)
-
     useEffect(() => {
         const timer = setTimeout(() => {
               if (!user) {
                 router.push(`/login?returnUrl=${encodeURIComponent(pathname)}`);
               }
-          }, 3000); // 5 seconds timeout
+          }, 1000);
       
           return () => clearTimeout(timer);
     },[user])
