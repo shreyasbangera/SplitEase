@@ -5,6 +5,7 @@ import { useAuth } from "../../../components/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { supabase } from "@/lib/supabaseClient";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function GroupDetails({ params }) {
   const { user } = useAuth();
@@ -58,8 +59,6 @@ export default function GroupDetails({ params }) {
 
       setExpenses(expensesData);
       setSplits(splitsData);
-
-      console.log(splitsData);
 
       // Calculate total pending amount
       const pending = splitsData.reduce(
@@ -122,11 +121,10 @@ export default function GroupDetails({ params }) {
     await fetchSettlements();
   }
 
-  if (!group) return <div>Loading...</div>;
 
   return (
     <div className="flex justify-center">
-      <div className="py-10 flex-1 justify-center lg:max-w-[50%] max-w-[85%]">
+      {group ? (<div className="py-10 flex-1 justify-center lg:max-w-[50%] max-w-[85%]">
         <h1 className="lg:text-3xl text-2xl font-extrabold py-4">
           {group.name}
         </h1>
@@ -153,7 +151,32 @@ export default function GroupDetails({ params }) {
           ))}
         </div>
         </div>
-      </div>
+      </div>)
+      :
+      (<div className="py-10 flex-1 justify-center lg:max-w-[50%] max-w-[85%]">
+        <Skeleton className="w-[50%] lg:h-[68px] h-16 py-4" />
+        <div className="flex justify-between py-5 px-4 my-3">
+        <div>
+          <Skeleton className="h-5 w-24" />
+          <Skeleton className="h-7 w-24"/>
+          </div>
+          <Skeleton className='w-24 h-10 rounded-xl'/>
+          </div>
+          <div className="py-3">
+        <Skeleton className="my-3 w-24 h-8"/>
+        <div>
+          {[1,2,3].map((index) => (
+            <div key={index} className="mb-2">
+              <div className=" flex justify-between">
+              <Skeleton className="w-24 h-4" /> 
+              <Skeleton className="w-24 h-4"/>
+              </div>
+              <Skeleton className="w-28 h-6"/>
+            </div>
+          ))}
+        </div>
+        </div>
+        </div>)}
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react'; 
 import googleIcon from '@/assets/google.png'
 import Image from "next/image";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Loading = () => <Skeleton className="w-[100px] h-[20px] rounded-full" /> 
 

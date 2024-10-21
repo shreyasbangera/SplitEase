@@ -6,13 +6,13 @@ const AuthContext = createContext()
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
-  const [isLoading, setIsLoading] = useState(true) // Add isLoading state
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         setUser(session?.user ?? null)
-        setIsLoading(false) // Stop loading once user data is fetched
+        setIsLoading(false)
       }
     )
 
