@@ -2,29 +2,29 @@
 import React from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "./ui/dropdown-menu";
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
-import { useAuth } from "./AuthProvider";
-import { useRequireAuth } from "./useRequireAuth";
 import Image from "next/image";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "./AuthProvider";
 
 const Navbar = () => {
-    const  user  = useRequireAuth()
+    const  {user}  = useAuth()
     const router = useRouter()
+    const { toast } = useToast()
 
     const handleSignOut = async () => {
         const { error } = await supabase.auth.signOut();
         if (error) {
-          alert(error.message);
+          toast({ variant:"destructive", description: error.message });
         } else {
-          alert('You have been signed out successfully!');
-          // Optional: Redirect to the login page or another route after sign-out
+          toast({ description :'You have been signed out successfully!', position: "top-right" });
           router.push('/login');
         }
       };
 
   return (
-    <header className="flex items-center justify-between border-b border-solid border-b-[#e7eef4] px-10 py-3">
+    <header className="fixed bg-white w-full flex items-center justify-between border-b border-solid border-b-[#e7eef4] lg:px-10 px-6 py-3 h-[54px]">
       <div onClick={() => router.push('/')} className="flex items-center gap-4 cursor-pointer">
         <svg
           className="w-4 h-4"
@@ -37,7 +37,7 @@ const Navbar = () => {
             fill="currentColor"
           ></path>
         </svg>
-        <h2 className="text-lg font-bold">BillSplittr</h2>
+        <h2 className="text-lg font-bold">SplitEase</h2>
       </div>
       {user && <DropdownMenu>
         <DropdownMenuTrigger className="focus-visible:outline-none flex items-center gap-3">
@@ -48,7 +48,7 @@ const Navbar = () => {
           <DropdownMenuLabel className='font-medium'>{user?.user_metadata.full_name}</DropdownMenuLabel>
           <DropdownMenuLabel className='font-thin text-xs py-1'>{user?.user_metadata.email}</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleSignOut} className='text-red-500'>Log out</DropdownMenuItem>
+          <DropdownMenuItem onClick={handleSignOut} className='text-red-500 cursor-pointer'>Log out</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>}
     </header>

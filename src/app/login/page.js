@@ -1,45 +1,17 @@
 'use client'
-import { useState } from 'react';
 import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "../../components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { supabase } from '../../lib/supabaseClient';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useRequireAuth } from '@/components/useRequireAuth';
-import { useAuth } from '@/components/AuthProvider';
-import { Suspense } from 'react'; // Import Suspense
+import { Suspense } from 'react'; 
+import googleIcon from '@/assets/google.png'
+import Image from "next/image";
 
-const Loading = () => <div>Loading...</div>; // Loading component
+const Loading = () => <Skeleton className="w-[100px] h-[20px] rounded-full" /> 
 
 const Page = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const router = useRouter();
   const searchParams = useSearchParams();
   const returnUrl = searchParams.get('returnUrl') || '/';
-  const user = useAuth();
-
-  const handleSignUp = async (e) => {
-    e.preventDefault();
-    const { error } = await supabase.auth.signUp({ email, password });
-    if (error) {
-      alert(error.message);
-    } else {
-      alert('Check your email for the login link!');
-    }
-  };
-
-  const handleSignIn = async (e) => {
-    e.preventDefault();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      alert(error.message);
-    } else {
-      g(returnUrl);
-      router.push(returnUrl);
-    }
-  };
 
   const handleGoogleSignIn = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
@@ -54,14 +26,15 @@ const Page = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <Card className="w-[350px]">
+    <div className="flex items-center justify-center bg-gray-100 h-[calc(100vh-54px)]">
+      <Card className="lg:w-[400px] w-[90%]">
         <CardHeader>
-          <CardTitle>Welcome to BillSplitr</CardTitle>
+          <CardTitle>Welcome to SplitEase</CardTitle>
           <CardDescription>Login or create an account to get started</CardDescription>
         </CardHeader>
         <CardFooter>
-          <Button variant="outline" className="w-full" onClick={handleGoogleSignIn}>
+          <Button variant="outline" className="w-full flex gap-2" onClick={handleGoogleSignIn}>
+          <Image src={googleIcon} alt='google' width={16} height={16} />
             Sign in with Google
           </Button>
         </CardFooter>
@@ -70,7 +43,6 @@ const Page = () => {
   );
 };
 
-// Wrap the component in a Suspense boundary
 const SuspenseWrapper = () => (
   <Suspense fallback={<Loading />}>
     <Page />
