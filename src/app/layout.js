@@ -4,13 +4,13 @@ import { AuthProvider } from "@/components/AuthProvider";
 import Navbar from "@/components/Navbar";
 import { Toaster } from '@/components/ui/toaster';
 
-const notoSans = Noto_Sans({
+const WorkSans = Work_Sans({
   weight: ['400', '500', '700', '900'],
   subsets: ['latin'],
 });
 
 export const metadata = {
-  title: "BillSplitr",
+  title: "SplitEase",
   description: "Simplify Group Expense",
 };
 
@@ -18,7 +18,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={notoSans.className}
+        className={WorkSans.className}
       >
       <AuthProvider>
       <Navbar />

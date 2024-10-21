@@ -5,13 +5,15 @@ import { Button } from "../components/ui/button";
 import { supabase } from "@/lib/supabaseClient";
 import { useRequireAuth } from "@/components/useRequireAuth";
 import Image from "next/image";
-import { Skeleton } from "../components/ui/skeleton"; // Import the skeleton component
+import { Skeleton } from "../components/ui/skeleton"; 
+import { useToast } from "@/hooks/use-toast";
 
 export default function Home() {
   const user = useRequireAuth();
   const router = useRouter();
   const [groups, setGroups] = useState([]);
-  const [loading, setLoading] = useState(true); // Loading state for skeleton
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast()
 
   useEffect(() => {
     console.log(user)
@@ -36,7 +38,7 @@ export default function Home() {
     if (groups.length > 0) {
       router.push("/add_expense");
     } else {
-      alert("Please create a group first before adding an expense.");
+     toast({title: "No Group Found",description: "Please create a group first before adding an expense."});
     }
   }
 
