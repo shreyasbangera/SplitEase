@@ -66,7 +66,7 @@ export default function AddGroup() {
 
   return (
     <div className="flex justify-center">
-    <div className="py-10 flex-1 justify-center lg:max-w-[50%] max-w-[85%]">
+    <div className="py-10 flex-1 justify-center lg:max-w-[60%] max-w-[85%]">
       <h1 className="lg:text-3xl text-2xl font-extrabold py-4">Create a group</h1>
         <>
         <div className="py-3">

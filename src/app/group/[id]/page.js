@@ -124,11 +124,11 @@ export default function GroupDetails({ params }) {
 
   return (
     <div className="flex justify-center">
-      {group ? (<div className="py-10 flex-1 justify-center lg:max-w-[50%] max-w-[85%]">
-        <h1 className="lg:text-3xl text-2xl font-extrabold py-4">
+      {group ? (<div className="lg:py-10 py-3 flex-1 justify-center lg:max-w-[60%] max-w-[85%]">
+        <h1 className="lg:text-3xl text-2xl font-bold py-4">
           {group.name}
         </h1>
-        <div className="flex my-3 justify-between py-5 bg-gray-100 px-4 rounded-xl">
+        <div className="flex lg:my-3 justify-between py-5 bg-gray-100 px-4 rounded-xl">
         <div>
           <p className="font-medium text-sm">Total balance</p>
           <p className="font-bold text-xl">Rs.{totalPending.toFixed(2)}</p>
@@ -140,20 +140,23 @@ export default function GroupDetails({ params }) {
         <div className="py-3">
         <p className="text-lg font-bold py-3">Expenses</p>
         <div>
-          {expenses.map((expense) => (
-            <div key={expense.id} className="mb-2">
-              <div className=" flex justify-between">
+          {expenses?.map((expense) => (
+            <div key={expense.id} className="mb-2 flex items-center gap-4">
+            <svg className="lg:w-[54px] lg:h-[54px] w-12 h-12" xmlns="http://www.w3.org/2000/svg"  width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M14 8H8"/><path d="M16 12H8"/><path d="M13 16H8"/></svg>
+              <div className="w-full">
+              <div className="flex justify-between items-center">
               <span className="font-medium">{expense.description}</span> 
               <p>Rs.{expense.amount}</p>
               </div>
-              <p>Paid by: {expense.paid_by === user.id ? "You" : expense.paid_by}</p>
+              <p>{expense.paid_by === user.id ? "You" : expense.paid_by_name} paid</p>
+              </div>
             </div>
           ))}
         </div>
         </div>
       </div>)
       :
-      (<div className="py-10 flex-1 justify-center lg:max-w-[50%] max-w-[85%]">
+      (<div className="py-10 flex-1 justify-center lg:max-w-[60%] max-w-[85%]">
         <Skeleton className="w-[50%] lg:h-[68px] h-16 py-4" />
         <div className="flex justify-between py-5 px-4 my-3">
         <div>

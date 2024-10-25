@@ -17,13 +17,18 @@ export default function AddExpensePage() {
   const { user } = useAuth()
 
   useEffect(() => {
+    if(user){
     fetchGroups()
-  }, [])
+    }
+  }, [user])
+
+  console.log(user)
 
   async function fetchGroups() {
     const { data, error } = await supabase
       .from('groups')
       .select('*')
+      .or(`invited_emails.cs.{${user.email}},created_by.eq.${user.id}`);
     
     if (error) {
       console.error('Error fetching groups:', error)
@@ -44,7 +49,8 @@ export default function AddExpensePage() {
           group_id: groupId,
           description,
           amount: parseFloat(amount),
-          paid_by: user.id
+          paid_by: user.id,
+          paid_by_name: user.user_metadata.name
         })
         .select()
         .single();
