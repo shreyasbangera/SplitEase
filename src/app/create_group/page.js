@@ -13,11 +13,22 @@ export default function AddGroup() {
   const router = useRouter();
   const [groupName, setGroupName] = useState("");
   const [inviteEmails, setInviteEmails] = useState([]);
+  const { toast } = useToast()
 
   async function handleCreateGroup() { 
+
+    const validEmails = inviteEmails
+    .split(',')
+    .map((email) => email.trim())
+    .filter((email) => validateEmail(email));
+
+  if (validEmails.length === 0) {
+    toast("Please enter valid email(s)");
+    return;
+  }
     const { data, error } = await supabase
       .from("groups")
-      .insert([{ name: groupName, invited_emails: inviteEmails.split(','), created_by: user.id }])
+      .insert([{ name: groupName, invited_emails: validEmails, created_by: user.id }])
       .select()
 
 
@@ -40,8 +51,8 @@ export default function AddGroup() {
         .map((email) => email.trim())
         .filter((email) => validateEmail(email));
         const groupLink = process.env.NODE_ENV === 'production'
-        ? `https://splitwise-clone.vercel.app/join_group/${groupId}`  
-        : `http://localhost:3000/join_group/${groupId}`;
+        ? `https://splittease.vercel.app/${groupId}`  
+        : `http://localhost:3000/${groupId}`;
 
       if (emails.length > 0) {
         setInviteEmails([]);
@@ -50,9 +61,8 @@ export default function AddGroup() {
             "service_1uig6lz",
             "template_6dxjwu3",
             {
-              to_name: "Viraj",
               to_email: email,
-              from_name: "Shreyas",
+              from_name: user?.user_metadata.name,
               message: `Group invite: ${groupLink}` ,
             },
             "AVaP81TyCDlZxN-1L"

@@ -22,8 +22,6 @@ export default function AddExpensePage() {
     }
   }, [user])
 
-  console.log(user)
-
   async function fetchGroups() {
     const { data, error } = await supabase
       .from('groups')
@@ -33,7 +31,6 @@ export default function AddExpensePage() {
     if (error) {
       console.error('Error fetching groups:', error)
     } else if (data) {
-      console.log(data)
       setGroups(data)
     }
   }
@@ -57,12 +54,14 @@ export default function AddExpensePage() {
 
       if (expenseError) throw expenseError;
 
-      // 2. Create splits for all group members
-      const splits = groups[0]?.invited_emails?.map(email => ({
+      const selectedGroup = groups.find(group => group.id === groupId)
+
+      const splits = selectedGroup?.invited_emails?.map(email => ({
         expense_id: expense.id,
         user_email: email,
-        share_amount: expense.amount / (groups[0].invited_emails.length+1),
-        is_settled: email === user.email // automatically settled for the payer
+        share_amount: expense.amount / (selectedGroup.invited_emails.length+1),
+        is_settled: email === user.email,
+        group_id: groupId
       }));
 
       const { error: splitsError } = await supabase

@@ -6,7 +6,7 @@ export function useRequireAuth() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-
+  
   useEffect(() => {
     if (!isLoading) {
       if (!user) {

@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { supabase } from "@/lib/supabaseClient";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useRequireAuth } from "@/components/useRequireAuth";
 
 export default function GroupDetails({ params }) {
-  const { user } = useAuth();
+  const user = useRequireAuth();
   const router = useRouter();
   const [group, setGroup] = useState(null);
   const [expenses, setExpenses] = useState([]);
@@ -39,7 +40,6 @@ export default function GroupDetails({ params }) {
 
   const fetchExpensesAndSplits = async () => {
     try {
-      // Fetch expenses
       const { data: expensesData, error: expensesError } = await supabase
         .from("expenses")
         .select(`*`)
@@ -48,19 +48,18 @@ export default function GroupDetails({ params }) {
 
       if (expensesError) throw expensesError;
 
-      // Fetch splits for current user
       const { data: splitsData, error: splitsError } = await supabase
         .from("expense_splits")
         .select("*")
         .eq("user_email", user.email)
-        .eq("is_settled", false);
+        .eq("is_settled", false)
+        .eq("group_id", params.id)
 
       if (splitsError) throw splitsError;
 
       setExpenses(expensesData);
       setSplits(splitsData);
 
-      // Calculate total pending amount
       const pending = splitsData.reduce(
         (sum, split) => sum + split.share_amount,
         0
@@ -70,6 +69,7 @@ export default function GroupDetails({ params }) {
       console.error(error);
     }
   };
+
 
   const fetchSettlements = async () => {
     const { data, error } = await supabase

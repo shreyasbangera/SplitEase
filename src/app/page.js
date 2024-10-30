@@ -16,7 +16,6 @@ export default function Home() {
   const { toast } = useToast();
 
   useEffect(() => {
-    console.log(user);
     if (user) fetchGroups();
   }, [user]);
 
@@ -50,7 +49,7 @@ export default function Home() {
       <div className="py-5 lg:max-w-[60%] max-w-[85%] w-full">
         <div className="flex lg:flex-row flex-col justify-end gap-3">
           <Button
-            onClick={() => router.push("/add_group")}
+            onClick={() => router.push("/create_group")}
             className="font-bold bg-[#e7eef4] text-[#0d151c] text-sm hover:bg-[#e7eef4]/80 px-4 rounded-xl"
           >
             Create new group
