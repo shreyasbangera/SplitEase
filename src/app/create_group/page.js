@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { supabase } from "@/lib/supabaseClient";
 import emailjs from "@emailjs/browser";
+import { useToast } from "@/hooks/use-toast";
 
 export default function AddGroup() {
   const { user } = useAuth();
@@ -17,13 +18,16 @@ export default function AddGroup() {
 
   async function handleCreateGroup() { 
 
-    const validEmails = inviteEmails
-    .split(',')
-    .map((email) => email.trim())
-    .filter((email) => validateEmail(email));
-
-  if (validEmails.length === 0) {
-    toast("Please enter valid email(s)");
+    const validEmails = [
+      ...inviteEmails
+        .split(',')
+        .map((email) => email.trim())
+        .filter((email) => validateEmail(email)),
+      user.email,
+    ];
+    
+  if (validEmails.length < 2) {
+    toast({description: "Please enter valid email(s)"});
     return;
   }
     const { data, error } = await supabase

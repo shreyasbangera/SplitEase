@@ -31,7 +31,7 @@ const Page = () => {
       <Card className="lg:w-[400px] w-[90%]">
         <CardHeader>
           <CardTitle>Welcome to SplitEase</CardTitle>
-          <CardDescription>Login or create an account to get started</CardDescription>
+          <CardDescription>Sign in or create an account to get started</CardDescription>
         </CardHeader>
         <CardFooter>
           <Button variant="outline" className="w-full flex gap-2" onClick={handleGoogleSignIn}>

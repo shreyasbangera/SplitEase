@@ -7,13 +7,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Card, CardHeader, CardTitle, CardContent } from "../../components/ui/card"
 import { supabase } from '../../lib/supabaseClient'
 import { useAuth } from '@/components/AuthProvider'
+import { useToast } from '@/hooks/use-toast'
 
 export default function AddExpensePage() {
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState('')
   const [groupId, setGroupId] = useState('')
   const [groups, setGroups] = useState([])
-  const router = useRouter()
+  const { toast } = useToast()
   const { user } = useAuth()
 
   useEffect(() => {
@@ -39,7 +40,6 @@ export default function AddExpensePage() {
     e.preventDefault();
 
     try {
-      // 1. Create the expense
       const { data: expense, error: expenseError } = await supabase
         .from('expenses')
         .insert({
@@ -56,21 +56,24 @@ export default function AddExpensePage() {
 
       const selectedGroup = groups.find(group => group.id === groupId)
 
-      const splits = selectedGroup?.invited_emails?.map(email => ({
+      const splits = selectedGroup?.invited_emails
+      ?.filter(email => email !== user.email)
+      .map(email => ({
         expense_id: expense.id,
         user_email: email,
-        share_amount: expense.amount / (selectedGroup.invited_emails.length+1),
-        is_settled: email === user.email,
-        group_id: groupId
+        share_amount: expense.amount / selectedGroup.invited_emails.length,
+        is_settled: false,
+        group_id: groupId,
+        paid_by: user.id,
+        paid_by_name: user.user_metadata.name
       }));
-
+    
       const { error: splitsError } = await supabase
         .from('expense_splits')
         .insert(splits);
 
       if (splitsError) throw splitsError;
-
-      // 3. Clear form and close modal
+      toast({description: `Added ${description}!`})
       setDescription('');
       setAmount('');
 

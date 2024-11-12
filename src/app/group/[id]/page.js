@@ -7,6 +7,8 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { supabase } from "@/lib/supabaseClient";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRequireAuth } from "@/components/useRequireAuth";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 export default function GroupDetails({ params }) {
   const user = useRequireAuth();
@@ -53,11 +55,15 @@ export default function GroupDetails({ params }) {
         .select("*")
         .eq("user_email", user.email)
         .eq("is_settled", false)
-        .eq("group_id", params.id)
+        .eq("group_id", params.id);
 
       if (splitsError) throw splitsError;
 
-      setExpenses(expensesData);
+      if (expensesData.length) {
+        setExpenses(expensesData);
+      } else {
+        setExpenses(null);
+      }
       setSplits(splitsData);
 
       const pending = splitsData.reduce(
@@ -70,6 +76,7 @@ export default function GroupDetails({ params }) {
     }
   };
 
+  console.log(splits)
 
   const fetchSettlements = async () => {
     const { data, error } = await supabase
@@ -86,14 +93,14 @@ export default function GroupDetails({ params }) {
     setSettlements(data);
   };
 
-  async function handleSettleUp() {
-    // First, upsert the settlement
+  async function handleSettleUp(expenseSplitsId, shareAmount, paidTo) {
     const { error: settlementError } = await supabase
       .from("settlements")
       .insert({
         group_id: params.id,
         paid_by: user.id,
-        amount: totalPending,
+        paid_to: paidTo,
+        amount: shareAmount,
       });
 
     if (settlementError) {
@@ -108,7 +115,8 @@ export default function GroupDetails({ params }) {
         settled_at: new Date().toISOString(),
       })
       .eq("user_email", user.email)
-      .eq("is_settled", false);
+      .eq("is_settled", false)
+      .eq("id", expenseSplitsId);
 
     if (splitUpdateError) {
       console.error(
@@ -121,65 +129,116 @@ export default function GroupDetails({ params }) {
     await fetchSettlements();
   }
 
-
   return (
     <div className="flex justify-center">
-      {group ? (<div className="lg:py-10 py-3 flex-1 justify-center lg:max-w-[60%] max-w-[85%]">
-        <h1 className="lg:text-3xl text-2xl font-bold py-4">
-          {group.name}
-        </h1>
-        <div className="flex lg:my-3 justify-between py-5 bg-gray-100 px-4 rounded-xl">
-        <div>
-          <p className="font-medium text-sm">Total balance</p>
-          <p className="font-bold text-xl">Rs.{totalPending.toFixed(2)}</p>
-          </div>
-          <Button className='font-bold text-sm px-4 rounded-xl' onClick={handleSettleUp} disabled={totalPending === 0}>
-            Settle Up
-          </Button>
-        </div>
-        <div className="py-3">
-        <p className="text-lg font-bold py-3">Expenses</p>
-        <div>
-          {expenses?.map((expense) => (
-            <div key={expense.id} className="mb-2 flex items-center gap-4">
-            <svg className="lg:w-[54px] lg:h-[54px] w-12 h-12" xmlns="http://www.w3.org/2000/svg"  width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M14 8H8"/><path d="M16 12H8"/><path d="M13 16H8"/></svg>
-              <div className="w-full">
-              <div className="flex justify-between items-center">
-              <span className="font-medium">{expense.description}</span> 
-              <p>Rs.{expense.amount}</p>
-              </div>
-              <p>{expense.paid_by === user.id ? "You" : expense.paid_by_name} paid</p>
-              </div>
+      {group ? (
+        <div className="lg:py-10 py-3 flex-1 justify-center lg:max-w-[60%] max-w-[85%]">
+          <h1 className="lg:text-3xl text-2xl font-bold py-4">{group.name}</h1>
+          <div className="flex lg:my-3 justify-between py-5 bg-gray-100 px-4 rounded-xl">
+            <div>
+              <p className="font-medium text-sm">Total balance</p>
+              <p className="font-bold text-xl">Rs.{totalPending.toFixed(2)}</p>
             </div>
-          ))}
-        </div>
-        </div>
-      </div>)
-      :
-      (<div className="py-10 flex-1 justify-center lg:max-w-[60%] max-w-[85%]">
-        <Skeleton className="w-[50%] lg:h-[68px] h-16 py-4" />
-        <div className="flex justify-between py-5 px-4 my-3">
-        <div>
-          <Skeleton className="h-5 w-24" />
-          <Skeleton className="h-7 w-24"/>
-          </div>
-          <Skeleton className='w-24 h-10 rounded-xl'/>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button
+                  className="font-bold text-sm px-4 rounded-xl"
+                  // onClick={handleSettleUp}
+                  disabled={totalPending === 0}
+                >
+                  Settle Up
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Settle Up</DialogTitle>
+                  <DialogDescription>
+                    Make changes to your profile here. Click save when you're
+                    done.
+                  </DialogDescription>
+                </DialogHeader>
+                {splits.length ? (<div className="flex flex-col gap-4">
+                  {splits.map(({paid_by_name, share_amount, id, paid_by}) => (
+                    <div key={id} className="flex justify-between items-center">
+                    <span>{paid_by_name}</span>
+                    <Button onClick={() => handleSettleUp(id, share_amount, paid_by)}>Pay Rs.{share_amount}</Button>
+                    </div>))}
+                </div> 
+                ) : (
+                  <div className="text-center h-10">Settled up</div>
+                )}
+              </DialogContent>
+            </Dialog>
           </div>
           <div className="py-3">
-        <Skeleton className="my-3 w-24 h-8"/>
-        <div>
-          {[1,2,3].map((index) => (
-            <div key={index} className="mb-2">
-              <div className=" flex justify-between">
-              <Skeleton className="w-24 h-4" /> 
-              <Skeleton className="w-24 h-4"/>
+            <p className="text-lg font-bold py-3">Expenses</p>
+            {expenses === null ? (
+              <div>No Expenses</div>
+            ) : expenses?.length ? (
+              <div className="flex flex-col gap-4">
+                {expenses?.map((expense) => (
+                  <div key={expense.id} className="flex items-center gap-4">
+                    <svg
+                      className="w-12 h-12"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z" />
+                      <path d="M14 8H8" />
+                      <path d="M16 12H8" />
+                      <path d="M13 16H8" />
+                    </svg>
+                    <div className="w-full">
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium">
+                          {expense.description}
+                        </span>
+                        <p>Rs.{expense.amount}</p>
+                      </div>
+                      <p>
+                        {expense.paid_by === user?.id
+                          ? "You"
+                          : expense.paid_by_name}{" "}
+                        paid
+                      </p>
+                    </div>
+                  </div>
+                ))}
               </div>
-              <Skeleton className="w-28 h-6"/>
+            ) : (
+              <div>
+                {[1, 2, 3].map((index) => (
+                  <Skeleton
+                    key={index}
+                    className="mb-2 flex justify-between h-[48px] lg:h-[54px]"
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="lg:py-10 py-3 flex-1 justify-center lg:max-w-[60%] max-w-[85%]">
+          <Skeleton className="w-[50%] lg:h-[36px] h-16 mt-4 mb-7" />
+          <Skeleton className="flex justify-between py-5 px-4 lg:mb-3 h-[88px]" />
+          <div className="py-3">
+            <Skeleton className="my-3 w-24 h-7" />
+            <div>
+              {[1, 2, 3].map((index) => (
+                <Skeleton
+                  key={index}
+                  className="mb-2 flex justify-between h-[48px] lg:h-[54px]"
+                />
+              ))}
             </div>
-          ))}
+          </div>
         </div>
-        </div>
-        </div>)}
+      )}
     </div>
   );
 }

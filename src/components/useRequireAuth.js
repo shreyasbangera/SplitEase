@@ -10,7 +10,7 @@ export function useRequireAuth() {
   useEffect(() => {
     if (!isLoading) {
       if (!user) {
-        router.push(`/login?returnUrl=${encodeURIComponent(pathname)}`);
+        router.push(`/signin?returnUrl=${encodeURIComponent(pathname)}`);
       }
     }
   }, [user, isLoading, pathname, router]);

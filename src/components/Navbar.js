@@ -18,8 +18,8 @@ const Navbar = () => {
         if (error) {
           toast({ variant:"destructive", description: error.message });
         } else {
-          toast({ title: "Signed Out", description :'You have been signed out successfully!', position: "top-right" });
-          router.push('/login');
+          router.push('/signin');
+          toast({ title: "Signed Out", description :'You have been signed out successfully!' });
         }
       };
 
