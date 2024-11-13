@@ -9,6 +9,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useRequireAuth } from "@/components/useRequireAuth";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function GroupDetails({ params }) {
   const user = useRequireAuth();
@@ -18,6 +20,9 @@ export default function GroupDetails({ params }) {
   const [totalPending, setTotalPending] = useState(0);
   const [settlements, setSettlements] = useState([]);
   const [splits, setSplits] = useState([]);
+  const [loadingId, setLoadingId ] = useState(null);
+  const [unsettledBalance, setUnsettledBalance] = useState([])
+  const { toast } = useToast()
 
   useEffect(() => {
     if (user && params.id) {
@@ -76,8 +81,6 @@ export default function GroupDetails({ params }) {
     }
   };
 
-  console.log(splits)
-
   const fetchSettlements = async () => {
     const { data, error } = await supabase
       .from("settlements")
@@ -94,56 +97,103 @@ export default function GroupDetails({ params }) {
   };
 
   async function handleSettleUp(expenseSplitsId, shareAmount, paidTo) {
-    const { error: settlementError } = await supabase
-      .from("settlements")
-      .insert({
-        group_id: params.id,
-        paid_by: user.id,
-        paid_to: paidTo,
-        amount: shareAmount,
-      });
+    console.log(expenseSplitsId)
+    setLoadingId(expenseSplitsId);
+    try {
+      const { error: settlementError } = await supabase
+        .from("settlements")
+        .insert({
+          group_id: params.id,
+          paid_by: user.id,
+          paid_to: paidTo,
+          amount: shareAmount,
+        });
 
-    if (settlementError) {
-      console.error("Error settling up:", settlementError);
-      return;
+      if (settlementError) throw settlementError;
+
+      const { data, error: splitUpdateError } = await supabase
+        .from("expense_splits")
+        .update({
+          is_settled: true,
+          settled_at: new Date().toISOString(),
+        })
+        .eq("user_email", user.email)
+        .eq("is_settled", false)
+
+      if (splitUpdateError) throw splitUpdateError;
+
+      await fetchExpensesAndSplits();
+      await fetchSettlements();
+    } catch (error) {
+      console.error("Error settling up:", error);
+    } finally {
+      setLoadingId(null);
+      toast({description: 'Payment Successfull!'})
     }
-
-    const { data, error: splitUpdateError } = await supabase
-      .from("expense_splits")
-      .update({
-        is_settled: true,
-        settled_at: new Date().toISOString(),
-      })
-      .eq("user_email", user.email)
-      .eq("is_settled", false)
-      .eq("id", expenseSplitsId);
-
-    if (splitUpdateError) {
-      console.error(
-        "Error updating settled amounts in expenses:",
-        splitUpdateError
-      );
-      return;
-    }
-    await fetchExpensesAndSplits();
-    await fetchSettlements();
   }
+
+  const handleUnsettledBalance = async() => {
+    const { data, error } = await supabase
+    .from("expense_splits")
+    .select("*")
+    .eq("is_settled", false)
+    .eq("group_id", params.id)
+    .eq("paid_by", user.id);
+
+    setUnsettledBalance(data)
+
+    if (error) throw error;
+  }
+
+  const groupedSplits = splits.reduce((acc, { share_amount, id, paid_by, paid_by_name }) => {
+    const existingUser = acc.find(item => item.paid_by.user_id === paid_by.user_id);
+  
+    if (existingUser) {
+      existingUser.share_amount += share_amount;
+    } else {
+      acc.push({ share_amount, id, paid_by, paid_by_name });
+    }
+  
+    return acc;
+  }, []);
+
+  console.log(groupedSplits)
 
   return (
     <div className="flex justify-center">
       {group ? (
         <div className="lg:py-10 py-3 flex-1 justify-center lg:max-w-[60%] max-w-[85%]">
+        <div className="flex items-center justify-between">
           <h1 className="lg:text-3xl text-2xl font-bold py-4">{group.name}</h1>
+          <Dialog className="min-h-20">
+              <DialogTrigger asChild>
+                <Button
+                  className="font-bold text-sm px-4 rounded-xl"
+                  onClick={() => handleUnsettledBalance()}
+                >
+                  Debts
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Debts</DialogTitle>
+                  <div className="py-4">
+                  {unsettledBalance?.map(({user_email, id, share_amount})=>(
+                  <li key={id}>{`${user_email} owes you Rs.${share_amount}`}</li>))}
+                  </div>
+                </DialogHeader>
+              </DialogContent>
+            </Dialog>
+            </div>
           <div className="flex lg:my-3 justify-between py-5 bg-gray-100 px-4 rounded-xl">
             <div>
               <p className="font-medium text-sm">Total balance</p>
               <p className="font-bold text-xl">Rs.{totalPending.toFixed(2)}</p>
             </div>
-            <Dialog>
+            <Dialog className="min-h-20">
               <DialogTrigger asChild>
                 <Button
                   className="font-bold text-sm px-4 rounded-xl"
-                  // onClick={handleSettleUp}
                   disabled={totalPending === 0}
                 >
                   Settle Up
@@ -152,20 +202,19 @@ export default function GroupDetails({ params }) {
               <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
                   <DialogTitle>Settle Up</DialogTitle>
-                  <DialogDescription>
-                    Make changes to your profile here. Click save when you're
-                    done.
-                  </DialogDescription>
                 </DialogHeader>
                 {splits.length ? (<div className="flex flex-col gap-4">
-                  {splits.map(({paid_by_name, share_amount, id, paid_by}) => (
+                  {groupedSplits.map(({paid_by_name, share_amount, id, paid_by}) => (
                     <div key={id} className="flex justify-between items-center">
                     <span>{paid_by_name}</span>
-                    <Button onClick={() => handleSettleUp(id, share_amount, paid_by)}>Pay Rs.{share_amount}</Button>
+                    <Button className='min-w-[98px]' onClick={() => handleSettleUp(id, share_amount, paid_by)}>{loadingId === id ? <Loader2 className="animate-spin" /> : `Pay Rs.${share_amount}`}</Button>
                     </div>))}
                 </div> 
                 ) : (
-                  <div className="text-center h-10">Settled up</div>
+                  <div className="min-h-20 flex flex-col gap-2 justify-center items-center py-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" height="42px" viewBox="0 -960 960 960" width="42px" fill="#9ca3af"><path d="m424-296 282-282-56-56-226 226-114-114-56 56 170 170Zm56 216q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"/></svg>
+                  <span className="font-semibold text-gray-400">Settled up</span>
+                  </div>
                 )}
               </DialogContent>
             </Dialog>
@@ -173,7 +222,10 @@ export default function GroupDetails({ params }) {
           <div className="py-3">
             <p className="text-lg font-bold py-3">Expenses</p>
             {expenses === null ? (
-              <div>No Expenses</div>
+              <div className="flex flex-col gap-2 justify-center items-center h-[30vh] font-semibold text-gray-400 text-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" height="42px" viewBox="0 -960 960 960" width="42px" fill="#9ca3af"><path d="M480-280q17 0 28.5-11.5T520-320q0-17-11.5-28.5T480-360q-17 0-28.5 11.5T440-320q0 17 11.5 28.5T480-280Zm-40-160h80v-240h-80v240Zm40 360q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"/></svg>
+              <span>No Expenses</span>
+              </div>
             ) : expenses?.length ? (
               <div className="flex flex-col gap-4">
                 {expenses?.map((expense) => (

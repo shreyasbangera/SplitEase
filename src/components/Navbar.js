@@ -48,7 +48,7 @@ const Navbar = () => {
           <DropdownMenuLabel className='font-medium'>{user?.user_metadata.full_name}</DropdownMenuLabel>
           <DropdownMenuLabel className='font-thin text-xs py-1'>{user?.user_metadata.email}</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleSignOut} className='text-red-500 cursor-pointer'>Log out</DropdownMenuItem>
+          <DropdownMenuItem onClick={handleSignOut} className='text-red-500 cursor-pointer'>Sign out</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>}
     </header>

@@ -33,6 +33,8 @@ export default function Home() {
     setLoading(false);
   }
 
+  console.log(user)
+
   async function handleAddExpense() {
     if (groups.length > 0) {
       router.push("/add_expense");
