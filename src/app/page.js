@@ -33,8 +33,6 @@ export default function Home() {
     setLoading(false);
   }
 
-  console.log(user)
-
   async function handleAddExpense() {
     if (groups.length > 0) {
       router.push("/add_expense");
@@ -52,12 +50,12 @@ export default function Home() {
         <div className="flex lg:flex-row flex-col justify-end gap-3">
           <Button
             onClick={() => router.push("/create_group")}
-            className="font-bold bg-[#e7eef4] text-[#0d151c] text-sm hover:bg-[#e7eef4]/80 px-4 rounded-xl"
+            className="font-medium bg-[#e7eef4] text-[#0d151c] text-sm hover:bg-[#e7eef4]/80 px-4 rounded-xl"
           >
             Create new group
           </Button>
           <Button
-            className="font-bold text-sm px-4 rounded-xl"
+            className="font-medium text-sm px-4 rounded-xl"
             onClick={handleAddExpense}
           >
             Add new expense
