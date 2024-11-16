@@ -30,6 +30,7 @@ export default function AddGroup() {
     toast({description: "Please enter valid email(s)"});
     return;
   }
+
     const { data, error } = await supabase
       .from("groups")
       .insert([{ name: groupName, invited_emails: validEmails, created_by: user.id }])

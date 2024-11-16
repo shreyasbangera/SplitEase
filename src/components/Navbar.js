@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "./AuthProvider";
+import { ModeToggle } from "./ModeToggle";
 
 const Navbar = () => {
     const  {user}  = useAuth()
@@ -24,7 +25,7 @@ const Navbar = () => {
       };
 
   return (
-    <header className="fixed bg-white w-full flex items-center justify-between border-b border-solid border-b-[#e7eef4] lg:px-10 px-6 py-3 h-[54px]">
+    <header className="fixed bg-white dark:bg-background w-full flex items-center justify-between border-b border-solid border-b-[#e7eef4] dark:border-b-gray-700 lg:px-10 px-6 py-3 h-[54px]">
       <div onClick={() => router.push('/')} className="flex items-center gap-4 cursor-pointer">
         <svg
           className="w-4 h-4"
@@ -39,6 +40,8 @@ const Navbar = () => {
         </svg>
         <h2 className="text-lg font-bold">SplitEase</h2>
       </div>
+      <div className="flex items-center gap-4">
+      <ModeToggle />
       {user && <DropdownMenu>
         <DropdownMenuTrigger className="focus-visible:outline-none flex items-center gap-3">
             <Image className="rounded-full aspect-square" src={user?.user_metadata.avatar_url} width={30} height={30} alt='avatar'/>
@@ -51,6 +54,7 @@ const Navbar = () => {
           <DropdownMenuItem onClick={handleSignOut} className='text-red-500 cursor-pointer'>Sign out</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>}
+      </div>
     </header>
   );
 };

@@ -1,12 +1,13 @@
-import { Noto_Sans, Work_Sans } from 'next/font/google';
+import { Noto_Sans, Work_Sans } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/components/AuthProvider";
 import Navbar from "@/components/Navbar";
-import { Toaster } from '@/components/ui/toaster';
+import { Toaster } from "@/components/ui/toaster";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const WorkSans = Work_Sans({
-  weight: ['400', '500', '700', '900'],
-  subsets: ['latin'],
+  weight: ["400", "500", "700", "900"],
+  subsets: ["latin"],
 });
 
 export const metadata = {
@@ -17,16 +18,19 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body
-        className={WorkSans.className}
-      >
-      <AuthProvider>
-      <Navbar />
-      <div className='pt-[54px]'>
-      {children}
-      </div>
-      </AuthProvider>
-      <Toaster />
+      <body className={WorkSans.className}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <AuthProvider>
+            <Navbar />
+            <div className="pt-[54px]">{children}</div>
+          </AuthProvider>
+        </ThemeProvider>
+        <Toaster />
       </body>
     </html>
   );
