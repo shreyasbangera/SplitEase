@@ -25,7 +25,7 @@ const Navbar = () => {
       };
 
   return (
-    <header className="fixed bg-white dark:bg-background w-full flex items-center justify-between border-b border-solid border-b-[#e7eef4] dark:border-b-gray-700 lg:px-10 px-6 py-3 h-[54px]">
+    <header className="fixed bg-white dark:bg-background w-full flex items-center justify-between border-b border-solid border-b-[#e7eef4] dark:border-b-gray-700 lg:px-10 px-4 py-3 h-[54px]">
       <div onClick={() => router.push('/')} className="flex items-center gap-4 cursor-pointer">
         <svg
           className="w-4 h-4"

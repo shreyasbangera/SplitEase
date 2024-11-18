@@ -1,10 +1,8 @@
 'use client'
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { useAuth } from "../../../components/AuthProvider"
 import { Button } from "@/components/ui/button"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { supabase } from "@/lib/supabaseClient"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useRequireAuth } from "@/components/useRequireAuth"
@@ -16,23 +14,24 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { CheckCircle, Loader2, PieChart, Receipt, CreditCard, ReceiptText } from 'lucide-react'
+import { CheckCircle, Loader2} from 'lucide-react'
 import { useToast } from "@/hooks/use-toast"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import Expenses from "@/components/Expenses"
+import Settlements from "@/components/Settlements"
+import Balances from "@/components/Balances"
+import GroupInfo from "@/components/GroupInfo"
 
 export default function GroupDetails({ params }) {
   const user = useRequireAuth()
-  const router = useRouter()
   const [group, setGroup] = useState(null)
   const [expenses, setExpenses] = useState([])
   const [totalPending, setTotalPending] = useState(0)
   const [settlements, setSettlements] = useState([])
-  const [splits, setSplits] = useState([])
   const [loadingId, setLoadingId] = useState(null)
-  const [unsettledBalance, setUnsettledBalance] = useState([])
   const [groupedSplits, setGroupedSplits] = useState([])
   const [unsettledDebts, setUnsettledDebts] = useState([])
   const { toast } = useToast()
+  const [groupMembers, setGroupMembers] = useState([])
 
   useEffect(() => {
     if (user && params.id) {
@@ -43,17 +42,35 @@ export default function GroupDetails({ params }) {
   }, [user, params.id])
 
   async function fetchGroup() {
-    const { data, error } = await supabase
+    const { data: groupData, error: groupError } = await supabase
       .from("groups")
       .select("*")
       .eq("id", params.id)
       .single()
 
-    if (error) {
-      console.error("Error fetching group:", error)
+    if (groupError) {
+      console.error("Error fetching group:", groupError)
       return
     }
-    setGroup(data)
+
+    console.log(groupData)
+
+    if(groupData){
+      setGroup(groupData)
+    }
+
+    const { data: membersData, error: membersError } = await supabase
+    .from("group_members")
+    .select("*")
+    .eq("group_id", params.id)
+
+  if (membersError) {
+    console.error("Error fetching group:", membersError)
+    return
+  }
+
+  if(membersData)
+    setGroupMembers(membersData)
   }
 
   const fetchExpensesAndSplits = async () => {
@@ -89,9 +106,6 @@ export default function GroupDetails({ params }) {
       } else {
         setExpenses(null)
       }
-      setSplits(splitsData || [])
-      setUnsettledBalance(unsettledData || [])
-
       const groupedSplits = (splitsData || []).reduce(
         (acc, { share_amount, id, paid_by, paid_by_name }) => {
           const existingUser = acc.find((item) => item.paid_by === paid_by)
@@ -199,9 +213,12 @@ export default function GroupDetails({ params }) {
   return (
     <div className="flex justify-center">
       {group ? (
-        <div className="lg:py-10 py-4 flex-1 justify-center lg:max-w-[60%] max-w-[85%]">
+        <div className="lg:py-10 py-4 flex-1 justify-center lg:max-w-[60%] px-4 lg:px-0">
           <div className="flex items-center justify-between lg:mb-6 mb-4">
+          <div className="flex gap-3 items-center">
             <h1 className="lg:text-3xl text-2xl font-bold">{group.name}</h1>
+            <GroupInfo groupMembers={groupMembers} />
+          </div>
           </div>
           <Card className="mb-6">
             <CardContent className="flex justify-between items-center p-6">
@@ -211,7 +228,7 @@ export default function GroupDetails({ params }) {
               </div>
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button className="font-medium text-sm px-4 rounded-xl" disabled={totalPending === 0}>
+                  <Button className="font-medium" disabled={totalPending === 0}>
                     Settle Up
                   </Button>
                 </DialogTrigger>
@@ -254,104 +271,17 @@ export default function GroupDetails({ params }) {
           <Tabs defaultValue="expenses" className="w-full">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="expenses">Expenses</TabsTrigger>
-              <TabsTrigger value="unsettled">Debts</TabsTrigger>
+              <TabsTrigger value="unsettled">Balances</TabsTrigger>
               <TabsTrigger value="activity">Settlements</TabsTrigger>
             </TabsList>
             <TabsContent value="expenses">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Expenses</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {expenses === null ? (
-                    <div className="flex flex-col gap-2 justify-center items-center h-[30vh] font-semibold text-lg opacity-30">
-                      <ReceiptText size={42} />
-                      <span>No Expenses</span>
-                    </div>
-                  ) : expenses?.length ? (
-                    <div className="flex flex-col gap-4">
-                      {expenses.map((expense) => (
-                        <div key={expense.id} className="flex items-center gap-4">
-                          <ReceiptText className="w-12 h-12" />
-                          <div className="w-full">
-                            <div className="flex justify-between items-center">
-                              <span className="font-medium">{expense.description}</span>
-                              <p>Rs.{expense.amount.toFixed(2)}</p>
-                            </div>
-                            <p>{expense.paid_by === user?.id ? "You" : expense.paid_by_name} paid</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div>
-                      {[1, 2, 3].map((index) => (
-                        <Skeleton key={index} className="mb-2 flex justify-between h-[48px] lg:h-[54px]" />
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+             <Expenses user={user} expenses={expenses}/>
             </TabsContent>
             <TabsContent value="unsettled">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Debts</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {unsettledDebts.length ? (
-                    <ul className="space-y-2">
-                      {unsettledDebts.map(({ user_email, id, share_amount }) => (
-                        share_amount > 0 ? (
-                          <li key={id} className="flex justify-between items-center">
-                            <span>{user_email}</span>
-                            <span className="font-semibold">Rs.{share_amount.toFixed(2)}</span>
-                          </li>
-                        ) : null
-                      ))}
-                    </ul>
-                  ) : (
-                    <div className="flex justify-center items-center h-[30vh] flex-col gap-2 py-4 font-semibold opacity-30">
-                      <CheckCircle size={42} />
-                      <span>No debts</span>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+            <Balances unsettledDebts={unsettledDebts} groupedSplits={groupedSplits}/>
             </TabsContent>
             <TabsContent value="activity">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Settlements</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {settlements.length ? (
-                    <ul className="space-y-4">
-                      {settlements.map((settlement) => (
-                        <li key={settlement.id} className="flex items-center justify-between border-b pb-2">
-                          <div className="flex items-center gap-2">
-                            <CreditCard size={20} className="text-green-500" />
-                            <div>
-                              <p className="font-medium">
-                                {settlement.paid_by === user.id ? 'You' : settlement.paid_by_name} paid {settlement.paid_to === user.id ? 'you' : settlement.paid_to_name}
-                              </p>
-                              <p className="text-sm text-muted-foreground">
-                                {new Date(settlement.settled_at).toLocaleDateString()}
-                              </p>
-                            </div>
-                          </div>
-                          <span className="font-semibold">Rs.{settlement.amount.toFixed(2)}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <div className="flex justify-center items-center h-[30vh] flex-col gap-2 py-4 font-semibold opacity-30">
-                      <CreditCard size={42} />
-                      <span>No Settlements</span>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+            <Settlements user={user} settlements={settlements} />
             </TabsContent>
           </Tabs>
         </div>

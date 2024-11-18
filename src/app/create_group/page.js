@@ -56,8 +56,8 @@ export default function AddGroup() {
         .map((email) => email.trim())
         .filter((email) => validateEmail(email));
         const groupLink = process.env.NODE_ENV === 'production'
-        ? `https://splittease.vercel.app/${groupId}`  
-        : `http://localhost:3000/${groupId}`;
+        ? `https://splittease.vercel.app/group/${groupId}`  
+        : `http://localhost:3000/group/${groupId}`;
 
       if (emails.length > 0) {
         setInviteEmails([]);
