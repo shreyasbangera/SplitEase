@@ -15,7 +15,9 @@ import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/components/AuthProvider";
 import { useToast } from "@/hooks/use-toast";
 
-export default function AddExpensePage() {
+const Loading = () => <Skeleton className="w-[100px] h-[20px] rounded-full" /> 
+
+const AddExpensePage = () => {
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [groupId, setGroupId] = useState("");
@@ -25,6 +27,7 @@ export default function AddExpensePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const preSelectedGroupId = searchParams.get("groupId");
+
 
   useEffect(() => {
     if (user) {
@@ -153,3 +156,11 @@ export default function AddExpensePage() {
     </div>
   );
 }
+
+const SuspenseWrapper = () => (
+  <Suspense fallback={<Loading />}>
+    <AddExpensePage />
+  </Suspense>
+);
+
+export default SuspenseWrapper;
