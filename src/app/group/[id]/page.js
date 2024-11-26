@@ -54,8 +54,6 @@ export default function GroupDetails({ params }) {
       return
     }
 
-    console.log(groupData)
-
     if(groupData){
       setGroup(groupData)
     }
@@ -151,8 +149,6 @@ export default function GroupDetails({ params }) {
       console.error(error)
     }
   }
-
-  console.log(groupedSplits)
 
   const fetchSettlements = async () => {
     const { data, error } = await supabase
