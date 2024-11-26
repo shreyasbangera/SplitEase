@@ -51,7 +51,7 @@ export default function Home() {
     <div className="container mx-auto px-4 lg:px-10 py-8">
       <div className="flex flex-col space-y-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-          <h1 className="text-3xl font-bold tracking-tight">Your Groups</h1>
+          <h1 className="text-2xl lg:text-3xl font-bold tracking-tight">Your Groups</h1>
           <div className="flex space-x-4">
             <Button
               onClick={() => router.push("/create_group")}
@@ -113,11 +113,11 @@ export default function Home() {
             ))}
           </div>
         ) : (
-          <Card>
+          <Card className="md:h-[70vh] h-[60vh] flex items-center justify-center">
             <CardContent className="p-6 text-center">
               <Users className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
               <h2 className="font-semibold text-xl mb-2">No groups yet</h2>
-              <p className="text-muted-foreground mb-4">
+              <p className="text-muted-foreground mb-4 text-sm md:text-base">
                 Create a group to start sharing expenses with friends, family, or roommates.
               </p>
               <Button onClick={() => router.push("/create_group")}>

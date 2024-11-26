@@ -14,12 +14,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { CheckCircle, Loader2} from 'lucide-react'
+import { CheckCircle, Loader2, Plus, PlusCircle} from 'lucide-react'
 import { useToast } from "@/hooks/use-toast"
 import Expenses from "@/components/Expenses"
 import Settlements from "@/components/Settlements"
 import Balances from "@/components/Balances"
 import GroupInfo from "@/components/GroupInfo"
+import Link from "next/link"
 
 export default function GroupDetails({ params }) {
   const user = useRequireAuth()
@@ -151,6 +152,8 @@ export default function GroupDetails({ params }) {
     }
   }
 
+  console.log(groupedSplits)
+
   const fetchSettlements = async () => {
     const { data, error } = await supabase
       .from("settlements")
@@ -219,6 +222,12 @@ export default function GroupDetails({ params }) {
             <h1 className="lg:text-3xl text-2xl font-bold">{group.name}</h1>
             <GroupInfo groupMembers={groupMembers} />
           </div>
+          <Link href={`/add_expense?groupId=${params.id}`} passHref>
+              <Button variant="outline" className="font-medium">
+                <Plus className="mr-2 h-4 w-4" />
+                Add Expense
+              </Button>
+            </Link>
           </div>
           <Card className="mb-6">
             <CardContent className="flex justify-between items-center p-6">
@@ -286,17 +295,30 @@ export default function GroupDetails({ params }) {
           </Tabs>
         </div>
       ) : (
-        <div className="lg:py-10 py-3 flex-1 justify-center lg:max-w-[60%] max-w-[85%]">
-          <Skeleton className="w-[50%] lg:h-[36px] h-16 mt-4 mb-7" />
-          <Skeleton className="flex justify-between py-5 px-4 lg:mb-3 h-[88px]" />
-          <div className="py-3">
-            <Skeleton className="my-3 w-24 h-7" />
-            <div>
-              {[1, 2, 3].map((index) => (
-                <Skeleton key={index} className="mb-2 flex justify-between h-[48px] lg:h-[54px]" />
-              ))}
+        <div className="lg:py-10 py-4 flex-1 justify-center lg:max-w-[60%] px-4 lg:px-0">
+          <div className="flex items-center justify-between lg:mb-6 mb-4">
+            <div className="flex gap-3 items-center">
+              <Skeleton className="w-40 h-8 lg:h-10" />
             </div>
+            <Skeleton className="w-32 h-10" />
           </div>
+          <Card className="mb-6">
+            <CardContent className="flex justify-between items-center p-6">
+              <div>
+                <Skeleton className="w-24 h-4 mb-2" />
+                <Skeleton className="w-32 h-6" />
+              </div>
+              <Skeleton className="w-24 h-10" />
+            </CardContent>
+          </Card>
+          <Tabs defaultValue="expenses" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <Skeleton className="h-10" />
+              <Skeleton className="h-10" />
+              <Skeleton className="h-10" />
+            </TabsList>
+            <Skeleton className="mt-4 h-[265.6px] lg:h-[283.6px]" />
+          </Tabs>
         </div>
       )}
     </div>

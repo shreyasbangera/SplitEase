@@ -19,15 +19,15 @@ const Settlements = ({settlements, user}) => {
                 <div className="flex items-center gap-4">
                   <CreditCard size={24} className="text-green-500" />
                   <div>
-                    <p className="font-medium">
-                      {settlement.paid_by === user.id
+                    <div className="font-medium text-sm  max-w-[16ch] sm:max-w-full">
+                    {settlement.paid_by === user.id
                         ? "You"
                         : settlement.paid_by_name}{" "}
                       paid{" "}
                       {settlement.paid_to === user.id
                         ? "you"
                         : settlement.paid_to_name}
-                    </p>
+                    </div>
                     <p className="text-sm text-muted-foreground">
                       {new Date(settlement.settled_at).toLocaleDateString()}
                     </p>

@@ -3,6 +3,10 @@ import React from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog'
 
 const GroupInfo = ({groupMembers}) => {
+
+  const capitalize = (str) => {
+    return str[0].toUpperCase() + str.slice(1).toLowerCase()
+  }
   return (
         <Dialog>
                 <DialogTrigger asChild>
@@ -12,11 +16,11 @@ const GroupInfo = ({groupMembers}) => {
                   <DialogHeader>
                     <DialogTitle>Group Info</DialogTitle>
                   </DialogHeader>
-                    <ul>
+                    <ul className='flex flex-col gap-2'>
                       {groupMembers.map(
                         ({ id, user_name }) => ( 
                             <li key={id}>
-                            {user_name}
+                            {capitalize(user_name)}
                             </li>
                         )
                       )}

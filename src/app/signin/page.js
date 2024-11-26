@@ -27,7 +27,7 @@ const Page = () => {
   };
 
   return (
-    <div className="flex items-center justify-center bg-gray-100 h-[calc(100vh-54px)]">
+    <div className="flex items-center justify-center bg-background h-[calc(100vh-54px)]">
       <Card className="lg:w-[400px] w-[90%]">
         <CardHeader>
           <CardTitle>Welcome to SplitEase</CardTitle>
