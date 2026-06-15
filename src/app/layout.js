@@ -28,9 +28,9 @@ export default function RootLayout({ children }) {
           <AuthProvider>
             <Navbar />
             <div className="pt-[54px]">{children}</div>
+            <Toaster />
           </AuthProvider>
         </ThemeProvider>
-        <Toaster />
       </body>
     </html>
   );

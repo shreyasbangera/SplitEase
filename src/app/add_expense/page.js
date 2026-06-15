@@ -16,7 +16,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const Loading = () => <Skeleton className="w-[100px] h-[20px] rounded-full" /> 
+const Loading = () => <Skeleton className="w-[100px] h-[20px] rounded-full" />
 
 const AddExpensePage = () => {
   const [description, setDescription] = useState("");
@@ -54,6 +54,20 @@ const AddExpensePage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!description.trim()) {
+      toast({ description: "Please enter a description.", variant: "destructive" });
+      return;
+    }
+    if (!amount || parseFloat(amount) <= 0 || isNaN(parseFloat(amount))) {
+      toast({ description: "Please enter a valid amount.", variant: "destructive" });
+      return;
+    }
+    if (!groupId) {
+      toast({ description: "Please select a group.", variant: "destructive" });
+      return;
+    }
+
 
     try {
       const { data: expense, error: expenseError } = await supabase

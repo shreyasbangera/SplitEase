@@ -14,7 +14,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { CheckCircle, Loader2, Plus, PlusCircle} from 'lucide-react'
+import { CheckCircle, Loader2, Plus, PlusCircle } from 'lucide-react'
 import { useToast } from "@/hooks/use-toast"
 import Expenses from "@/components/Expenses"
 import Settlements from "@/components/Settlements"
@@ -54,22 +54,22 @@ export default function GroupDetails({ params }) {
       return
     }
 
-    if(groupData){
+    if (groupData) {
       setGroup(groupData)
     }
 
     const { data: membersData, error: membersError } = await supabase
-    .from("group_members")
-    .select("*")
-    .eq("group_id", params.id)
+      .from("group_members")
+      .select("*")
+      .eq("group_id", params.id)
 
-  if (membersError) {
-    console.error("Error fetching group:", membersError)
-    return
-  }
+    if (membersError) {
+      console.error("Error fetching group:", membersError)
+      return
+    }
 
-  if(membersData)
-    setGroupMembers(membersData)
+    if (membersData)
+      setGroupMembers(membersData)
   }
 
   const fetchExpensesAndSplits = async () => {
@@ -120,12 +120,12 @@ export default function GroupDetails({ params }) {
       setGroupedSplits(groupedSplits)
 
       const unsettledDebts = (unsettledData || []).reduce(
-        (acc, { user_email, id, share_amount, user_id }) => {
+        (acc, { user_email, id, share_amount }) => {
           const existingUser = acc.find((item) => item.user_email === user_email)
           if (existingUser) {
             existingUser.share_amount += share_amount
           } else {
-            acc.push({ user_email, id, share_amount, user_id })
+            acc.push({ user_email, id, share_amount })
           }
           return acc
         },
@@ -133,15 +133,10 @@ export default function GroupDetails({ params }) {
       )
       setUnsettledDebts(unsettledDebts)
 
+      // Calculate total pending: sum of what you owe others
       let pending = 0
       for (const gSplit of groupedSplits) {
-        const matchingDebt = unsettledDebts.find((debt) => debt.user_id === gSplit.paid_by)
-        if (matchingDebt) {
-          const netAmount = gSplit.share_amount - matchingDebt.share_amount
-          pending += netAmount > 0 ? netAmount : 0
-        } else {
-          pending += gSplit.share_amount
-        }
+        pending += gSplit.share_amount > 0 ? gSplit.share_amount : 0
       }
 
       setTotalPending(pending)
@@ -177,7 +172,9 @@ export default function GroupDetails({ params }) {
           settled_at: new Date().toISOString(),
         })
         .eq("user_email", user.email)
+        .eq("paid_by", paidTo)
         .eq("is_settled", false)
+        .eq("group_id", params.id)
 
       if (splitUpdateError) throw splitUpdateError
 
@@ -200,12 +197,12 @@ export default function GroupDetails({ params }) {
         p_paid_to: paidToId,
         p_amount: amount
       });
-  
+
     if (error) {
       console.error('Error creating settlement:', error)
       throw error
     }
-  
+
     return data
   }
 
@@ -214,11 +211,11 @@ export default function GroupDetails({ params }) {
       {group ? (
         <div className="lg:py-10 py-4 flex-1 justify-center lg:max-w-[60%] px-4 lg:px-0">
           <div className="flex items-center justify-between lg:mb-6 mb-4">
-          <div className="flex gap-3 items-center">
-            <h1 className="lg:text-3xl text-2xl font-bold">{group.name}</h1>
-            <GroupInfo groupMembers={groupMembers} />
-          </div>
-          <Link href={`/add_expense?groupId=${params.id}`} passHref>
+            <div className="flex gap-3 items-center">
+              <h1 className="lg:text-3xl text-2xl font-bold">{group.name}</h1>
+              <GroupInfo groupMembers={groupMembers} />
+            </div>
+            <Link href={`/add_expense?groupId=${params.id}`} passHref>
               <Button variant="outline" className="font-medium">
                 <Plus className="mr-2 h-4 w-4" />
                 Add Expense
@@ -280,13 +277,13 @@ export default function GroupDetails({ params }) {
               <TabsTrigger value="activity">Settlements</TabsTrigger>
             </TabsList>
             <TabsContent value="expenses">
-             <Expenses user={user} expenses={expenses}/>
+              <Expenses user={user} expenses={expenses} />
             </TabsContent>
             <TabsContent value="unsettled">
-            <Balances unsettledDebts={unsettledDebts} groupedSplits={groupedSplits}/>
+              <Balances unsettledDebts={unsettledDebts} groupedSplits={groupedSplits} />
             </TabsContent>
             <TabsContent value="activity">
-            <Settlements user={user} settlements={settlements} />
+              <Settlements user={user} settlements={settlements} />
             </TabsContent>
           </Tabs>
         </div>

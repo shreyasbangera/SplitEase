@@ -3,26 +3,27 @@ import React from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "./ui/dropdown-menu";
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import Image from "next/image";
-import { supabase } from "@/lib/supabaseClient";
+
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "./AuthProvider";
 import { ModeToggle } from "./ModeToggle";
 
 const Navbar = () => {
-    const  {user}  = useAuth()
-    const router = useRouter()
-    const { toast } = useToast()
+  const { user, signOut } = useAuth()
+  const router = useRouter()
+  const { toast } = useToast()
 
-    const handleSignOut = async () => {
-        const { error } = await supabase.auth.signOut();
-        if (error) {
-          toast({ variant:"destructive", description: error.message });
-        } else {
-          router.push('/signin');
-          toast({ title: "Signed Out", description :'You have been signed out successfully!' });
-        }
-      };
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      router.push('/signin');
+      toast({ title: "Signed Out", description: 'You have been signed out successfully!' });
+    } catch (error) {
+      console.warn('Sign out error (session may already be invalid):', error.message);
+      router.push('/signin');
+    }
+  };
 
   return (
     <header className="fixed bg-white dark:bg-background w-full flex items-center justify-between border-b border-solid border-b-[#e7eef4] dark:border-b-gray-700 lg:px-10 px-4 py-3 h-[54px]">
@@ -41,19 +42,19 @@ const Navbar = () => {
         <h2 className="text-lg font-bold">SplitEase</h2>
       </div>
       <div className="flex items-center gap-4">
-      <ModeToggle />
-      {user && <DropdownMenu>
-        <DropdownMenuTrigger className="focus-visible:outline-none flex items-center gap-3">
-            <Image className="rounded-full aspect-square" src={user?.user_metadata.avatar_url} width={30} height={30} alt='avatar'/>
-          <span className="text-sm lg:flex hidden">{user?.user_metadata.full_name}</span>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className='mr-5'>
-          <DropdownMenuLabel className='font-medium'>{user?.user_metadata.full_name}</DropdownMenuLabel>
-          <DropdownMenuLabel className='font-thin text-xs py-1'>{user?.user_metadata.email}</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleSignOut} className='text-red-500 cursor-pointer'>Sign out</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>}
+        <ModeToggle />
+        {user && <DropdownMenu>
+          <DropdownMenuTrigger className="focus-visible:outline-none flex items-center gap-3">
+            <Image className="rounded-full aspect-square" src={user?.user_metadata.avatar_url} width={30} height={30} alt='avatar' />
+            <span className="text-sm lg:flex hidden">{user?.user_metadata.full_name}</span>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className='mr-5'>
+            <DropdownMenuLabel className='font-medium'>{user?.user_metadata.full_name}</DropdownMenuLabel>
+            <DropdownMenuLabel className='font-thin text-xs py-1'>{user?.user_metadata.email}</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleSignOut} className='text-red-500 cursor-pointer'>Sign out</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>}
       </div>
     </header>
   );

@@ -9,9 +9,29 @@ export function AuthProvider({ children }) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    // Fetch initial session — handle session_not_found gracefully
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.warn('Session expired or invalid, clearing local auth:', error.message)
+        // Clear any stale local tokens
+        supabase.auth.signOut({ scope: 'local' })
+        setUser(null)
+      } else {
+        setUser(session?.user ?? null)
+      }
+      setIsLoading(false)
+    })
+
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        setUser(session?.user ?? null)
+        if (event === 'TOKEN_REFRESHED' && !session) {
+          // Token refresh failed (session revoked from another browser)
+          setUser(null)
+        } else if (event === 'SIGNED_OUT') {
+          setUser(null)
+        } else {
+          setUser(session?.user ?? null)
+        }
         setIsLoading(false)
       }
     )
@@ -29,8 +49,10 @@ export function AuthProvider({ children }) {
   }
 
   async function signOut() {
-    const { error } = await supabase.auth.signOut()
+    // Use scope: 'local' to avoid revoking the session for other browsers
+    const { error } = await supabase.auth.signOut({ scope: 'local' })
     if (error) console.error('Error signing out:', error)
+    setUser(null)
   }
 
   return (
