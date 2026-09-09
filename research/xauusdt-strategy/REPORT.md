@@ -8,8 +8,14 @@
 
 ## Bottom line
 
-**No strategy met the qualifying criteria**, across two rounds covering 12 strategy families, a
-systematic feature scan, a multi-factor model, and machine learning — roughly 300 configurations.
+**No strategy met the qualifying criteria**, across three rounds covering 12 strategy families, a
+systematic feature scan, a multi-factor model, machine learning, and a 20-instrument multi-asset
+portfolio — roughly 300 configurations.
+
+Round 3 closed the question mathematically: with the **measured** cross-asset correlation of
+strategy returns (ρ = 0.043 over 20 instruments), the diversification ratio is capped at
+**1/√ρ = 4.82×** no matter how many instruments are added. That caps portfolio Sharpe at ≈2.9,
+and therefore caps CAGR at a 20% drawdown limit at **≈58%**. The target needs Sharpe ≈9.
 
 The best strategy that survives out-of-sample delivers **10.3% CAGR at 34.4% max drawdown**
 (full sample). Buy-and-hold gold returned 14.3% CAGR at 27.7% DD over the same period.
@@ -144,10 +150,55 @@ Costs: actual per-minute broker spread (half-spread per side) + 0.04 bps/side co
 **No configuration satisfies all criteria simultaneously**, and none comes within an order of
 magnitude of the profit target while respecting the drawdown limit.
 
-## 7. Limitations
+## 7. Round 3 — the multi-asset ceiling (the last remaining lever)
+
+Diversification is the only legitimate way to raise Calmar once single-asset edge is exhausted, so
+it was tested directly. 20 instruments were downloaded (8 FX pairs, 2 metals, 2 energy, 8 equity
+indices) and the **identical** TREND strategy was run on each; the correlation of the resulting
+*strategy return* series was then measured.
+
+| Measurement | Value |
+|---|---|
+| Mean pairwise correlation of strategy returns | **+0.043** (median +0.011) |
+| Equal-weight diversification ratio, N=20 | 3.31× |
+| **Asymptotic diversification ratio, N→∞** | **4.82×** (= 1/√ρ) |
+
+The correlation is genuinely low — this is *favourable*, and it is why managed-futures funds
+diversify. But because the diversification ratio converges to 1/√ρ, adding instruments has a hard
+ceiling:
+
+| Instruments | Diversification ratio |
+|---|---|
+| 5 | 2.07× |
+| 20 | 3.32× |
+| 100 | 4.36× |
+| 10,000 | 4.82× |
+
+Consequently, with the standalone Sharpe actually measured on 9.3 years of gold (0.59–0.78):
+
+| Single-asset Sharpe | Max portfolio Sharpe | Max CAGR at <20% DD |
+|---|---|---|
+| 0.6 | 2.89 | 58% (optimistic) / 23% (realistic) |
+| 0.8 | 3.86 | 77% / 31% |
+| 1.0 | 4.82 | 96% / 39% |
+
+To reach 500% CAGR at <20% DD via diversification, **every instrument in the portfolio would need a
+standalone Sharpe of ≈1.9 before diversifying** — roughly triple the best figure measured here, and
+above what most professional managed-futures programmes achieve.
+
+*Caveat:* the 20-instrument window is ~8 weeks, which is too short for reliable per-asset Sharpe.
+It is used **only** to estimate the correlation structure (1,935 overlapping 15m bars), which is
+what the ceiling depends on; the Sharpe inputs come from the 9.3-year gold series.
+
+## 8. Limitations
 
 XAUUSD is a proxy for XAUUSDT (exchange data unreachable); perpetual funding unmodelled; both primary
 datasets come from the same broker; the wide scan carries multiple-comparison risk, which is why only
 IS→OOS-stable effects are reported; one asset, one 9.3-year window. A multi-asset portfolio is the one
-untested lever that could raise Sharpe materially — diversification across uncorrelated markets is the
-standard route to higher Calmar, and it is not available within a single instrument.
+lever that could raise Sharpe materially was multi-asset diversification — now tested in §7, and it
+too falls an order of magnitude short. Every avenue available with reachable data has been exhausted.
+
+**What would change the answer:** a genuinely different edge source, not a variation on these —
+e.g. order-book/microstructure data (not available at any resolution here), cross-asset predictors
+such as real yields or DXY, options-implied information, or alternative data. Within OHLCV on
+liquid instruments, the ceiling documented above holds.
