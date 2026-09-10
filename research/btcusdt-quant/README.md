@@ -4,9 +4,17 @@ A search for a BTCUSDT strategy meeting: net yearly profit > 300%, at least 100 
 trades, profit factor > 1.10, maximum drawdown < 20%, realistic risk management, no
 look-ahead bias.
 
-**Result: no strategy qualified.** The best configuration found reaches 39.5% net annual
-with a 16.2% maximum drawdown, profit factor 1.29 over 622 trades — it clears every gate
-except net yearly profit, which it misses by a factor of 7.6.
+Scope: **Binance USDⓈ-M perpetual futures BTCUSDT only.** No spot leg.
+
+**Result: no strategy qualified.** Under a 20% drawdown budget the best futures-only
+configuration reaches roughly 20% net annual. Removing the drawdown constraint, the best
+single book peaks at 59.6% CAGR (convex trend, growth-optimal size, −70% drawdown) and a
+continuous volatility-targeted implementation reaches 100.6% CAGR at −74%.
+
+The binding result is the **growth-optimal leverage curve** (`strategies/s18_kelly.py`):
+compound return peaks and then *declines* with size. At 5% risk per trade the convex book
+returns +59.6%; at 22% risk the same book returns **−71.6%**. No leverage setting reaches
+300%, because compound growth has a maximum that is a property of the return distribution.
 
 * `REPORT.html` — the full write-up: rankings, reproduction specs, and the arithmetic
   showing why the target is not reachable on a single instrument.
@@ -25,7 +33,7 @@ except net yearly profit, which it misses by a factor of 7.6.
 | `research/ic.py` | rank-IC and decile-economics screens |
 | `research/harness.py` | signal→execution alignment with the one-bar lag that prevents look-ahead |
 | `research/robust.py` | block bootstrap and cost-stress diagnostics |
-| `strategies/` | S01–S14 plus portfolio construction |
+| `strategies/` | S01–S22: signal books, convex/pyramided trend, meta-labelling, portfolio construction, growth-optimal leverage curve |
 
 ## Reproducing
 
@@ -46,7 +54,7 @@ in the same archive.
 
 ## Trading assumptions
 
-Binance USDⓈ-M perpetual BTCUSDT. 5 bps commission and 3 bps slippage per side (16 bps
+Binance USDⓈ-M perpetual BTCUSDT (futures only). 5 bps commission and 3 bps slippage per side (16 bps
 round-turn), real historical funding at 00/08/16 UTC, USDT borrow at 8% APR on levered spot
 legs. Signals from closed bars only; fills at the open of the next 15-minute execution bar;
 stops resolved on 15-minute bars with the stop assumed to fill first when a bar spans both

@@ -389,3 +389,63 @@ SMRD↔CONVEX **0.70**, CONVEX↔AVT 0.60, SMRD↔AVT 0.44, OFS↔others 0.25–
 **Removing the spot leg costs most of the diversification**: Sharpe 1.93 → 1.12, Calmar
 2.45 → 1.17. The futures-only answer under a 20% drawdown budget is **≈20% net annual**, not
 39.5%.
+
+## S16 — Drawdown-constrained grid search (480 configs, IS-selected then OOS-validated)
+Grid over base risk × pyramid depth × throttle parameters × trail width; selection maximises
+in-sample CAGR subject to a drawdown budget; the winner is then reported out-of-sample untouched.
+
+| DD budget | IS CAGR / DD | OOS CAGR / DD | full CAGR / DD | winning config |
+|---|---|---|---|---|
+| 15% | 19.3% / −14.6% | 9.9% / −20.0% | 14.1% / −20.0% | risk 2%, pyr 2, throttle 5/16 floor 0.40 |
+| 20% | 31.1% / −17.9% | **11.0% / −23.0%** | 22.1% / −23.0% | risk 2%, pyr 2, throttle 10/22 floor 0.45 |
+| 25% | 37.8% / −22.1% | 14.7% / −31.7% | 28.3% / −31.7% | risk 2%, pyr 2, **throttle off** |
+| 40% | **73.3%** / −38.5% | **20.2%** / −54.2% | 50.3% / −54.2% | risk 4%, pyr 2, **throttle off** |
+
+**Verdict: FAILS, and instructively.** In-sample CAGR rises to 73.3% as the budget loosens
+while out-of-sample sits at 20% regardless — the textbook signature of selection bias once the
+real edge is exhausted. The 20% budget is also *breached out of sample* (−23.0%). Note that at
+the two loosest budgets the winning configuration has the **throttle switched off**: the grid
+independently rediscovered that capping drawdown by shrinking size is not worth its cost.
+
+## S21 — Multi-timeframe ensemble
+Same positioning signal on 2h/4h/8h/12h/1D sleeves, equal weight, monthly rebalance.
+Per-sleeve IS Sharpe: 2h 1.46 · 4h 1.17 · 8h 0.71 · 12h 0.54 · 1D 0.49.
+Cross-sleeve correlations 0.18–0.79.
+Best: risk 3.5% → CAGR 19.1%, DD −16.7%, PF 1.17, Sharpe 1.10, N 970.
+**Verdict: FAILS.** Equal weighting drags the blend *below* its best single sleeve. Time
+diversification is real but the weak long-horizon sleeves cost more than the decorrelation
+gains.
+
+## S22 — Short-timeframe positioning book
+1h / 2h / 3h / 6h versions of the S7 signal, chasing the higher breadth implied by the 2h
+in-sample Sharpe of 1.46.
+
+| tf | IS CAGR / Sharpe | OOS CAGR / Sharpe | full CAGR / DD / PF / N |
+|---|---|---|---|
+| 1h thr0.5 7d | 23.8% / **1.48** | 11.6% / **0.72** | 19.2% / −14.3% / 1.26 / 722 |
+| 2h thr0.5 7d | 15.4% / 1.35 | 8.8% / 0.76 | 12.8% / −11.4% / 1.32 / 468 |
+| 4h (baseline) | 22.3% / 1.17 | 24.1% / 1.10 | 22.9% / −18.7% / 1.49 / 229 |
+
+**Verdict: FAILS — and the apparent short-timeframe advantage was in-sample only.** Sharpe
+halves out of sample at 1h and 2h, while the 4h book is stable (1.17 → 1.10). Buying breadth
+by shortening the horizon does not work for this signal.
+
+---
+# Final answer — futures-only
+
+**No strategy qualified.** Under the 20% drawdown limit the best books reach ≈23% net annual.
+Removing the limit does not help: the strongest single book peaks at 59.6% CAGR at its
+growth-optimal size, and beyond that point more leverage returns less.
+
+| # | Strategy | CAGR | MaxDD | PF | N | Sharpe | IS | OOS | gate missed |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | S7 Smart-money vs retail, 2.5% risk | **22.9%** | −18.7% | 1.49 | 229 | 1.14 | 22.3% | 24.1% | profit only |
+| 2 | S19 futures-only portfolio, size 2 | 22.6% | −19.3% | 1.24 | 811 | 1.10 | 17.9% | 23.3% | profit only |
+| 3 | S15 convex trend, 2% risk | 37.2% | −36.0% | **1.91** | 261 | 0.95 | — | 56.4% | profit + drawdown |
+| 4 | S20 continuous vol-targeted | 31.0% | −25.9% | 1.18 | — | 1.21 | — | 22.2% | profit + drawdown |
+| 5 | S21 multi-timeframe ensemble | 19.1% | −16.7% | 1.17 | 970 | 1.10 | 21.6% | 15.2% | profit only |
+| 6 | S4 adaptive trend, 2.5% risk | 17.1% | −22.2% | 1.46 | 211 | 0.77 | 16.4% | 22.4% | profit + drawdown |
+| — | BTCUSDT perp buy & hold | 16.8% | −75.2% | — | 1 | 0.55 | — | — | — |
+
+Every book beats the underlying on this window (perp: 10k → 24.2k; convex book: 10k → 60.0k
+at half the drawdown). None comes within an order of magnitude of 300%.
