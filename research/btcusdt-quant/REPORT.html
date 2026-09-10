@@ -153,10 +153,10 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
     <span class="eyebrow">2021-01 → 2026-08</span>
   </div>
   <h1>The 300% Problem</h1>
-  <p class="lede">Fifty-one strategies on the BTCUSDT perpetual, against a target of 300% net
+  <p class="lede">Fifty-four strategies on the BTCUSDT perpetual, against a target of 300% net
   annual profit at under 20% drawdown. One account, one position at a time. This is the record of
   what was tested, what survived walk-forward validation, and the measured reason the target is
-  unreachable — which is not a shortage of good signals but the correlation between them.</p>
+  unreachable — which is not a shortage of good signals but how few of them are independent.</p>
 
   <div class="verdict">
     <div class="verdict-top"><span class="verdict-label">Verdict</span></div>
@@ -172,8 +172,8 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
       <div class="gap-item"><div class="k">Required net / year</div><div class="v">300%</div></div>
       <div class="gap-item"><div class="k">Best, 5.5y incl. bear market</div><div class="v" style="color:var(--fail)">54.9%</div></div>
       <div class="gap-item"><div class="k">Walk-forward, 8 folds</div><div class="v">76.3%</div></div>
-      <div class="gap-item"><div class="k">Strategies tested</div><div class="v">51</div></div>
-      <div class="gap-item"><div class="k">Parameter sets run</div><div class="v">7,000+</div></div>
+      <div class="gap-item"><div class="k">Strategies tested</div><div class="v">54</div></div>
+      <div class="gap-item"><div class="k">Parameter sets run</div><div class="v">7,400+</div></div>
     </div>
   </div>
 </header>
@@ -1277,7 +1277,7 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
   <div class="stack-lg">
     <div class="stack-sm">
       <span class="eyebrow">9 — Validation</span>
-      <h2>Does it survive choosing the parameters honestly?</h2>
+      <h2>Does it survive being chosen honestly?</h2>
       <p class="prose" style="color:var(--ash)">A single in-sample/out-of-sample split tests one
       decision boundary. It does not test the <em>process</em> that made the choices — and by this
       point the study had made a lot of them, several fixed early and carried forward, so the whole
@@ -1308,6 +1308,72 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
     <p class="note">Fold by fold: 2022-09 <strong>−14.6%</strong>, 2023-03 +153.1%, 2023-09
     +360.9%, 2024-03 +58.4%, 2024-09 +19.7%, 2025-03 +33.2%, 2025-09 +51.8%, 2026-03 +125.0%.
     Seven of eight positive; the loss is the first fold, in the back half of the bear market.</p>
+
+    <div class="why">
+      <h3>Portfolio theory stops describing this book — and that changes what to search for</h3>
+      <p class="prose">Standard practice says a signal earns its place if its own Sharpe beats its
+      correlation to the book times the book's Sharpe: <em>sᵢ &gt; ρᵢ · S</em>. Tested against
+      every signal this study has, in the book and rejected alike, the correlation between what
+      that criterion predicts and what actually happens is <strong>+0.05</strong>. It is wrong on
+      every row that matters — it says skip all five signals carrying the book, and add the one
+      that costs the most.</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Signal</th><th>Status</th><th>Own Sharpe</th><th>Corr. to book</th>
+            <th>Criterion says</th><th>Actual ΔSharpe</th></tr></thead>
+          <tbody>
+            <tr><td>order flow</td><td>in book</td><td class="n">1.12</td><td class="n">0.57</td>
+              <td>skip</td><td class="n pos">+0.15</td></tr>
+            <tr><td>stablecoin basis</td><td>in book</td><td class="n">0.86</td><td class="n">0.43</td>
+              <td>skip</td><td class="n pos">+0.83</td></tr>
+            <tr class="best"><td>BTC dominance</td><td>in book</td><td class="n">0.01</td><td class="n">0.28</td>
+              <td>skip</td><td class="n pos">+0.17</td></tr>
+            <tr class="best"><td>funding</td><td>in book</td><td class="n">−0.04</td><td class="n">0.17</td>
+              <td>skip</td><td class="n pos">+0.24</td></tr>
+            <tr><td>positioning</td><td>in book</td><td class="n">0.98</td><td class="n">0.61</td>
+              <td>skip</td><td class="n pos">+0.61</td></tr>
+            <tr><td>alt top-trader positioning</td><td>rejected</td><td class="n">0.57</td><td class="n">0.17</td>
+              <td><strong>add</strong></td><td class="n neg">−0.44</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="prose">The reason is structural, and it invalidates a chunk of this study's own
+      earlier reasoning. <strong>A netted single-position book is not a portfolio in the
+      mean-variance sense.</strong> The signals combine <em>before</em> a position exists: two
+      agreeing make it bigger, two disagreeing make it <em>zero</em>. That is a nonlinear
+      interaction through the entry, sizing and exit logic, and covariance algebra does not
+      describe it. The correlation arithmetic that drove the middle of this study was valid for
+      sub-accounts, which really were separate return streams — and it kept being applied after
+      the switch to netting, where it does not hold.</p>
+      <p class="note">The two highlighted rows are the ones to look at. BTC dominance and funding
+      have standalone Sharpe of <strong>0.01 and −0.04</strong> — no edge at all, either of them —
+      and removing either costs the book 0.17 and 0.24 of Sharpe. Their value is in
+      <em>vetoing</em>: cancelling other signals' positions at the right moments. No screen of
+      standalone performance would ever have found them, and this study's first screen didn't.</p>
+    </div>
+
+    <div class="why">
+      <h3>So all 116 candidates were re-screened inside the book, and it is saturated</h3>
+      <p class="prose">Each feature was added to the five-signal net position one at a time and
+      the <em>book's</em> Sharpe measured, ranked on in-sample only. <strong>Eight of 116 improve
+      it — 7%.</strong> The median candidate makes it <em>worse</em> by 0.28 of Sharpe.</p>
+      <p class="prose">If additions were neutral you would expect about half to help. Seven percent
+      means adding almost anything to a well-formed netted book actively hurts it — the exact
+      mirror image of the sub-account result earlier in this report, where going from three sleeves
+      to eight raised Sharpe monotonically. Under netting each extra signal dilutes the weight of
+      the good ones and adds veto noise. <strong>Netting saturates, and five signals is where.</strong></p>
+      <p class="note">Seven of the eight in-sample improvers degrade the full sample. The one that
+      does not is <code class="mono">dc_pos</code> — Donchian channel position, long near the top
+      of the trailing 55-bar range. At matched bootstrap risk it is worth about five points of
+      CAGR, lifting out-of-sample profit factor from 2.04 to 2.16 and Calmar from 3.68 to 4.16,
+      and its out-of-sample gain (+0.10 Sharpe) is <em>larger</em> than its in-sample one (+0.023)
+      — the right signature. It was also the 7th of 232 tested variants on a +0.023 margin, which
+      is squarely inside the multiple-testing zone, so it is recorded as a verified-but-marginal
+      sixth signal rather than promoted. There is a pleasing detail in which one it is: the book is
+      built entirely of <em>non-price</em> reads — flow, stablecoin basis, turnover rotation,
+      funding, positioning — and out of 116 candidates the only thing that adds to it is the
+      simplest price signal there is.</p>
+    </div>
 
     <div class="why">
       <h3>The random row is the one that matters</h3>
