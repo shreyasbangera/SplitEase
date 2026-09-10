@@ -863,3 +863,46 @@ The useful generalisation: **a sleeve with almost no standalone edge but near-ze
 is worth more to a portfolio than a strong sleeve correlated 0.7 with what you already hold.**
 That is why the original four-sleeve portfolio (four correlated directional books, Sharpe 1.12)
 was beaten by a two-book pair reading different things (Sharpe 1.43).
+
+## Order-book imbalance — the last data source, and the sharpest lesson in the study
+24 days of `bookTicker` (top-of-book quotes) streamed and reduced to 34,547 minute bars across
+four month-blocks, 2023-06 → 2024-02. Binance stopped publishing these daily files after early
+2024, so the whole sample sits inside the in-sample window; the four blocks are split
+early-vs-late as the nearest available substitute for an out-of-sample test.
+
+Market context measured directly: **mean quoted spread 0.034 bps** (BTCUSDT perp is usually one
+tick wide), mean top-of-book depth **$582,481**, **11,744 quote updates per minute**.
+
+| feature | early h=1m | late h=1m | early h=15m | late h=15m |
+|---|---|---|---|---|
+| **`obi_last`** (imbalance at the minute's last quote) | **+0.1079** | **+0.0811** | +0.0268 | +0.0236 |
+| `obi` (minute mean) | +0.0250 | +0.0095 | −0.0174 | +0.0065 |
+| `micro_dev` (microprice − mid) | +0.0250 | +0.0030 | −0.0176 | −0.0052 |
+| `spread_bps` | +0.0111 | +0.0004 | +0.0499 | +0.0089 |
+| `kline_imb` (baseline) | −0.0161 | −0.0108 | −0.0371 | −0.0132 |
+
+**`obi_last` is the strongest stable predictor found anywhere in this entire study** — IC
+**+0.108** in the early blocks and **+0.081** in the late ones, holding its sign and most of its
+magnitude, which almost nothing else did.
+
+**And it is completely untradable.** The decile economics:
+
+| signal | horizon | D1 | D10 | spread | vs cost |
+|---|---|---|---|---|---|
+| `obi` | 1 min | −0.08 bps | +0.08 bps | **+0.16 bps** | 16 bps |
+| `obi` | 60 min | +0.35 bps | +1.58 bps | **+1.23 bps** | 16 bps |
+| `micro_dev` | 5 min | −0.01 bps | −0.59 bps | −0.58 bps | 16 bps |
+
+The predictable move is **two orders of magnitude smaller than the round turn**. Even at maker
+fees (≈3.6 bps round trip, tested earlier) the 60-minute decile spread of 1.23 bps does not
+clear.
+
+**This is the study's clearest separation of statistical significance from economic
+significance.** Order-book imbalance is real, strong and stable — and it is a *market maker's*
+signal, not a taker's. A maker earns the spread and is paid for providing liquidity; the
+imbalance tells them which side to skew. A taker must cross that spread and pay fees, and no
+amount of predictive accuracy at a one-minute horizon recovers 16 bps from a 0.16 bps move.
+
+With this, **every data source Binance publishes for BTCUSDT has been mined**: OHLCV, taker
+volume, trade count, funding, open interest, trader positioning, quarterly futures, the
+coin-margined contract, tick prints, and now the order book.
