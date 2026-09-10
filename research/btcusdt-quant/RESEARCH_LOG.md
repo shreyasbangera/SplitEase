@@ -1755,3 +1755,69 @@ The adaptive weighting rediscovers the invalid criterion on its own and pays for
 Equal weights stand. The adaptive exponent is kept; adaptive weighting is rejected. Two independent
 routes now say the same thing: **in a netted book you cannot judge a signal by what it does alone,
 at any point in time, statically or dynamically.**
+
+## S62 — Continuous exposure: the elegant version is half as good
+The discrete book enters at full size and holds until a stop, target, flat-exit or 21-day cap, so
+exposure is close to binary. The obvious criticism is that a position taken at high conviction is
+still carried at full size after conviction has decayed. A continuous book fixes that by
+construction: each bar it targets an exposure proportional to current conviction, volatility-
+normalised, and rebalances toward it.
+
+| variant | CAGR | MaxDD | PF | Sharpe | Calmar | **C/S** |
+|---|---|---|---|---|---|---|
+| **discrete book (reference)** | **54.9%** | **−14.9%** | **2.03** | **2.20** | **3.68** | **1.68** |
+| continuous, exponent 1.0, scale 0.45 | 41.4% | −20.5% | 1.28 | 1.54 | 2.02 | 1.31 |
+| continuous, exponent 2.0, scale 0.30 | 21.9% | −29.3% | 1.22 | 1.05 | 0.75 | 0.71 |
+| continuous, exponent 2.5, scale 0.30 | 18.1% | −39.0% | 1.18 | 0.82 | 0.46 | 0.56 |
+| continuous, exp 2.0, rebalance band 0.5 | 33.9% | −19.1% | 1.34 | 1.45 | 1.78 | 1.22 |
+
+**Roughly half the Calmar**, and three things in the table explain why.
+
+Turnover: profit factor falls from 2.03 to about 1.30, and widening the rebalance band from 0 to
+0.5 lifts Calmar from 0.75 to 1.78 — most of the loss is paying 16 bps on noise.
+
+No stop: the continuous book has no stop-loss at all. It rides a loser down for as long as the
+signal says long. That is what the C/S column is measuring — 1.31 against 1.68.
+
+**And the conviction exponent inverts.** In the discrete book raising it from 1.0 to 2.5 improves
+everything; here it is catastrophic, Calmar 2.02 → 0.46. That is the most useful thing this test
+produced: **conviction sizing works in the discrete book *because of* the stop.** A large position
+taken on unanimity is safe when its downside is defined at 3 ATR. The same position without a stop
+is just leverage, and the harder you concentrate the worse it gets.
+
+Rejected. The discrete entry-stop-exit structure is not a crude approximation of the continuous
+one — it is doing essential work.
+
+## S63 — The adaptive machinery does not transfer to the six-signal short window
+Re-running S60's quarterly re-selection on the 2023-06 → 2026-08 window with the implied-volatility
+signal added: Sharpe 1.47–1.52, Calmar 1.97–2.33, against the five-signal long-window book's 5.71.
+Much worse. The test is weak — a 12-month lookback leaves only nine quarters to trade — but there
+is no sign of a gain, and the adaptive selection needs more history than that window has. The
+five-signal long-window book stands.
+
+## S64 — Learning the combination is worse than adding, and indistinguishable from noise
+Every version of this book has combined the five signals by **adding** them and raising the sum to
+a power. That form cannot express interactions — it has no way to say "flow only matters when
+funding is not already stretched". A gradient-boosted tree on the five signal values can.
+
+Guard rails: purged walk-forward (24 months train, 3 months test, 2 bars purged at each boundary so
+a training row's forward-return label can never overlap a test row), depth-3 trees with heavy
+regularisation, and the model's output mapped to a position and traded through the identical engine.
+
+| variant (from 2023-03) | CAGR | MaxDD | PF | Sharpe | Calmar |
+|---|---|---|---|---|---|
+| **linear sum (control)** | **71.3%** | **−14.9%** | **2.16** | **2.49** | **4.78** |
+| learned combiner | −28.4% | −87.0% | 0.94 | −0.47 | −0.33 |
+| shuffled labels, seed 0 | +0.3% | −48.2% | 1.08 | 0.23 | 0.01 |
+| shuffled labels, seed 1 | −56.0% | −96.9% | 0.66 | −1.72 | −0.58 |
+
+**The learned model is indistinguishable from its own shuffled-label control.** That is the whole
+result, and the control is what makes it worth stating: this is not "the model underperformed", it
+is "the machinery found nothing, and would have produced the same thing from random labels".
+
+Two reasons, both familiar. At a per-signal rank-IC of 0.05–0.10 the learnable structure is tiny
+next to what a tree will cheerfully memorise. And equal-weighted addition is close to optimal for
+near-independent signals of similar strength — the 1/N result — because estimation error in any
+fitted combination exceeds the gain from fitting it. **Adding beats learning here, and the study
+now has three independent demonstrations of the same thing** (static fitted weights, adaptive
+IC weights, and a learned combiner).
