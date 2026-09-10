@@ -153,25 +153,26 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
     <span class="eyebrow">2021-01 → 2026-08</span>
   </div>
   <h1>The 300% Problem</h1>
-  <p class="lede">Thirty-two strategies on the BTCUSDT perpetual, against a target of 300% net
+  <p class="lede">Forty-two strategies on the BTCUSDT perpetual, against a target of 300% net
   annual profit at under 20% drawdown. This is the record of what was tested, what survived
-  out of sample, and the measured reason the target is unreachable — which turns out not to be
-  a matter of finding a better signal.</p>
+  out of sample, and the measured reason the target is unreachable. The answer changed twice
+  during the study, and the final one is a number: the average correlation between independent
+  signals on a single instrument.</p>
 
   <div class="verdict">
     <div class="verdict-top"><span class="verdict-label">Verdict</span></div>
     <h2>No strategy qualified.</h2>
-    <p>Under the 20% drawdown limit the best result is <strong>38.6% net annual</strong> — three
-    books run as a portfolio. Lifting that limit does not rescue it: the strongest
-    single book peaks at <strong>59.6%</strong> at its growth-optimal size, and past that point
-    more leverage buys <em>less</em> compound return and strictly more drawdown.
-    Section&nbsp;3 shows the curve.</p>
+    <p>The best book improved 3.1× over the course of the study — from 38.6% to
+    <strong>120.7% net annual</strong> at a 19.8% measured drawdown — and it still fails, by
+    2.5×. Every gain came from the same place: not better signals, but <em>less correlated</em>
+    ones. Eight near-independent sleeves on one instrument reach Sharpe 2.32. The arithmetic in
+    section&nbsp;10 says roughly 3 is the ceiling, and 300% needs about 11.</p>
     <div class="gap-row">
       <div class="gap-item"><div class="k">Required net / year</div><div class="v">300%</div></div>
-      <div class="gap-item"><div class="k">Best under 20% DD</div><div class="v" style="color:var(--fail)">38.6%</div></div>
-      <div class="gap-item"><div class="k">Best at any drawdown</div><div class="v">59.6%</div></div>
-      <div class="gap-item"><div class="k">Strategies tested</div><div class="v">32</div></div>
-      <div class="gap-item"><div class="k">Parameter sets run</div><div class="v">3,700+</div></div>
+      <div class="gap-item"><div class="k">Best under 20% DD</div><div class="v" style="color:var(--fail)">120.7%</div></div>
+      <div class="gap-item"><div class="k">Same book, 5.5y window</div><div class="v">40.3%</div></div>
+      <div class="gap-item"><div class="k">Strategies tested</div><div class="v">42</div></div>
+      <div class="gap-item"><div class="k">Parameter sets run</div><div class="v">5,400+</div></div>
     </div>
   </div>
 </header>
@@ -181,31 +182,32 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
     <div class="stack-sm">
       <span class="eyebrow">1 — Qualification gates</span>
       <h2>The best qualifying-shaped strategy, gate by gate</h2>
-      <p class="prose" style="color:var(--ash)">Measured on S32 — the flow book, the
-      positioning book and the convex trend book run as a portfolio — at the largest size that
-      still respects the drawdown limit. Perpetual futures only, no spot leg anywhere. Net of
-      fees, slippage and real funding.</p>
+      <p class="prose" style="color:var(--ash)">Measured on S41 — eight near-independent
+      books run as one portfolio, at the largest size whose <em>measured</em> drawdown still
+      respects the limit. Perpetual futures only, no spot leg anywhere. Net of fees, slippage
+      and real funding. Window 2023-06 → 2026-08, set by when Binance's implied-volatility
+      index begins.</p>
     </div>
     <div class="gates">
       <div class="gate">
         <div class="req">Net yearly profit &gt; 300%</div>
-        <div class="got" style="color:var(--fail)">38.6%</div>
+        <div class="got" style="color:var(--fail)">120.7%</div>
         <span class="tag f">Fail</span>
       </div>
       <div class="gate">
         <div class="req">At least 100 completed trades</div>
-        <div class="got">724</div>
+        <div class="got">1,582</div>
         <span class="tag p">Pass</span>
       </div>
       <div class="gate">
         <div class="req">Profit factor &gt; 1.10</div>
-        <div class="got">1.27</div>
+        <div class="got">1.51</div>
         <span class="tag p">Pass</span>
       </div>
       <div class="gate">
         <div class="req">Maximum drawdown &lt; 20%</div>
-        <div class="got">19.0%</div>
-        <span class="tag p">Pass</span>
+        <div class="got">19.8%</div>
+        <span class="tag p">Pass<span class="sub" style="display:block">measured only</span></span>
       </div>
       <div class="gate">
         <div class="req">Realistic risk management</div>
@@ -218,13 +220,17 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
         <span class="tag p">Pass</span>
       </div>
     </div>
-    <p class="note">In-sample 33.7% against out-of-sample <strong>47.7%</strong>, and positive
-    in five of six calendar years (worst: −8%). It gets there because the flow book reads
-    something genuinely different from the two positioning books — correlation
-    <strong>0.30</strong>, against 0.71 between the positioning books themselves. That is a 72%
-    improvement on the best single book at the same drawdown, and still 7.8× short of the
-    target. The margin is thin: one size step up puts the bootstrap probability of breaching
-    20% at 100%.</p>
+    <p class="note">In-sample 122.1% against out-of-sample <strong>119.7%</strong> — the
+    closest agreement of any result here. But the drawdown gate passes on a technicality and
+    should not be read as passing. A stationary block bootstrap of the same daily returns puts
+    the <em>median</em> drawdown at 22.1% and the chance of breaching 20% at
+    <strong>66%</strong>; the 19.8% figure is one draw from that distribution, and a lucky one.
+    Backed off to a genuinely safe size the book returns <strong>69.6%</strong> with a 13% chance
+    of breaching. And the window matters: it starts in 2023-06 because that is when Binance's
+    volatility index begins, so it contains no bear market. The same machinery without the
+    implied-volatility sleeve, run over the full 5.5 years including 2022, returns
+    <strong>40.3%</strong> at −18.5%. Both numbers are in section&nbsp;4; neither is close to
+    300%.</p>
   </div>
 </section>
 <section>
@@ -281,9 +287,170 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
   </div>
 </section>
 <section>
+  <div class="stack-lg">
+    <div class="stack-sm">
+      <span class="eyebrow">3 — What actually moved the number</span>
+      <h2>Correlation, not signal quality</h2>
+      <p class="prose" style="color:var(--ash)">The best book tripled during this study. Not one
+      point of that came from finding a stronger signal. It came from finding signals that were
+      <em>different</em> — and the effect is large enough, and regular enough, to be the report's
+      main result.</p>
+    </div>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Sleeves in the portfolio</th><th>What was added</th><th>Sharpe</th>
+          <th>Calmar</th><th>CAGR at ≈19% DD</th></tr></thead>
+        <tbody>
+          <tr><td>3 — flow, positioning, convexity</td><td>the starting point</td>
+            <td class="n">1.36</td><td class="n">2.09</td><td class="n">39.8%</td></tr>
+          <tr><td>5 — + stablecoin basis, ETH-relative</td><td>two new input classes</td>
+            <td class="n">1.58</td><td class="n">2.18</td><td class="n">40.2%</td></tr>
+          <tr><td>7 — + BTC dominance, funding</td><td>the screen's own survivors</td>
+            <td class="n">1.84</td><td class="n">2.18</td><td class="n">40.3%</td></tr>
+          <tr class="best"><td>8 — + implied volatility <span class="sub">(short window)</span></td>
+            <td>the options market</td>
+            <td class="n"><strong>2.32</strong></td><td class="n"><strong>6.09</strong></td>
+            <td class="n pos">120.7%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">The first three rows share the full 5.5-year window including the 2022 bear
+    market, so they are directly comparable: Sharpe rises 1.36 → 1.84 while the drawdown-matched
+    return barely moves, because on that window the added sleeves buy <em>risk reduction</em>
+    rather than return. The fourth row is on a shorter window — Binance's volatility index only
+    begins in 2023-06 — and that shorter window has no bear market in it. Both facts are true at
+    once and neither cancels the other.</p>
+
+    <div class="why">
+      <h3>The one input class the study had never touched</h3>
+      <p class="prose">Every signal in this study up to this point was <em>realised</em>: prices,
+      taker flow, open interest, trader positioning, funding. Binance also publishes
+      <strong>BVOL</strong>, a 30-day forward-looking implied volatility index for BTC — a VIX
+      analogue, at one-second resolution. 1,152 daily files were streamed and reduced to
+      <strong>1,656,492 minute bars</strong> covering 2023-06-20 → 2026-09-09. It is not a
+      measurement of past risk. It is the market's <em>price</em> of future risk.</p>
+      <p class="prose">The variance risk premium is right there and it is real — mean implied
+      volatility <strong>51.4%</strong> against mean realised <strong>42.7%</strong>, a
+      <strong>+8.7 point</strong> premium, the same anomaly that exists in equities. It is also
+      not harvestable here: collecting it means selling options, and this is a futures study.</p>
+      <p class="prose">What <em>is</em> tradable is the movement. Most implied-volatility features
+      are unstable — the level, the premium and the implied/realised ratio all flip sign between
+      in- and out-of-sample. One does not: the three-day change in implied volatility carries a
+      rank-IC of <strong>+0.046 in-sample and +0.091 out-of-sample</strong> at a one-day horizon,
+      and it is not a price-momentum proxy — the two correlate −0.10, and price momentum's own IC
+      over this window is <em>negative</em>. Projecting price momentum out <em>raises</em> the IC
+      to +0.083 rather than lowering it. Decile spread: <strong>+44 bps against a 16 bps round
+      turn</strong>, the widest margin over cost of anything in the study.</p>
+      <div class="pill-row">
+        <span class="pill">standalone: 15.6% CAGR · PF 1.61 · Sharpe 1.41</span>
+        <span class="pill">correlation to the other books: 0.09 / 0.17 / 0.23</span>
+        <span class="pill">worth +40% of portfolio return at matched drawdown</span>
+      </div>
+    </div>
+
+    <div class="why">
+      <h3>Then stop looking for a better signal and look for a different one</h3>
+      <p class="prose">All <strong>116</strong> panel features were put through one identical
+      book — 12h decision, 15m execution, 1.0 z threshold, 3 ATR stop, 2R target, 7-day cap —
+      with nothing tuned per feature and the sign chosen in-sample only. 50 produced enough
+      trades to judge, 22 beat out-of-sample profit factor 1.10, 13 beat 1.30. <strong>The
+      multiple-testing exposure is stated before the results, not after:</strong> at a 5%
+      false-positive rate roughly ten of those are luck, so in-sample rank was used only to order
+      the queue and nothing was kept unless it also cleared a period the screen never saw.</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Sleeve</th><th>What it reads</th><th>Corr.</th><th>IS PF</th>
+            <th>OOS PF</th><th>Sharpe</th></tr></thead>
+          <tbody>
+            <tr><td>CMPX</td><td>log(BTCUSD_PERP / BTCUSDT_PERP) momentum — BTC cancels, leaving
+              the implied <strong>USDT/USD rate</strong></td>
+              <td class="n">0.14</td><td class="n">1.20</td><td class="n pos">1.82</td><td class="n">0.99</td></tr>
+            <tr><td>BTCDOM</td><td>BTC's share of dollar turnover across the perp complex —
+              rotation and attention, not price</td>
+              <td class="n">0.11</td><td class="n">1.51</td><td class="n">1.25</td><td class="n">1.11</td></tr>
+            <tr><td>ETHREL</td><td>fade ETH's three-day outperformance of BTC</td>
+              <td class="n">0.23</td><td class="n">1.08</td><td class="n pos">1.50</td><td class="n">0.57</td></tr>
+            <tr><td>FUNDZ</td><td>fade the funding z-score — crowded longs pay to stay long</td>
+              <td class="n">−0.03</td><td class="n">1.21</td><td class="n">1.10</td><td class="n">0.44</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note"><code class="mono">btc_dom</code> came from an earlier build script whose
+      source did not survive, so its definition was <strong>verified by reconstruction</strong>:
+      BTC quote volume ÷ (BTC + 15 alts quote volume) reproduces the stored series at correlation
+      1.0000, maximum absolute difference 0.000000. Nothing in this report rests on a series
+      whose construction could not be re-derived. Three families were tested and
+      <em>rejected</em>: coin-margined funding divergence (OOS PF 0.97), quarterly term structure
+      (too weak to trade), and alt-market breadth (OOS PF 0.76 — actively harmful).</p>
+    </div>
+
+    <div class="why">
+      <h3>Nothing here is carried by one sleeve</h3>
+      <p class="prose">Removing any single book makes the portfolio worse, and the three
+      <em>newest</em> sleeves — the three weakest on standalone return — beat every original
+      strategy when run on their own.</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Sleeve set, same window and size</th><th>CAGR</th><th>Sharpe</th>
+            <th>Bootstrap P(drawdown &gt; 20%)</th></tr></thead>
+          <tbody>
+            <tr class="best"><td>all six</td><td class="n">51.7%</td><td class="n"><strong>2.13</strong></td>
+              <td class="n pos">8%</td></tr>
+            <tr><td>drop ETH-relative</td><td class="n">60.7%</td><td class="n">1.90</td><td class="n">38%</td></tr>
+            <tr><td>drop stablecoin basis</td><td class="n">55.3%</td><td class="n">2.02</td><td class="n">24%</td></tr>
+            <tr><td>drop implied volatility</td><td class="n">52.9%</td><td class="n">1.92</td><td class="n">28%</td></tr>
+            <tr><td>the three <em>new</em> sleeves alone</td><td class="n">35.0%</td>
+              <td class="n">2.00</td><td class="n pos">2%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">Read the second row carefully — dropping a sleeve <em>raises</em> CAGR at
+      the same nominal size while quadrupling the chance of a 20% drawdown. Sizing knobs are not
+      comparable across different portfolios; only risk-matched numbers are, and this is why every
+      headline in this report is paired with a bootstrap.</p>
+    </div>
+
+    <div class="why">
+      <h3>An audit of every new sleeve for look-ahead</h3>
+      <p class="prose">Three tests on the live harness: an oracle control fed literal next-bar
+      returns, each real signal shifted one bar <em>earlier</em> (peeking), and each delayed one
+      bar. A clean signal should improve when it peeks and degrade when it is delayed.</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Sleeve</th><th>As traded</th><th>Peek 1 bar</th><th>Delayed 1 bar</th>
+            <th>Reading</th></tr></thead>
+          <tbody>
+            <tr><td>oracle control</td><td class="n"><strong>20.12</strong></td><td class="n">—</td>
+              <td class="n">—</td><td>the harness <em>can</em> express a leak</td></tr>
+            <tr><td>stablecoin basis</td><td class="n">0.99</td><td class="n pos">2.20</td>
+              <td class="n">0.42</td><td>textbook gradient — clean</td></tr>
+            <tr><td>BTC dominance</td><td class="n">1.11</td><td class="n pos">1.32</td>
+              <td class="n">0.27</td><td>textbook gradient — clean</td></tr>
+            <tr><td>implied volatility</td><td class="n">0.98</td><td class="n">0.85</td>
+              <td class="n">0.70</td><td>flat — slow signal, no bar-timing content</td></tr>
+            <tr><td>ETH-relative</td><td class="n">0.57</td><td class="n">0.01</td>
+              <td class="n">0.48</td><td>flat — weak, and the fragile one</td></tr>
+            <tr><td>funding</td><td class="n">0.44</td><td class="n">0.24</td>
+              <td class="n">0.24</td><td>flat — a persistent tilt, not a timed entry</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">Sharpe ratios. A flat gradient is <em>not</em> evidence of leakage — leakage
+      shows up as peeking adding nothing because the future is already in the signal — but it does
+      say those three sleeves have no sharp timing content, which marks them as the fragile ones.
+      Recorded that way rather than smoothed over. One more disclosure: the winning
+      implied-volatility configuration was chosen from a grid that printed in- and out-of-sample
+      side by side, so out-of-sample numbers were visible at the moment of choosing. Re-checked on
+      in-sample alone the same threshold wins regardless of the stop/target pair, and all three
+      pairs hold out of sample at PF 1.31 / 1.45 / 1.41. Small, but disclosed.</p>
+    </div>
+  </div>
+</section>
+<section>
   <div class="stack">
     <div class="stack-sm">
-      <span class="eyebrow">3 — The binding constraint</span>
+      <span class="eyebrow">4 — The binding constraint</span>
       <h2>Compound growth has a maximum</h2>
       <p class="prose" style="color:var(--ash)">The intuition that a good strategy can simply be
       levered to any return target is wrong, and measurably so. Below the growth-optimal size
@@ -357,7 +524,7 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
 <section>
   <div class="stack">
     <div class="stack-sm">
-      <span class="eyebrow">4 — Ranking</span>
+      <span class="eyebrow">5 — Ranking</span>
       <h2>The finalists, ranked by robustness</h2>
       <p class="prose" style="color:var(--ash)">Ranked on out-of-sample agreement first, then
       cost tolerance, then drawdown behaviour, then raw return. <strong>None qualify;</strong>
@@ -369,61 +536,85 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
           <th>Sharpe</th><th>Calmar</th><th>IS CAGR</th><th>OOS CAGR</th><th>Gate missed</th></tr></thead>
         <tbody>
           <tr class="best">
-            <td><span class="rk">1</span> <span class="name">S32 · Flow + positioning portfolio</span><br>
+            <td><span class="rk">1</span> <span class="name">S41 · Eight-sleeve portfolio</span><br>
+              <span class="sub">flow · positioning · convexity · implied vol · stablecoin basis · ETH-relative · BTC dominance · funding · 2023-06→2026-08</span></td>
+            <td class="n pos">69.6%</td><td class="n">−13.3%</td><td class="n">1.52</td><td class="n">1,582</td>
+            <td class="n"><strong>2.32</strong></td><td class="n"><strong>5.22</strong></td><td class="n">72.6%</td><td class="n pos">68.3%</td>
+            <td>profit only</td></tr>
+          <tr class="rank">
+            <td><span class="rk">2</span> <span class="name">S41 · Eight sleeves, aggressive size</span><br>
+              <span class="sub">same book, size 8 · measured DD passes, bootstrap says 66% chance it would not</span></td>
+            <td class="n pos">120.7%</td><td class="n">−19.8%</td><td class="n">1.51</td><td class="n">1,582</td>
+            <td class="n"><strong>2.32</strong></td><td class="n"><strong>6.09</strong></td><td class="n">122.1%</td><td class="n pos">119.7%</td>
+            <td>profit only</td></tr>
+          <tr class="rank">
+            <td><span class="rk">3</span> <span class="name">S41 · Seven sleeves, full window</span><br>
+              <span class="sub">no implied-vol sleeve · 2021-03→2026-08, includes the 2022 bear</span></td>
+            <td class="n pos">40.3%</td><td class="n">−18.5%</td><td class="n">1.42</td><td class="n">2,132</td>
+            <td class="n">1.84</td><td class="n">2.18</td><td class="n">32.9%</td><td class="n pos">52.8%</td>
+            <td>profit only</td></tr>
+          <tr class="rank">
+            <td><span class="rk">4</span> <span class="name">S39 · The three new sleeves alone</span><br>
+              <span class="sub">implied vol + stablecoin basis + ETH-relative · none of the original books</span></td>
+            <td class="n pos">35.0%</td><td class="n">−11.7%</td><td class="n">1.42</td><td class="n">570</td>
+            <td class="n">2.00</td><td class="n">3.00</td><td class="n">28.4%</td><td class="n pos">38.4%</td>
+            <td>profit only</td></tr>
+          <tr class="rank">
+            <td><span class="rk">5</span> <span class="name">S32 · Flow + positioning portfolio</span><br>
               <span class="sub">3 sleeves · monthly rebalance · size 1.5</span></td>
             <td class="n pos">38.6%</td><td class="n">−19.0%</td><td class="n">1.27</td><td class="n">724</td>
             <td class="n">1.34</td><td class="n">2.03</td><td class="n">33.7%</td><td class="n pos">47.7%</td>
             <td>profit only</td></tr>
           <tr class="rank">
-            <td><span class="rk">2</span> <span class="name">S33 · + open-interest sleeve</span><br>
+            <td><span class="rk">6</span> <span class="name">S33 · + open-interest sleeve</span><br>
               <span class="sub">4 sleeves · size 1.8 · highest Sharpe with size</span></td>
             <td class="n pos">37.8%</td><td class="n">−19.9%</td><td class="n">1.30</td><td class="n">1090</td>
             <td class="n"><strong>1.41</strong></td><td class="n">1.90</td><td class="n">33.1%</td><td class="n pos">46.8%</td>
             <td>profit only</td></tr>
           <tr class="rank">
-            <td><span class="rk">3</span> <span class="name">S32 · Flow + positioning pair</span><br>
+            <td><span class="rk">7</span> <span class="name">S32 · Flow + positioning pair</span><br>
               <span class="sub">2 sleeves · size 1.5 · highest Sharpe</span></td>
             <td class="n pos">35.8%</td><td class="n">−19.7%</td><td class="n">1.25</td><td class="n">463</td>
             <td class="n"><strong>1.43</strong></td><td class="n">1.82</td><td class="n">34.1%</td><td class="n pos">39.8%</td>
             <td>profit only</td></tr>
           <tr class="rank">
-            <td><span class="rk">4</span> <span class="name">S31 · Short-window orthogonal flow</span><br>
+            <td><span class="rk">8</span> <span class="name">S31 · Short-window orthogonal flow</span><br>
               <span class="sub">12h · 3.5% risk · found by the stability screen</span></td>
             <td class="n pos">22.4%</td><td class="n">−19.6%</td><td class="n">1.60</td><td class="n">234</td>
             <td class="n">1.23</td><td class="n">1.14</td><td class="n">20.7%</td><td class="n pos">26.2%</td>
             <td>profit only</td></tr>
           <tr class="rank">
-            <td><span class="rk">5</span> <span class="name">S7 · Smart-money vs retail</span><br>
+            <td><span class="rk">9</span> <span class="name">S7 · Smart-money vs retail</span><br>
               <span class="sub">4h · 2.5% risk · 2.5R target</span></td>
             <td class="n pos">22.9%</td><td class="n">−18.7%</td><td class="n">1.49</td><td class="n">229</td>
             <td class="n">1.14</td><td class="n">1.23</td><td class="n">22.3%</td><td class="n pos">24.1%</td>
             <td>profit only</td></tr>
           <tr class="rank">
-            <td><span class="rk">6</span> <span class="name">S19 · Futures-only portfolio</span><br>
+            <td><span class="rk">10</span> <span class="name">S19 · Futures-only portfolio</span><br>
               <span class="sub">4 directional books · size 2</span></td>
             <td class="n pos">22.6%</td><td class="n">−19.3%</td><td class="n">1.24</td><td class="n">811</td>
             <td class="n">1.10</td><td class="n">1.16</td><td class="n">17.9%</td><td class="n pos">23.3%</td>
             <td>profit only</td></tr>
           <tr class="rank">
-            <td><span class="rk">7</span> <span class="name">S15 · Convex trend</span><br>
+            <td><span class="rk">11</span> <span class="name">S15 · Convex trend</span><br>
               <span class="sub">4h · 2% risk · pyramid 3 · no target</span></td>
             <td class="n pos">37.2%</td><td class="n">−36.0%</td><td class="n">1.91</td><td class="n">261</td>
             <td class="n">0.95</td><td class="n">1.03</td><td class="n">—</td><td class="n pos">56.4%</td>
             <td>profit + drawdown</td></tr>
           <tr class="rank">
-            <td><span class="rk">8</span> <span class="name">S20 · Continuous vol-targeted</span><br>
+            <td><span class="rk">12</span> <span class="name">S20 · Continuous vol-targeted</span><br>
               <span class="sub">4h rebalance · target vol 35%</span></td>
             <td class="n pos">31.0%</td><td class="n">−25.9%</td><td class="n">1.18</td><td class="n">—</td>
             <td class="n">1.21</td><td class="n">1.20</td><td class="n">—</td><td class="n pos">22.2%</td>
             <td>profit + drawdown</td></tr>
           <tr class="rank">
-            <td><span class="rk">9</span> <span class="name">S21 · Multi-timeframe ensemble</span><br>
+            <td><span class="rk">13</span> <span class="name">S21 · Multi-timeframe ensemble</span><br>
               <span class="sub">2h/4h/8h/12h/1D sleeves · 3.5% risk</span></td>
             <td class="n pos">19.1%</td><td class="n">−16.7%</td><td class="n">1.17</td><td class="n">970</td>
             <td class="n">1.10</td><td class="n">1.15</td><td class="n">21.6%</td><td class="n pos">15.2%</td>
             <td>profit only</td></tr>
           <tr class="rank">
-            <td><span class="rk">10</span> <span class="name">S4 · Adaptive trend</span><br>
+            <td><span class="rk">14</span> <span class="name">S4 · Adaptive trend</span><br>
               <span class="sub">4h Donchian · ADX + efficiency gate</span></td>
             <td class="n pos">17.1%</td><td class="n">−22.2%</td><td class="n">1.46</td><td class="n">211</td>
             <td class="n">0.77</td><td class="n">0.83</td><td class="n">16.4%</td><td class="n pos">22.4%</td>
@@ -437,26 +628,83 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
         </tbody>
       </table>
     </div>
-    <p class="note">Rank 6 is the interesting one. Removing the take-profit and pyramiding into
-    winners lifted profit factor from 1.46 to <strong>1.91</strong> and dropped the win rate to
-    22% — a genuinely convex payoff, which is exactly the shape you want when a drawdown limit
-    is binding. It still failed, because the drawdown grew with the return.</p>
+    <p class="note">Rank 4 is the one that reframes the study. Those three sleeves are the
+    <em>weakest</em> books here on standalone return — 15.6%, 10.9% and 5.4% a year — and
+    together, with none of the original strategies, they beat every one of them on Sharpe. Rank 1
+    is not a better idea than rank 5; it is the same ideas with five more uncorrelated ones
+    beside them. Rank 11 is the older lesson worth keeping: removing the take-profit and
+    pyramiding into winners lifted profit factor from 1.46 to <strong>1.91</strong> and dropped
+    the win rate to 22% — a genuinely convex payoff, which is what you want when a drawdown limit
+    binds. It still failed, because the drawdown grew with the return.</p>
   </div>
 </section>
 <section>
   <div class="stack-lg">
     <div class="stack-sm">
-      <span class="eyebrow">5 — Reproduction</span>
+      <span class="eyebrow">6 — Reproduction</span>
       <h2>Complete specifications</h2>
       <p class="prose" style="color:var(--ash)">Everything needed to rebuild the top books.
       Rolling windows are counted in decision bars. Costs and execution rules are identical
-      across every strategy and listed once in section&nbsp;9.</p>
+      across every strategy and listed once in section&nbsp;10.</p>
     </div>
 
     <article class="spec">
       <div class="spec-head">
+        <h3>S41 · Eight-sleeve portfolio</h3>
+        <span class="id">RANK 1 · CAGR 69.6% · DD −13.3% · PF 1.52 · N 1,582</span>
+      </div>
+      <div class="spec-body">
+        <p>Eight sub-accounts run in parallel and rebalance monthly to inverse-volatility weights
+        computed in-sample only. Every sleeve trades <strong>BTCUSDT perpetual futures and
+        nothing else</strong> — what differs is what each one reads to decide. Average pairwise
+        correlation <strong>0.10</strong>; three pairs are negative.</p>
+        <dl class="kv">
+          <dt>Sleeves and signals</dt>
+          <dd><code>IVOL 14%</code> — 3-day change in the Binance BVOL implied-volatility index,
+            z-scored on 120 bars, 12h · <code>CMPX 16%</code> —
+            <code>log(BTCUSD_PERP / BTCUSDT_PERP)</code> differenced 6 bars, i.e. the implied
+            USDT/USD rate, 12h · <code>ETHREL 17%</code> — fade ETH minus BTC 3-day return, 12h ·
+            <code>BTCDOM 14%</code> — BTC's share of dollar turnover across 16 perps, 12h ·
+            <code>FUNDZ 18%</code> — fade the funding z-score, 12h · <code>FLOW 10%</code> (S31,
+            12h) · <code>POSN 7%</code> (S7, 4h) · <code>CONVEX 4%</code> (S15, 4h)</dd>
+          <dt>Common rules</dt>
+          <dd>Entry when the z-score crosses ±1.0; stop at 3 × ATR(14); target at 2R; 7-day
+            maximum hold; 10× notional cap per sleeve. Signals are computed on closed decision
+            bars and executed on the next 15-minute bar.</dd>
+          <dt>Size</dt>
+          <dd>Safe operating point (size 4.5): 9.0% risk/trade on IVOL, CMPX and BTCDOM, 8.1% on
+            ETHREL and FUNDZ, sleeve caps on the three original books. Aggressive point (size 8)
+            doubles these.</dd>
+          <dt>Result</dt>
+          <dd>IS 72.6% · OOS <strong>68.3%</strong> · full period 69.6% / −13.3%, PF 1.52,
+            Sharpe 2.32, Calmar 5.22 over 1,582 trades. At size 8: 120.7% / −19.8%, IS 122.1% vs
+            OOS 119.7%.</dd>
+          <dt>Yearly</dt>
+          <dd class="mono">2023 +23% · 2024 +68% · 2025 +71% · 2026 +53% (at size 4.5)</dd>
+          <dt>Window</dt>
+          <dd>2023-06-21 → 2026-08-31, set by the start of the BVOL index. In-sample ends
+            2024-07-01, so 2.17 of the 3.2 years are out of sample.</dd>
+        </dl>
+        <p class="note"><strong>Read the drawdown from the bootstrap, not from the sample.</strong>
+        A stationary block bootstrap (2,500 paths, 5-day blocks) of the same daily returns gives a
+        median drawdown of −14.8% at size 4.5 and a 13% chance of breaching 20%; at size 8 the
+        median is −22.1% and the chance is <strong>66%</strong>. The 19.8% headline is one draw
+        from that distribution and a favourable one. Sizes between the two trace 83.0% at 25% and
+        97.4% at 40%.</p>
+        <p class="note"><strong>And the window is the friendly one.</strong> Dropping the
+        implied-volatility sleeve, which is what the pre-2023 data allows, and running the
+        remaining seven over the full 5.5 years including the 2022 bear market gives
+        <strong>40.3% at −18.5%</strong>, PF 1.42, Sharpe 1.84, Calmar 2.18, over 2,132 trades —
+        yearly 2021 +34%, 2022 −8%, 2023 +71%, 2024 +46%, 2025 +40%, 2026 +50%. Calmar peaks at
+        that size on the long window and <em>falls</em> beyond it. The honest reading of this
+        strategy is the pair of numbers, not the better half.</p>
+      </div>
+    </article>
+
+    <article class="spec">
+      <div class="spec-head">
         <h3>S32 · Flow + positioning portfolio</h3>
-        <span class="id">RANK 1 · CAGR 38.6% · DD −19.0% · PF 1.27 · N 724</span>
+        <span class="id">RANK 5 · CAGR 38.6% · DD −19.0% · PF 1.27 · N 724</span>
       </div>
       <div class="spec-body">
         <p>Three sub-accounts run in parallel and rebalance monthly. The point is not that there
@@ -496,7 +744,7 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
     <article class="spec">
       <div class="spec-head">
         <h3>S31 · Short-window orthogonal flow</h3>
-        <span class="id">RANK 4 · CAGR 22.4% · DD −19.6% · PF 1.60 · N 234</span>
+        <span class="id">RANK 8 · CAGR 22.4% · DD −19.6% · PF 1.60 · N 234</span>
       </div>
       <div class="spec-body">
         <p>Raw taker imbalance is contaminated by short-horizon price reversal. Projecting it
@@ -552,7 +800,7 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
     <article class="spec">
       <div class="spec-head">
         <h3>S7 · Smart-money vs retail positioning</h3>
-        <span class="id">RANK 5 · CAGR 22.9% · DD −18.7% · PF 1.49 · N 229</span>
+        <span class="id">RANK 9 · CAGR 22.9% · DD −18.7% · PF 1.49 · N 229</span>
       </div>
       <div class="spec-body">
         <p>Binance publishes, every five minutes, the long/short <em>account</em> ratio of its
@@ -595,7 +843,7 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
     <article class="spec">
       <div class="spec-head">
         <h3>S19 · Futures-only portfolio</h3>
-        <span class="id">RANK 6 · CAGR 22.6% · DD −19.3% · PF 1.24 · N 811</span>
+        <span class="id">RANK 10 · CAGR 22.6% · DD −19.3% · PF 1.24 · N 811</span>
       </div>
       <div class="spec-body">
         <p>Four directional books on the same perpetual, run as separate sub-accounts and
@@ -619,7 +867,7 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
     <article class="spec">
       <div class="spec-head">
         <h3>S15 · Convex trend</h3>
-        <span class="id">RANK 7 · CAGR 37.2% · DD −36.0% · PF 1.91 · N 261</span>
+        <span class="id">RANK 11 · CAGR 37.2% · DD −36.0% · PF 1.91 · N 261</span>
       </div>
       <div class="spec-body">
         <p>Same entry as S7, but restructured to break the symmetric return distribution that
@@ -649,7 +897,7 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
 <section>
   <div class="stack">
     <div class="stack-sm">
-      <span class="eyebrow">6 — The ledger</span>
+      <span class="eyebrow">7 — The ledger</span>
       <h2>Every attempt, and why it died</h2>
       <p class="prose" style="color:var(--ash)">Four ideas were killed at the signal screen
       before a backtest was written — measuring predictive power against the round-turn cost
@@ -766,7 +1014,7 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
 <section>
   <div class="stack">
     <div class="stack-sm">
-      <span class="eyebrow">7 — Two things that were not the problem</span>
+      <span class="eyebrow">8 — What was not the problem</span>
       <h2>Ruling out the usual suspects</h2>
     </div>
     <div class="why stack-sm">
@@ -860,10 +1108,59 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
       features — who is trading, whether they are splitting orders, what their flow costs in
       impact — carry residual IC of 0.003 to 0.015 against forward returns at horizons from 5
       minutes to 4 hours, which is noise at n = 43,200. The 51 GB full-history download is not
-      justified. Every source Binance publishes for this instrument has now been mined: OHLCV,
-      taker volume, trade count, funding, open interest, trader positioning, quarterly futures,
-      the coin-margined contract, and tick prints. Only the order book remains, and that is a
-      market-making dataset rather than a directional-signal one.</p>
+      justified.</p>
+
+      <h3>The fast end, measured and closed from two directions</h3>
+      <p style="color:var(--ash)">The order book was the last classic source. 24 days of
+      top-of-book quotes were streamed and reduced to <strong>34,547 minute bars</strong>
+      (2023-06 → 2024-02, the whole window Binance publishes). Market context, measured rather
+      than assumed: mean quoted spread <strong>0.034 bps</strong>, mean top-of-book depth
+      <strong>$582,481</strong>, <strong>11,744 quote updates per minute</strong>.</p>
+      <p style="color:var(--ash)">Order-book imbalance at the minute's last quote is the
+      <em>strongest and most stable predictor found anywhere in this study</em> — rank-IC
+      <strong>+0.108</strong> in the early blocks and <strong>+0.081</strong> in the late ones,
+      holding both its sign and most of its magnitude, which almost nothing else here did. And it
+      is completely untradable: the decile spread is <strong>+0.16 bps at one minute</strong> and
+      +1.23 bps at sixty, against a 16 bps round turn. Two orders of magnitude short. Even at
+      maker fees it does not clear. <strong>This is the study's cleanest separation of
+      statistical significance from economic significance.</strong> Order-book imbalance is a
+      market maker's signal — they are paid the spread for providing liquidity, and imbalance
+      tells them which way to skew. A taker must cross that spread, and no amount of predictive
+      accuracy at a one-minute horizon recovers 16 bps from a 0.16 bps move.</p>
+      <p style="color:var(--ash)">So the other half was tested too: <em>become the maker</em>. A
+      second engine was built on 1-minute bars in which orders rest rather than cross — filled
+      only when a later minute trades strictly through the limit, cancelled on a TTL, exiting at
+      a resting limit for the target and a market order for the stop. That drops the round turn
+      from 16 bps to <strong>3.6 bps, 4.4× cheaper</strong>. Full grids of a 5-minute reversal
+      book returned profit factor <strong>0.36 to 0.81 — every configuration lost</strong>.
+      Rather than tune, the raw edge was isolated: the mean forward return from each fill,
+      before any stop or target.</p>
+      <div class="scroll"><table>
+        <thead><tr><th>limit rests at</th><th>fill rate</th><th>+5m</th><th>+15m</th><th>+30m</th>
+          <th>+60m</th><th>+120m</th></tr></thead>
+        <tbody>
+          <tr><td>0.25 σ below</td><td class="n">85%</td><td class="n">−0.39</td><td class="n">−0.37</td>
+            <td class="n">−0.41</td><td class="n">−0.69</td><td class="n">−0.72</td></tr>
+          <tr><td>0.50 σ below</td><td class="n">75%</td><td class="n">+0.10</td><td class="n">+0.15</td>
+            <td class="n">+0.22</td><td class="n">−0.14</td><td class="n">−0.30</td></tr>
+          <tr class="best"><td>1.00 σ below, 2σ trigger</td><td class="n">69%</td><td class="n">+1.15</td>
+            <td class="n">+1.19</td><td class="n pos"><strong>+1.57</strong></td><td class="n">+1.06</td>
+            <td class="n">+0.52</td></tr>
+        </tbody>
+      </table></div>
+      <p style="color:var(--ash)">Basis points, against a <strong>3.6 bps</strong> maker round
+      turn. The trade-off is textbook and perfectly monotone — the deeper the order rests, the
+      better the fill-conditional edge and the lower the fill rate — and the best point on that
+      curve is <strong>+1.57 bps against a 3.6 bps cost</strong>, less than half of what is
+      needed. Fading beats joining at every offset, so short-term reversal is the right sign;
+      there is simply almost nothing there. The order book says the <em>information</em> at a
+      one-minute horizon is worth 0.16 bps; the maker engine says the <em>execution saving</em> is
+      worth 12.4 bps but the fill-conditional edge only 1.6. Retail high-frequency trading on
+      BTCUSDT does not fail on cost or on signal. It fails on both.</p>
+      <p style="color:var(--ash)">With this, every source Binance publishes for the instrument has
+      been mined: OHLCV, taker volume, trade count, funding, open interest, trader positioning,
+      quarterly futures, the coin-margined contract, tick prints, the order book — and, found last
+      and worth more than all the rest, the implied-volatility index.</p>
 
       <h3>Two things that did check out</h3>
       <p style="color:var(--ash)"><strong>Execution granularity.</strong> Every result resolved
@@ -970,18 +1267,29 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
 <section>
   <div class="stack">
     <div class="stack-sm">
-      <span class="eyebrow">8 — Why the target is out of reach</span>
+      <span class="eyebrow">9 — Why the target is out of reach</span>
       <h2>The arithmetic behind the shortfall</h2>
     </div>
 
     <div class="why stack">
       <div class="stack-sm">
-        <h3>The measured ceiling</h3>
-        <p style="color:var(--ash)">Section&nbsp;3 is the answer: compound growth peaks near
-        <strong>60% CAGR</strong> and declines beyond it. That peak is not a parameter — it
-        follows from the return distribution, and every strategy in this study lands in the
-        same place. Under a 20% drawdown budget you operate far below the peak, at roughly
-        23%.</p>
+        <h3>The answer changed twice, and the final one is a number</h3>
+        <p style="color:var(--ash)">The first answer was the growth-optimal ceiling in
+        section&nbsp;4: compound return peaks and then declines, so leverage cannot be the
+        route. That still holds — every book in this study has such a peak. But it turned out
+        not to be the binding constraint, because the peak <em>moves</em> when the portfolio's
+        Sharpe rises, and Sharpe rose from 1.36 to 2.32 during this study.</p>
+        <p style="color:var(--ash)">The real constraint is the one underneath it. Add
+        <em>k</em> sleeves of individual Sharpe <em>s</em> with average pairwise correlation
+        <em>ρ̄</em>, and the portfolio's Sharpe is bounded — not by how many you add, but by
+        <em>ρ̄</em>:</p>
+        <div class="eq">Sharpe(k)  =  s·√k ⁄ √(1 + (k−1)·ρ̄)   →   s ⁄ √ρ̄   as k → ∞</div>
+        <p style="color:var(--ash)">Measured on this instrument: <strong>s ≈ 0.9–1.1</strong>
+        per sleeve, <strong>ρ̄ ≈ 0.10</strong> across the eight. That puts the ceiling at
+        <strong>Sharpe ≈ 3</strong>. Eight sleeves already reach 2.32, which is 78% of the way
+        there. Sleeves nine through twenty are worth the remaining 22% between them, and then
+        nothing. <em>ρ̄ is a property of the market, not of the search</em> — every signal
+        available on one instrument is ultimately a view on the same price.</p>
       </div>
 
       <div class="stack-sm">
@@ -993,12 +1301,20 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
         <code>0.108 × √91 ≈ 1.03</code> — almost exactly the Sharpe of 1.14 the strategy
         actually delivered. The model is not being pessimistic; it is describing what
         happened.</p>
-        <p style="color:var(--ash)">Every route to more breadth on one instrument was tested
-        and closed. Shorter horizons: IC collapses to 0.013 at 1h, and the 1h book's apparent
-        Sharpe advantage was in-sample only (1.48 → 0.72 out of sample). More sleeves: the
-        four perp books correlate 0.25–0.70 because they are all directional on the same
-        asset, so Sharpe stays at 1.10. Cheaper fills: worth 1.2 percentage points. Convexity:
-        raises profit factor to 1.91, leaves Sharpe at 0.95.</p>
+        <p style="color:var(--ash)">Three of the four routes to more breadth on one instrument
+        stayed closed. Shorter horizons: IC collapses to 0.013 at 1h, and the 1h book's apparent
+        Sharpe advantage was in-sample only (1.48 → 0.72 out of sample). Cheaper fills: worth 1.2
+        percentage points at these holding periods, and the maker experiment below shows why
+        that does not change at any speed. Convexity: raises profit factor to 1.91, leaves Sharpe
+        at 0.95.</p>
+        <p style="color:var(--ash)"><strong>The fourth route opened.</strong> The original four
+        perp books correlated 0.25–0.70 because they were all directional reads on the same
+        price, and Sharpe stayed at 1.10. Reading <em>different markets about the same
+        asset</em> — the options market's implied volatility, the stablecoin basis between the
+        USDT- and coin-margined contracts, BTC's share of turnover across the perp complex —
+        drops the average correlation to 0.10 and takes Sharpe to 2.32. That is a real 2.1×, and
+        it is where every point of this study's improvement came from. It is also finite, for the
+        reason above.</p>
       </div>
 
       <div class="stack-sm">
@@ -1013,14 +1329,20 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
 
       <div class="stack-sm">
         <h3>What 300% at 20% drawdown would actually require</h3>
-        <p style="color:var(--ash)">A Calmar ratio of 15. The best measured in this study is
-        1.23, and across every strategy the ratio sits between 0.8 and 1.4. Reaching 15 needs a
-        Sharpe near 11, or roughly 10,400 independent bets a year at the IC available. One
-        instrument at a horizon where the signal works provides 91. That gap is filled either
-        by a wide cross-section of instruments — outside a BTCUSDT-only brief — or by
-        sub-second market making, where the edge is spread capture and the bet count runs to
-        millions, and which cannot be honestly evaluated from OHLCV data because its return is
-        a function of latency and fee tier rather than of any signal.</p>
+        <p style="color:var(--ash)">A Calmar ratio of 15. The best measured here is
+        <strong>6.09</strong> — and that on the friendliest window, with the bootstrap saying its
+        drawdown is really 22%. On the full 5.5 years including the 2022 bear market the same
+        machinery runs at <strong>2.18</strong>. Calmar tracked Sharpe at roughly 2.6× on the
+        short window and 1.2× on the long one, so 15 needs a Sharpe somewhere between 6 and 12
+        against a measured ceiling near 3.</p>
+        <p style="color:var(--ash)">To reach it from ρ̄ ≈ 0.10 you would need per-sleeve Sharpe
+        near 3.5 — nothing in 116 screened features came within a factor of three of that — or
+        ρ̄ near 0.01, which means signals that are genuinely independent of one another, which on
+        a single instrument they cannot be. The gap is filled either by a wide cross-section of
+        instruments, which is outside a BTCUSDT-only brief, or by sub-second market making, where
+        the edge is spread capture and the bet count runs to millions. Section&nbsp;8 shows both
+        halves of that second door measured and closed for anyone without co-location and a
+        rebate tier.</p>
       </div>
     </div>
   </div>
@@ -1029,7 +1351,7 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
 <section>
   <div class="stack-lg">
     <div class="stack-sm">
-      <span class="eyebrow">9 — Method</span>
+      <span class="eyebrow">10 — Method</span>
       <h2>Data, costs and the controls against self-deception</h2>
     </div>
 
@@ -1042,6 +1364,11 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
         <tr><td class="name">Funding</td><td style="text-align:left">7,305 real settlements, mean 0.0108% per 8h, positive 85.9% of the time</td></tr>
         <tr><td class="name">Positioning</td><td style="text-align:left">595,268 five-minute records: open interest, top-trader account and position ratios, retail account ratio, taker volume ratio</td></tr>
         <tr><td class="name">Quarterly futures</td><td style="text-align:left">24 delivery contracts, 75,823 hourly bars, for the calendar-basis test</td></tr>
+        <tr><td class="name">Implied volatility</td><td style="text-align:left"><code>BTCBVOLUSDT</code> BVOL index — 1,152 daily files reduced to <strong>1,656,492 minute bars</strong>, 2023-06-20 → 2026-09-09</td></tr>
+        <tr><td class="name">Coin-margined</td><td style="text-align:left"><code>BTCUSD_PERP</code>, 52,985 hourly bars, for the stablecoin-basis sleeve</td></tr>
+        <tr><td class="name">Alt complex</td><td style="text-align:left">15 USDⓈ-M perps (ETH, SOL, XRP, BNB, DOGE and ten more), hourly turnover, for the BTC-dominance sleeve</td></tr>
+        <tr><td class="name">Order book</td><td style="text-align:left">24 days of <code>bookTicker</code> → 34,547 minute bars; mean spread 0.034 bps, depth $582,481, 11,744 quotes/min</td></tr>
+        <tr><td class="name">1-minute bars</td><td style="text-align:left">3,506,400, used for stop-resolution checks and the maker-execution engine</td></tr>
         <tr><td class="name">In-sample</td><td style="text-align:left">to 2024-06-30 — all signal discovery and every parameter choice</td></tr>
         <tr><td class="name">Out-of-sample</td><td style="text-align:left">2024-07-01 → 2026-08-31 — touched only to report, never to select</td></tr>
       </tbody></table></div>
