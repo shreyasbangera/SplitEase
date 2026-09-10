@@ -1355,3 +1355,135 @@ The four-signal row has the better Calmar in isolation, so it was checked proper
 assumed away: at matched bootstrap risk the five-signal book wins. Four signals reach a 15%
 breach probability at about 45% CAGR; five reach it at 51.3%, with 44% more trades and a higher
 Sharpe (2.13 against 1.92).
+
+## S47 — Frequency separation: the decorrelation is real, the signals are not
+Every signal in the book uses a three-day lookback on 12h bars held 7–21 days. Two signals
+sampling the same frequency of the same price cannot stay independent, so ρ̄ is floored around
+0.10 by construction. Slow versions of the same reads — 45-day lookbacks held 30 days — should be
+mechanically uncorrelated with the fast ones whether or not they work.
+
+**They were, exactly as predicted, and that is the whole finding.** Correlations to the fast net:
+
+| slow signal | corr to fast net | IS PF | OOS PF | ALL CAGR | Sharpe |
+|---|---|---|---|---|---|
+| **slow_flow** (45d mean of orthogonalised imbalance) | **+0.01** | 1.37 | 1.13 | 10.4% | 0.51 |
+| slow_cmpx (45d change in the implied USDT/USD rate) | +0.18 | 1.80 | **1.53** | 18.7% | 0.87 |
+| slow_dom (45d change in BTC turnover share) | +0.07 | 1.71 | 0.33 | 7.0% | 0.41 |
+| slow_posn (45d mean of positioning) | −0.00 | 1.40 | 0.58 | −2.6% | 0.01 |
+| carry (30d accumulated funding) | +0.15 | 0.88 | 0.76 | −8.6% | −0.22 |
+| slow_oi (45d change in open interest) | +0.05 | 1.58 | 0.95 | 8.1% | 0.51 |
+| slow_trend (90d price momentum) | −0.06 | 1.07 | 1.08 | 0.8% | 0.16 |
+
+Correlations of +0.01 and −0.00 are as close to independent as anything in this study. But the
+best slow Sharpe is 0.87 and four of seven lose money out of sample. **Frequency separation
+delivers the decorrelation it promises and there is nothing at the slow end to decorrelate
+with.**
+
+Added to the book anyway, to be sure: `slow_cmpx` alone makes it *worse* (Sharpe 2.13 → 1.80,
+drawdown −17.1% → −35.8%). `slow_cmpx` + `slow_flow` together land at the same CAGR (51.3%) and
+the same bootstrap risk as the five-signal book, with a higher profit factor (2.45 vs 2.09) but a
+deeper realised drawdown (−22.9% vs −17.1%). Not an improvement — recorded as neutral and
+dropped.
+
+A structural note worth keeping: a 30-to-60 day holding period yields at most ~35 non-overlapping
+trades in 5.5 years, so **no slow strategy can satisfy the ≥100-trade criterion on this sample**,
+however good it looks.
+
+## S48 — A false positive, caught by re-testing on the real book
+Four normalisations of the same five signals were compared — plain z-score, robust (median/MAD),
+rolling percentile rank, and tanh squashing — on a rebuilt panel:
+
+| normalisation | CAGR | DD | PF | Sharpe | OOS |
+|---|---|---|---|---|---|
+| z | 34.6% | −31.7% | 1.79 | 1.45 | 38.8% |
+| robust (median/MAD) | 25.8% | −21.6% | 1.56 | 1.20 | 29.1% |
+| rank | 36.6% | −33.9% | 1.57 | 1.46 | 18.9% |
+| **tanh** | 34.7% | −26.6% | **1.93** | **1.65** | 36.6% |
+
+tanh looked like a clean 14% gain in Sharpe over z. **It did not transfer.** Applied to the
+actual signal set it *lost*: Sharpe 2.13 → 1.80, CAGR 51.3% → 34.4%.
+
+The reason is that this test's own "z" baseline was **not the strategy** — rebuilding the signals
+from raw inputs re-derived three of the five differently from how the book computes them
+(`btc_dom` and `fund` are used as their stored z-scores, and the positioning composite is already
+standardised). So the comparison was internally valid but measured a different object, and its
+winner was the winner *for that object*. Recorded as a live example of the most common way a
+backtest study fools itself: **a controlled experiment on the wrong control.** The lesson is
+cheap here only because the transfer test was run before the result was believed.
+
+## S50 — Exit when the model stops believing
+Positions ran to their stop, target or 21-day cap regardless of what the signals said afterwards.
+Adding one rule — **close the position whenever the net signal goes flat**, i.e. when no signal
+is past its threshold any more — is the largest single improvement since the netting itself:
+
+| | no flat exit | **with flat exit** |
+|---|---|---|
+| CAGR | 51.3% | **54.9%** |
+| Max drawdown | −17.1% | **−14.9%** |
+| Profit factor | 2.09 | 2.03 |
+| Trades | 787 | 1,005 |
+| Sharpe | 2.13 | **2.20** |
+| Calmar | 3.01 | **3.68** |
+| In-sample | 54.1% | 54.1% |
+| **Out-of-sample** | 46.5% | **55.7%** |
+
+The out-of-sample column is the point. **Most of the in-sample/out-of-sample gap was not decay in
+the signals — it was holding positions the model had already abandoned.** With the exit the two
+halves read 54.1% and 55.7%.
+
+It does not help everywhere: on the short window with the implied-volatility signal the same rule
+*costs* return (123.2% → 103.4% at 15% risk, and the drawdown crosses 20%). Reported both ways
+rather than adopted selectively.
+
+## S46 — FINAL SPECIFICATION, updated
+Five signals, equal weight, one account, one position. Entry when the net is non-zero, size =
+risk × |net| ÷ stop distance, stop 3 × ATR(14), target 2R, **exit when the net goes flat**,
+21-day cap, signal from the closed 12h bar filled on the next 15m bar.
+
+**Long window 2021-03 → 2026-08 (5.5 years, includes the 2022 bear market):**
+
+| risk | CAGR | MaxDD | PF | N | Sharpe | Calmar | IS | OOS | boot med DD | P(DD>20%) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 6% | 39.6% | −11.4% | 2.02 | 1001 | 2.20 | 3.47 | 39.2% | 40.3% | −12.1% | **3%** |
+| **8%** | **54.9%** | **−14.9%** | **2.03** | **1005** | **2.20** | **3.68** | 54.1% | **55.7%** | −15.8% | 17% |
+| 10% | 69.2% | −19.6% | 2.02 | 1009 | 2.15 | 3.54 | 67.6% | 72.2% | −19.6% | 47% |
+
+Yearly at 8%: 2021 +54%, **2022 +5%**, 2023 +116%, 2024 +57%, 2025 +25%, 2026 +63%.
+
+Robustness: look-ahead gradient **4.62 / 2.20 / 1.55** (peek / traded / delayed) against an
+oracle control at 20.3; cost ladder 2.29 / 2.03 / 1.81 / 1.63 / **1.47** profit factor from zero
+to a quadruple 64 bps round turn; leave-one-out shows the stablecoin basis and positioning are
+load-bearing (Sharpe → 1.50 and 1.51 without them) and no signal is redundant.
+
+**Gate by gate: trades 1,005 ✓ · profit factor 2.03 ✓ · drawdown −14.9% ✓ · risk management ✓ ·
+no look-ahead ✓ · net yearly profit 54.9% ✗ against 300%.** Short by 5.5×.
+
+## Options skew — the last unexplored source, and it is noise on the sample available
+Binance publishes an end-of-hour options summary carrying, per strike per hour, mark implied
+volatility, delta, gamma, vega and open interest. 147 daily files reduced to **3,501 hourly rows,
+2023-05-18 → 2023-10-23** — five months, which is all there is.
+
+Measured directly: mean ATM implied volatility **46.3%**, mean 25-delta risk reversal **+5.61
+volatility points** (calls persistently bid over puts, the opposite of equity index skew), mean
+butterfly −3.21, mean put/call open interest ratio 0.81.
+
+Five classic options signals were built — 25-delta risk reversal, butterfly, ATM level, put/call
+open interest, and a dealer gamma proxy — each as a level and a 24-hour change, and split first
+half against second half.
+
+**Every one of them flips sign between the halves.** At a 24-hour horizon: risk-reversal change
++0.061 → −0.082; gamma change −0.143 → +0.008; put/call open interest −0.099 → −0.070 at 24h but
+−0.268 → +0.054 at 72h. The decile spreads look enormous — +69 bps for the gamma proxy against a
+16 bps cost — and they are worthless, because a spread computed on a signal whose sign is
+unstable is measuring the sample, not the market. **This is the same trap as the order book in
+reverse: there the statistics were real and the economics were not; here the economics look real
+and the statistics are not.**
+
+One feature holds its sign in both halves: the 24-hour change in ATM implied volatility (+0.036 →
++0.057 at h=4h). That is the same quantity as the BVOL implied-volatility momentum signal already
+in the book, arriving from an entirely different dataset built by a different pipeline — a
+genuine consistency check on the one implied-volatility result the study does rely on.
+
+With this the source list is closed for real: OHLCV, taker volume, trade count, funding, open
+interest, trader positioning, quarterly futures, the coin-margined contract, tick prints, the
+order book, the volatility index, and the options chain.
