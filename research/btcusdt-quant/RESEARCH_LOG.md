@@ -619,3 +619,126 @@ that matches the baseline is the weakest possible veto — which removes just 12
 i.e. converges to doing nothing. The contrast with S1 is the point: gating works when the
 confirmer is genuinely predictive, and breadth is not (S28 lost money in every out-of-sample
 variant). Gating cannot rescue a signal that has no out-of-sample edge.
+
+---
+# Round 5
+
+## IS-vs-OOS IC split — the screen I should have been running all along
+Every earlier screen measured IC on in-sample data and used decile economics to decide what to
+build. S28 showed that is not enough (top decile t=10.9 in sample, lost money out of sample).
+The correct filter is to measure the SAME IC separately in both windows.
+
+| feature | IS h=96 | OOS h=96 | verdict |
+|---|---|---|---|
+| `tt_vs_retail` (1h) | +0.108 | **−0.054** | collapses, flips sign |
+| `retail_rng96` | −0.098 | −0.005 | collapses |
+| `oi_vol96` | +0.082 | −0.004 | collapses |
+| `tt_pos_rng96_z` | +0.057 | −0.041 | collapses, flips |
+| `flow_breadth96` | +0.062 | +0.005 | collapses |
+| `ttvr_accel96` | +0.085 | +0.016 | partial |
+| `disagree` | +0.076 | +0.003 | partial |
+
+**Almost every feature that looked strong in sample is weak or sign-flipped out of sample.**
+Applied earlier this screen would have rejected S28 before a line of strategy code was written.
+
+## Audit of my own headline result
+The 1h `tt_vs_retail` reading above flips sign out of sample, yet the S7 strategy built on it
+reported IS CAGR 22.3% against OOS 24.1%. Both cannot be innocent, so I checked directly.
+
+**The composite the strategy actually uses degrades but does not collapse** (4h bars, which is
+what it trades):
+| horizon | IS | OOS |
+|---|---|---|
+| 96h | +0.0819 | +0.0142 |
+| 168h | +0.0720 | +0.0336 |
+
+**But the component doing the work out of sample is not the one the strategy is named after.**
+At h=96 on 4h bars: `tt_vs_retail` IS +0.104 → OOS **−0.003**; `−retail_acct_z` IS +0.083 → OOS
+**+0.017**; `−tt_acct_z` IS +0.126 → OOS **+0.023**. The "smart-money vs retail" ratio is the
+component that stops working; what survives is **fading crowded retail and a crowded count of
+top-trader accounts**. The strategy's name overstates what is actually carrying it.
+
+**It is not disguised long-bias beta**, which was the other suspicion:
+| window | long trades | long P&L | short trades | short P&L | perp buy & hold |
+|---|---|---|---|---|---|
+| IS | 56 | +9,501 | 65 | +976 | +94.9% |
+| OOS | 55 | +5,453 | 53 | +978 | +25.1% |
+
+Net exposure is −0.07 in sample and +0.02 out of sample, and **the short book is profitable in
+both windows** — including out of sample, where the perpetual rose 25%. Shorts making money
+into a rising market is genuine alpha, not beta. Longs do contribute 85–91% of gross P&L, so
+the book is long-driven, but not long-only in disguise.
+
+**Net effect on the study's conclusion: none.** S7 remains the best book at 22.9% net annual.
+But the honest characterisation is weaker than the earlier framing: the edge degrades roughly
+three- to five-fold out of sample, and it rests on crowd-fading rather than on following
+sophisticated positioning.
+
+## Systematic stability screen — the most useful thing in this study
+Applied the IS-vs-OOS IC split to **all 91 features** in the 4h panel, at both a 24h and a 96h
+horizon. A feature "survives" only if it keeps its sign in both windows at both horizons and
+retains more than 40% of its in-sample strength.
+
+* **Sign-stable at both horizons: 41 of 91 (45%)** — barely better than a coin flip.
+* Of the 33 with |IS IC| > 0.04, only 18 (55%) are sign-stable, and the **median out-of-sample
+  retention is 0.27**: a strong-looking feature keeps about a quarter of its apparent power.
+
+**Survivors (|IS IC| > 0.03, sign-stable, retention > 40%):**
+| feature | IS h=24 | OOS h=24 | IS h=96 | OOS h=96 | retention |
+|---|---|---|---|---|---|
+| **`oi_rank`** (open-interest percentile, faded) | −0.071 | −0.033 | **−0.137** | **−0.073** | 0.53 |
+| **`ofi6_res`** (6-bar flow ⟂ past returns) | +0.039 | **+0.058** | +0.085 | +0.044 | 0.68 |
+| `ofi6_resz` | +0.043 | +0.056 | +0.080 | +0.032 | 0.70 |
+| **`fund`** (funding, faded) | −0.030 | −0.022 | −0.053 | **−0.060** | 1.13 |
+| **`fund3`** | −0.017 | −0.023 | −0.041 | **−0.060** | 1.47 |
+| `ofi96_res` | +0.008 | +0.010 | +0.040 | +0.034 | 0.85 |
+| `ofi24_res` | +0.038 | +0.023 | +0.042 | +0.020 | 0.55 |
+
+**Biggest in-sample mirages (|IS IC| > 0.06, sign flips out of sample):**
+| feature | IS h=96 | OOS h=96 |
+|---|---|---|
+| **`tt_vs_retail`** — what the study's best book was built on | **+0.104** | **−0.003** |
+| `ofi96_resz` | +0.080 | −0.009 |
+| `mom168` | +0.068 | −0.014 |
+
+**The uncomfortable conclusion:** the feature I selected the best strategy from is the single
+biggest mirage in the panel, and the strongest *stable* feature — open-interest crowding,
+`oi_rank`, at IS −0.137 / OOS −0.073 — was screened early, scored well, and never had a
+strategy built on it. Selecting on in-sample IC, which is what I did for 29 strategies, is the
+wrong selection rule. Funding, faded, is genuinely stronger out of sample than in it.
+
+## S30 — Stability-Screened Composite — and the discovery of the study's best book
+Built only from features that passed the stability screen: `−oi_rank`, `+ofi6_res`, `−fund`.
+Each component was also traded alone.
+
+**4h bars (risk 2.5%):**
+| book | CAGR | DD | PF | N | Sharpe | IS | OOS | OOS PF |
+|---|---|---|---|---|---|---|---|---|
+| `−oi_rank` thr0.7 10d | 8.1% | −32.2% | 1.13 | 366 | 0.48 | 6.5% | 11.2% | 1.15 |
+| **`ofi6_res` thr0.7 5d** | **22.9%** | −24.3% | 1.29 | **810** | 0.99 | **23.5%** | **21.9%** | 1.27 |
+| `ofi6_res` thr1.0 10d | 17.8% | −25.5% | 1.27 | 553 | 0.83 | **17.7%** | **17.6%** | 1.28 |
+| `−fund` thr0.7 5d | 5.7% | −36.0% | 1.08 | 574 | 0.37 | 15.6% | **−8.6%** | 0.92 |
+| COMPOSITE thr0.7 5d | 12.2% | −26.4% | 1.18 | 378 | 0.69 | 17.6% | 4.1% | 1.08 |
+
+**12h bars (risk 2.5%):**
+| book | CAGR | DD | PF | N | Sharpe | Calmar | IS | OOS | OOS PF |
+|---|---|---|---|---|---|---|---|---|---|
+| **`ofi6_res` thr0.7 10d** | 16.9% | **−17.4%** | **1.62** | 259 | **1.31** | 0.97 | 20.3% | 11.7% | 1.38 |
+| `ofi6_res` thr1.0 10d | 12.0% | −16.7% | 1.58 | 200 | 1.01 | 0.72 | **11.6%** | **13.2%** | 1.56 |
+| COMPOSITE thr0.7 10d | 10.9% | −17.3% | 1.68 | 132 | 1.04 | 0.63 | 11.8% | 9.5% | 1.49 |
+
+Three results worth separating:
+
+1. **`ofi6_res` is the best single book in the study.** Sharpe **1.31** on 12h (against S7's 1.14),
+   profit factor 1.62, drawdown inside the 20% limit, and the tightest IS/OOS agreement anywhere
+   here — 11.6% vs 13.2% at thr1.0, 23.5% vs 21.9% on 4h. It also trades 3.5× more often than S7.
+
+2. **Blending diluted again — the third time.** The equal-weight composite of the three
+   stability-screened features is worse than `ofi6_res` alone on every measure (OOS 4.1% vs
+   21.9% at 4h). S2, the breadth blend and now this: averaging signals of unequal strength is
+   a reliable way to make the strong one worse.
+
+3. **A stable IC does not guarantee a tradable strategy.** `−fund` passed the stability screen
+   with the *highest* retention in the panel (1.13–1.47, stronger out of sample than in) and
+   still loses money out of sample (−8.6%, PF 0.92). Its IC is real but too small (|0.05|) to
+   survive a 16 bps round turn. Stability is necessary, not sufficient — magnitude matters too.
