@@ -56,8 +56,10 @@ def panel(tf="1h"):
     _cache[tf] = (fut, f)
     return _cache[tf]
 
+EXEC_TF = ["fut_15m"]          # execution grid; swap to "fut_1m" for finer stop resolution
+
 def exec_grid():
-    return load("fut_15m")
+    return load(EXEC_TF[0])
 
 def slice_period(df, start=None, end=None):
     m = np.ones(len(df), bool)
@@ -71,7 +73,7 @@ def _ctx(start, end, fee, slip, eq0, max_lev, sig_df):
     """Cache the sliced execution grid, the Engine (funding array) and the
     first-bar-of-decision-bar mask; these depend only on the period + costs."""
     tfd = pd.Series(sig_df.dt).diff().median()
-    key = (start, end, fee, slip, eq0, max_lev, str(tfd))
+    key = (start, end, fee, slip, eq0, max_lev, str(tfd), EXEC_TF[0])
     if key not in _ctxc:
         ex_s, _ = slice_period(exec_grid(), start, end)
         eng = Engine(ex_s, fee_bps=fee, slip_bps=slip, eq0=eq0, max_leverage=max_lev)
@@ -91,7 +93,7 @@ def backtest(sig_df, arrays, tf, period=("all"), risk=0.01, max_lev=5.0,
     ex_s, eng, first = _ctx(start, end, fee, slip, eq0, max_lev, sig_df)
     al = align_to_exec(sig_df, ex_s, arrays, lag=1)
     entry = np.nan_to_num(al["entry"]) * first
-    bar_h = 0.25
+    bar_h = pd.Series(ex_s.dt).diff().median().total_seconds() / 3600.0
     return eng.run(entry,
                    exit_flag=np.nan_to_num(al.get("exit", np.zeros(len(ex_s)))),
                    stop_dist=al.get("stop"), tp_dist=al.get("tp"),

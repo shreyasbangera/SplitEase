@@ -449,3 +449,153 @@ growth-optimal size, and beyond that point more leverage returns less.
 
 Every book beats the underlying on this window (perp: 10k → 24.2k; convex book: 10k → 60.0k
 at half the drawdown). None comes within an order of magnitude of 300%.
+
+---
+# Round 3
+
+## S23 — USDT-perp vs COIN-margined-perp funding differential — REJECTED
+Second attempt to rebuild a market-neutral sleeve without a spot leg. Downloaded Binance
+COIN-margined `BTCUSD_PERP` (52,985 hourly bars, 2020-08 → 2026-08) and its independent
+funding series; matched 2,115 settlements against the USDⓈ-M perp.
+
+| leg | mean funding |
+|---|---|
+| USDⓈ-M perp `BTCUSDT` | +8.31%/yr |
+| COIN-M perp `BTCUSD_PERP` | +8.38%/yr |
+| **differential** | **−0.07%/yr**, sd 7.8%, positive **32%** of the time |
+
+**Verdict: no edge.** The two funding rates track each other to within 7 bps a year. Combined
+with the quarterly calendar spread (−1.3%/yr, positive 49%), this settles the question:
+**Binance's futures complex is internally well-arbitraged and contains no futures-only carry.**
+The market-neutral sleeve that carried the earlier portfolio genuinely required the spot leg.
+
+## S24 — Session Range Breakout — REJECTED
+Asia (00–08 UTC) range traded in the London session, London range traded in the US session,
+US range traded into Asia. 1h bars, ATR or range-width stops, 24 variants.
+Range across all variants: CAGR −29% to −54%, **PF 0.83–0.97**, win rate 34–42%, DD −90% to −99%.
+
+## S25 — Session Range FADE — REJECTED, and the pair is informative
+Same structure with the signal inverted, on the hypothesis that if breaking out loses then
+fading should win. It does not: **PF 0.60–0.76**, CAGR −50% to −63%.
+
+**The pair is the finding.** Costs subtract from both directions, so inverting a post-cost
+PF 0.83 strategy does not hand you PF 1.20 — but if range breaks were pure noise the two sides
+would lose roughly symmetrically around the cost drag. The fade losing *materially more* than
+the breakout (0.60–0.76 vs 0.83–0.97) means breakouts do carry **weak genuine continuation**;
+it is simply far too small to clear a 16 bps round turn. Together with S14 (volatility-squeeze
+breakout, PF 0.85–0.98) this closes the whole intraday-breakout family: real but sub-cost
+momentum at range edges, in both the volatility-compression and session-structure versions.
+
+## Tick-level microstructure — tested and REJECTED as an information source
+Downloaded 30 days of `aggTrades` (638 MB, ~50M prints) spanning three regimes (2022-06,
+2024-03, 2025-10) and built per-minute features that klines **cannot** express: signed volume
+restricted to large prints (≥$50k) vs small prints (≤$1k), aggressor run lengths (the
+signature of one participant working an order), true VPIN, trade-size concentration, and
+Kyle's lambda (price impact per unit of signed flow). 43,200 minute observations.
+
+| feature | h=5m | h=15m | h=60m | h=240m |
+|---|---|---|---|---|
+| `kline_imb` (baseline, from klines) | −0.0155 | −0.0187 | −0.0078 | −0.0090 |
+| `lg_imb` large-print imbalance | −0.0176 | −0.0201 | −0.0080 | −0.0090 |
+| `lg_sm_div` institutions vs retail | −0.0196 | −0.0137 | −0.0006 | −0.0041 |
+| `run_len` order-splitting signature | +0.0101 | +0.0101 | +0.0098 | +0.0115 |
+| `vpin` | +0.0077 | +0.0131 | +0.0084 | +0.0045 |
+| `lam` Kyle's lambda | −0.0102 | −0.0161 | +0.0013 | −0.0054 |
+
+**Residual IC after orthogonalising to the kline baseline: 0.003–0.015** — noise at this sample
+size (SE ≈ 0.005). And `corr(tick imbalance, kline imbalance) = 0.9999`: the aggregate
+`taker_buy_base ÷ volume` already in the klines is a near-perfect proxy for the tick-level
+computation.
+
+**Verdict: no incremental information.** The 51 GB full-history download is not justified. This
+closes the last untested data source for a directional futures-only study — OHLCV, taker
+volume, trade count, funding, open interest, trader positioning, quarterly futures,
+coin-margined perp and now tick prints have all been mined. Only the order book remains, and
+that is a market-making dataset rather than a directional-signal one.
+
+## Execution-granularity validation — results hold at 1-minute resolution
+Every result in this study resolved stops and targets on **15-minute** bars, with the stop
+assumed to fill first whenever one bar straddled both levels. That worst-case rule could cut
+either way at finer resolution: fewer bars straddle both levels, but stops also trigger on
+wicks a coarse bar smooths over. Downloaded the full **1-minute** perp history (3,506,400 bars,
+zero gaps, zero OHLC violations) and re-ran the finalists on it.
+
+| book | exec grid | CAGR | MaxDD | PF | N | Sharpe |
+|---|---|---|---|---|---|---|
+| S7 SMRD 2.5% | 15m | 22.9% | −18.7% | 1.49 | 229 | 1.14 |
+| | **1m** | **21.8%** | **−19.2%** | 1.46 | 229 | 1.10 |
+| S15 convex 2% pyr3 | 15m | 37.2% | −36.0% | 1.91 | 261 | 0.95 |
+| | **1m** | **36.4%** | **−30.5%** | 1.66 | 283 | 0.93 |
+
+The 15-minute grid was **mildly optimistic on return** (−0.8 to −1.1 pp) and, for the convex
+book, **pessimistic on drawdown** (−36.0% at 15m vs −30.5% at 1m — the stop-first rule fires
+less often when the path is resolved finely). Net: the headline numbers are robust to
+execution granularity, and no conclusion in this study changes.
+
+## S26 — Adaptive Sleeve Allocation — REJECTED
+Monthly re-weighting of the four perp sleeves in proportion to trailing risk-adjusted
+performance (3/6/12-month lookbacks, Sharpe- and mean-weighted), using only data available
+before each month begins.
+
+| scheme (knob 2) | IS CAGR / DD | OOS CAGR / DD | ALL CAGR / DD | Sharpe | Calmar |
+|---|---|---|---|---|---|
+| **fixed equal weight** | 19.4% / −13.9% | 28.2% / −19.3% | **22.6% / −19.3%** | **1.10** | **1.17** |
+| adaptive Sharpe 3m | 20.8% / −15.4% | 21.3% / −19.1% | 21.5% / −19.1% | 1.01 | 1.12 |
+| adaptive mean 6m | 24.3% / −16.2% | 24.3% / −24.7% | 24.8% / −24.5% | 0.99 | 1.01 |
+| adaptive Sharpe 12m | 21.8% / −14.1% | 24.4% / −18.2% | 22.0% / −18.9% | 1.10 | 1.16 |
+
+**Verdict: FAILS.** No adaptive scheme beats fixed equal weight on Sharpe or Calmar; the
+higher-CAGR variants buy it entirely with deeper drawdowns. Relative sleeve performance is not
+persistent enough month-to-month to chase.
+
+## S27 — Parameter Ensemble — the one technique that helped
+72 configurations of the S7 book (4 thresholds × 3 stops × 3 reward:risk × 2 holding caps) run
+simultaneously at 1/N size instead of selecting one.
+
+| | ensemble | median single config | gain |
+|---|---|---|---|
+| IS Sharpe | **1.54** | 1.34 | **+0.20** |
+| OOS Sharpe | **0.80** | 0.73 | +0.07 |
+| IS CAGR / DD | 28.1% / −12.2% | 26.5% / −14.1% | — |
+| OOS CAGR / DD | 15.0% / −22.2% | 15.6% / −21.8% | — |
+
+**Verdict: helps, modestly.** The ensemble beats the median single configuration in both
+windows, and unlike a selected configuration it cannot be the one that happened to fit the
+sample. Single-config CAGR ranged from −0.6% to +36.0% out of sample — that spread is exactly
+the selection risk S16 exposed. This is the correct default; it does not change the ceiling.
+
+## Market-wide breadth screen — one genuinely new signal
+Downloaded 15 liquid USDⓈ-M alt perps (ETH, BNB, SOL, XRP, ADA, DOGE, AVAX, LINK, DOT, LTC,
+TRX, BCH, ATOM, NEAR, FIL — 58,440 hours, 99.9% coverage) to use as **sensors only**; BTCUSDT
+remains the sole traded instrument.
+
+| feature | h=24 | h=48 | h=96 | note |
+|---|---|---|---|---|
+| `breadth24` (fraction of alts up over 24h) | **−0.074** | −0.045 | −0.026 | crypto-wide overbought |
+| `flow_breadth96` (median 96h taker imbalance across 15 perps) | +0.024 | +0.044 | **+0.062** | vs BTC's own ofi24_z at +0.039 |
+| `altrel24` (alt median return − BTC) | −0.063 | −0.053 | −0.034 | |
+| `btc_dom` (BTC share of complex volume) | +0.037 | +0.039 | +0.050 | risk-off rotation into BTC |
+
+**Averaging the same measure across 15 instruments beats BTC's own version** (+0.062 vs
++0.039) — more breadth in the *estimator*, not in the bets. `flow_breadth96`'s top decile earns
++131.9 bps over 96h (t=10.9), +115.9 bps net of cost, and correlates only **0.22** with the S7
+positioning composite.
+
+**Blending it into the S7 composite made things worse** — combined IC 0.070 vs 0.108 at h=96,
+decile spread 135 bps vs 390 bps. This is the S2 failure repeating: equal-weight averaging
+drags the strongest signal down toward the weakest. It is therefore run as its own sleeve (S28).
+
+## S28 — Market-Wide Flow Breadth as a standalone sleeve — REJECTED out of sample
+`flow_breadth96` z-scored, traded on 4h and 12h bars, 24 variants.
+
+| variant | IS CAGR | OOS CAGR | OOS PF | full CAGR / DD |
+|---|---|---|---|---|
+| thr 0.4, 5d, long-only | +13.0% | **−13.0%** | 0.80 | +2.4% / −34.4% |
+| thr 0.7, 5d, long-only | +10.8% | **−7.3%** | 0.87 | +3.5% / −25.3% |
+| thr 1.0, 5d, long/short | +10.4% | **−3.4%** | 0.97 | +4.9% / −30.5% |
+
+**Verdict: FAILS.** Every variant is positive in-sample and negative out-of-sample. The
+in-sample decile economics were genuinely strong (top decile +131.9 bps over 96h, t = 10.9,
++115.9 bps net of cost) and they did not survive. This is the sharpest reminder in the study
+that **in-sample decile economics are not evidence of out-of-sample tradability** — a t-stat of
+10.9 on overlapping 96-hour windows is far weaker evidence than it looks.

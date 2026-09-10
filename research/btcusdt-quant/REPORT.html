@@ -153,7 +153,7 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
     <span class="eyebrow">2021-01 → 2026-08</span>
   </div>
   <h1>The 300% Problem</h1>
-  <p class="lede">Twenty-two strategies on the BTCUSDT perpetual, against a target of 300% net
+  <p class="lede">Twenty-eight strategies on the BTCUSDT perpetual, against a target of 300% net
   annual profit at under 20% drawdown. This is the record of what was tested, what survived
   out of sample, and the measured reason the target is unreachable — which turns out not to be
   a matter of finding a better signal.</p>
@@ -169,8 +169,8 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
       <div class="gap-item"><div class="k">Required net / year</div><div class="v">300%</div></div>
       <div class="gap-item"><div class="k">Best under 20% DD</div><div class="v" style="color:var(--fail)">22.9%</div></div>
       <div class="gap-item"><div class="k">Best at any drawdown</div><div class="v">59.6%</div></div>
-      <div class="gap-item"><div class="k">Strategies tested</div><div class="v">22</div></div>
-      <div class="gap-item"><div class="k">Parameter sets run</div><div class="v">2,400+</div></div>
+      <div class="gap-item"><div class="k">Strategies tested</div><div class="v">28</div></div>
+      <div class="gap-item"><div class="k">Parameter sets run</div><div class="v">3,100+</div></div>
     </div>
   </div>
 </header>
@@ -662,6 +662,94 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
       <strong>−1.3%</strong> and is positive 49% of the time. Once both legs are futures the
       funding sits on both sides and the spread prices to zero, exactly as arbitrage should.
       There is no futures-native carry to harvest.</p>
+    </div>
+  </div>
+</section>
+<section>
+  <div class="stack-lg">
+    <div class="stack-sm">
+      <span class="eyebrow">7b — Closing the remaining avenues</span>
+      <h2>Six more things that were not the problem</h2>
+      <p class="prose" style="color:var(--ash)">Once the growth-optimal curve showed leverage
+      could not close the gap, the remaining hypothesis was that the <em>signal</em> was
+      leaving something on the table — a data source not yet mined, or a construction not yet
+      tried. Each was tested directly.</p>
+    </div>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Avenue</th><th>What was tested</th><th>Result</th><th>Verdict</th></tr></thead>
+        <tbody>
+          <tr><td class="name">Cross-margin carry</td>
+            <td style="text-align:left">USDⓈ-M perp vs COIN-margined <code>BTCUSD_PERP</code>, 2,115 matched settlements</td>
+            <td class="n">differential <strong>−0.07%/yr</strong>, positive 32%</td>
+            <td>No edge — the two funding rates track to within 7 bps a year</td></tr>
+          <tr><td class="name">Session structure</td>
+            <td style="text-align:left">Asia/London/US range breakout, 24 variants</td>
+            <td class="n">PF 0.83–0.97</td>
+            <td>Fails</td></tr>
+          <tr><td class="name">Session structure, inverted</td>
+            <td style="text-align:left">Fading the same breaks</td>
+            <td class="n">PF <strong>0.60–0.76</strong></td>
+            <td>Fails worse — see below</td></tr>
+          <tr><td class="name">Tick-level microstructure</td>
+            <td style="text-align:left">30 days of <code>aggTrades</code> (~50M prints) across three regimes: large-print vs small-print imbalance, aggressor run lengths, VPIN, size concentration, Kyle's lambda</td>
+            <td class="n">residual IC <strong>0.003–0.015</strong></td>
+            <td>No incremental information over klines</td></tr>
+          <tr><td class="name">Adaptive allocation</td>
+            <td style="text-align:left">Monthly re-weighting of sleeves by trailing Sharpe / mean, 3–12 month lookbacks</td>
+            <td class="n">Sharpe 0.97–1.10 vs <strong>1.10</strong> fixed</td>
+            <td>No scheme beats fixed equal weight</td></tr>
+          <tr><td class="name">Market-wide breadth</td>
+            <td style="text-align:left">15 alt perps as sensors (BTCUSDT still the only traded instrument): breadth, flow breadth, alt-vs-BTC, volume dominance</td>
+            <td class="n">IS +10 to +13%, <strong>OOS −3 to −17%</strong></td>
+            <td>In-sample only</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="why stack-sm">
+      <h3>The breakout pair is itself a result</h3>
+      <p style="color:var(--ash)">Costs subtract from both directions, so inverting a
+      post-cost PF of 0.83 does not hand you 1.20. But if range breaks were pure noise, the two
+      sides would lose roughly <em>symmetrically</em> around the cost drag. The fade losing
+      materially more than the breakout (0.60–0.76 against 0.83–0.97) says breakouts carry
+      <strong>weak genuine continuation</strong> — real, and far too small to clear 16 bps.
+      Together with the volatility-squeeze version (PF 0.85–0.98) that closes the whole
+      intraday-breakout family.</p>
+
+      <h3>The tick result closes the data question</h3>
+      <p style="color:var(--ash)">The correlation between the tick-computed order imbalance and
+      the one already available in the klines is <strong>0.9999</strong>. The genuinely new
+      features — who is trading, whether they are splitting orders, what their flow costs in
+      impact — carry residual IC of 0.003 to 0.015 against forward returns at horizons from 5
+      minutes to 4 hours, which is noise at n = 43,200. The 51 GB full-history download is not
+      justified. Every source Binance publishes for this instrument has now been mined: OHLCV,
+      taker volume, trade count, funding, open interest, trader positioning, quarterly futures,
+      the coin-margined contract, and tick prints. Only the order book remains, and that is a
+      market-making dataset rather than a directional-signal one.</p>
+
+      <h3>Two things that did check out</h3>
+      <p style="color:var(--ash)"><strong>Execution granularity.</strong> Every result resolved
+      stops on 15-minute bars with the stop assumed to fill first when a bar straddled both
+      levels. Re-run on the full 1-minute history (3,506,400 bars, zero gaps): S7 goes 22.9% →
+      21.8%, and the convex book's drawdown <em>improves</em> from −36.0% to −30.5% because the
+      worst-case rule fires less often on a finely resolved path. The 15-minute grid was mildly
+      optimistic on return and pessimistic on drawdown. No conclusion changes.</p>
+      <p style="color:var(--ash)"><strong>Parameter ensembling.</strong> Running all 72
+      configurations of the S7 book simultaneously at 1/N size, rather than selecting one, lifts
+      Sharpe from a median single-config 1.34 to <strong>1.54</strong> in sample and 0.73 to
+      <strong>0.80</strong> out of sample. Single configurations ranged from −0.6% to +36.0%
+      CAGR out of sample; that spread is precisely the selection risk the grid search exposed.
+      This is the right default. It does not move the ceiling.</p>
+
+      <h3>The sharpest methodological lesson</h3>
+      <p style="color:var(--ash)">The breadth signal's in-sample decile economics were the most
+      convincing in the whole study outside the winner: top decile +131.9 bps over 96 hours,
+      t = 10.9, +115.9 bps net of cost, and only 0.22 correlated with the incumbent. Traded, it
+      lost money in every out-of-sample variant. A t-statistic of 10.9 computed on overlapping
+      96-hour windows is far weaker evidence than it appears, and in-sample decile economics are
+      not evidence of out-of-sample tradability.</p>
     </div>
   </div>
 </section>
