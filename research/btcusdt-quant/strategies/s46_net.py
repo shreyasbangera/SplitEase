@@ -43,16 +43,21 @@ from strategies.s45_single import grid, unit, composite, book, THR, CAP, FULL_ST
 LONG = ["flow", "cmpx", "btcdom", "fundz", "posn"]              # 2021-03 -> 2026-08
 SHORT = ["flow", "ivol", "cmpx", "btcdom", "fundz", "posn"]     # 2023-06 -> 2026-08
 
-def run(names, start, risk=0.08, hold=21, stp=3.0, rr=2.0, fee=5.0, slip=3.0, end=OOS_END):
+def run(names, start, risk=0.08, hold=21, stp=3.0, rr=2.0, fee=5.0, slip=3.0,
+        end=OOS_END, since=None):
+    """The panel is ALWAYS built from `start` so that rolling z-score windows warm
+    up before the tested period. `since` selects a sub-period of that panel - it is
+    what makes the out-of-sample slice honest. Rebuilding the panel from the OOS
+    boundary instead would let every window warm up inside the test period."""
     g = grid(start)
     a = book(g, composite(g, names), stp=stp, rr=rr)
-    return backtest(g, a, "12h", start=start, end=end, risk=risk, max_lev=10.0,
+    return backtest(g, a, "12h", start=since or start, end=end, risk=risk, max_lev=10.0,
                     max_bars_h=hold * 24, fee=fee, slip=slip)
 
 def report(names, start, risk, label):
     A = run(names, start, risk)
     I = run(names, start, risk, end=IS_END)
-    O = run(names, IS_END, risk)
+    O = run(names, start, risk, since=IS_END)
     r = pd.Series(A["equity"], index=pd.to_datetime(A["dt"])).resample("1D").last(
         ).dropna().pct_change().fillna(0).to_numpy()
     b = bootstrap_dd(r, n=3000)

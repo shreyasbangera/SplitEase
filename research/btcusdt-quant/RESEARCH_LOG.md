@@ -1282,17 +1282,18 @@ closed 12h bar, filled on the next 15m bar.
 | Sharpe | **2.13** |
 | Calmar | 3.01 |
 | In-sample | 54.1% / PF 2.13 |
-| **Out-of-sample** | **57.8% / PF 2.27 / N 329** |
+| **Out-of-sample** | **46.5% / PF 2.06 / N 323** |
 | Bootstrap median DD | −15.4% (5th pct −23.6%) |
 | P(DD worse than 20%) | **15%** |
 
 Yearly: 2021 +65%, **2022 +6%**, 2023 +79%, 2024 +55%, 2025 +20%, 2026 +68% — **every calendar
-year positive, including the bear market**, and out-of-sample stronger than in-sample.
+year positive, including the bear market**. Out-of-sample sits slightly below in-sample (46.5%
+against 54.1%, profit factor 2.06 against 2.13), which is the normal and expected direction.
 
 At risk 6%: 37.2% CAGR, −13.4% DD, P(DD>20%) = **2%**.
 
 **Short window 2023-06 → 2026-08 with the implied-volatility signal added, risk 15%:** CAGR
-**123.2%**, DD −19.3%, PF 2.48, Sharpe 2.26, Calmar 6.40, OOS 122.5% / PF 2.63 — but the
+**123.2%**, DD −19.3%, PF 2.48, Sharpe 2.26, Calmar 6.40, OOS 107.8% / PF 2.52 — but the
 bootstrap puts P(DD>20%) at **64%**, so the 19.3% is a favourable draw and the honest point on
 that window is 66.0% at a 9% breach probability.
 
@@ -1319,3 +1320,38 @@ Gate by gate at the headline configuration: **trades 787 ✓, profit factor 2.09
 The single failing gate is the return, and it is short by 5.8×. On the short window with implied
 volatility the same book reaches 123.2% at −19.3%, short by 2.4×, at a drawdown the bootstrap
 says is really 22%.
+
+### Correction — an out-of-sample measurement error I made and fixed
+The first version of `s46_net.py` measured the out-of-sample slice by **rebuilding the feature
+panel from the out-of-sample boundary** rather than slicing a panel built from the start of
+history. Every rolling window — the 480-bar z-score on order flow, the 120-bar z-scores on the
+rest — therefore warmed up *inside* the test period, and the first months of it were dropped or
+computed differently. That inflated the reported out-of-sample return from **46.5% to 57.8%**
+and produced the false claim that the strategy did better out of sample than in.
+
+Corrected: the panel is now always built from the start of history and `since=` selects the
+sub-period. The honest figures are **IS 54.1% / PF 2.13 against OOS 46.5% / PF 2.06**, and on
+the short window **IS 164.7% against OOS 107.8%**. Out-of-sample below in-sample is the normal
+direction; the earlier number was wrong, not merely optimistic.
+
+### The signal-addition ladder, measured
+All five rows on the full window at identical rules and identical 8% risk, so the effect of each
+addition is visible on its own:
+
+| signals | CAGR | MaxDD | PF | N | Sharpe | Calmar |
+|---|---|---|---|---|---|---|
+| order flow alone | 58.1% | **−71.0%** | 1.53 | 166 | 1.07 | 0.82 |
+| + positioning | 58.6% | −42.8% | 1.64 | 243 | 1.32 | 1.37 |
+| + funding | 38.0% | −21.6% | 1.71 | 370 | 1.28 | 1.76 |
+| + stablecoin basis | 55.1% | −15.6% | **2.13** | 547 | 1.92 | **3.52** |
+| **+ BTC dominance** | **51.3%** | −17.1% | 2.09 | 787 | **2.13** | 3.01 |
+
+**Return is roughly flat down the column — 58% to 51% — while drawdown collapses from −71% to
+−17%.** Decorrelation is not buying return here; it is buying the ability to hold the same return
+at a quarter of the risk, which under a drawdown budget is the same thing. Sharpe doubles, Calmar
+goes up 3.7×.
+
+The four-signal row has the better Calmar in isolation, so it was checked properly rather than
+assumed away: at matched bootstrap risk the five-signal book wins. Four signals reach a 15%
+breach probability at about 45% CAGR; five reach it at 51.3%, with 44% more trades and a higher
+Sharpe (2.13 against 1.92).

@@ -1,25 +1,25 @@
 
 ### LONG WINDOW 2021-03 -> 2026-08, 5 signals, risk 6%
   CAGR 37.2%   MaxDD -13.4%   PF 2.08   N 784   WR 48.6%   Sharpe 2.14   Calmar 2.79
-  IS 39.4% / PF 2.15    OOS 41.8% / PF 2.25 / N 329
+  IS 39.4% / PF 2.15    OOS 33.8% / PF 2.02 / N 323
   bootstrap  median DD -11.7%   5th pct -18.1%   P(DD>20%) 2%
   yearly 2021:+47% 2022:+6% 2023:+55% 2024:+39% 2025:+15% 2026:+49%
 
 ### LONG WINDOW 2021-03 -> 2026-08, 5 signals, risk 8%  [HEADLINE]
   CAGR 51.3%   MaxDD -17.1%   PF 2.09   N 787   WR 48.7%   Sharpe 2.13   Calmar 3.01
-  IS 54.1% / PF 2.13    OOS 57.8% / PF 2.27 / N 329
+  IS 54.1% / PF 2.13    OOS 46.5% / PF 2.06 / N 323
   bootstrap  median DD -15.4%   5th pct -23.6%   P(DD>20%) 15%
   yearly 2021:+65% 2022:+6% 2023:+79% 2024:+55% 2025:+20% 2026:+68%
 
 ### SHORT WINDOW 2023-06 -> 2026-08, 6 signals, risk 9%
   CAGR 66.0%   MaxDD -12.0%   PF 2.38   N 497   WR 45.9%   Sharpe 2.28   Calmar 5.49
-  IS 83.9% / PF 2.45    OOS 64.1% / PF 2.49 / N 336
+  IS 83.9% / PF 2.45    OOS 58.1% / PF 2.36 / N 335
   bootstrap  median DD -13.6%   5th pct -21.8%   P(DD>20%) 9%
   yearly 2023:+27% 2024:+63% 2025:+47% 2026:+67%
 
 ### SHORT WINDOW 2023-06 -> 2026-08, 6 signals, risk 15%
   CAGR 123.2%   MaxDD -19.3%   PF 2.48   N 498   WR 45.8%   Sharpe 2.26   Calmar 6.40
-  IS 164.7% / PF 2.45    OOS 122.5% / PF 2.63 / N 337
+  IS 164.7% / PF 2.45    OOS 107.8% / PF 2.52 / N 336
   bootstrap  median DD -21.8%   5th pct -34.1%   P(DD>20%) 64%
   yearly 2023:+46% 2024:+117% 2025:+81% 2026:+127%
 
