@@ -843,10 +843,21 @@ or account positioning.
 | 1.5 | 27.3% / −16.9% | 38.6% / −14.8% | 31.2% / −16.9% | 1.30 | **1.41** | 1.85 | 1090 | **52%** |
 | 2 | 35.4% / −21.9% | 52.1% / −19.3% | 41.1% / −21.9% | 1.29 | 1.39 | 1.87 | 1092 | — |
 
-**Verdict: it earns its place on risk, not on return.** Against the three-sleeve S32 it raises
-Sharpe (1.41 vs 1.34), profit factor (1.30 vs 1.27) and trade count (1090 vs 724), and lowers
-drawdown at matched size. But on the study's binding measure — highest CAGR with drawdown under
-20% — the three-sleeve version still wins (38.6% at −19.0% against roughly 36% at −19%).
+Sized to the drawdown limit for a like-for-like comparison:
+
+| portfolio | size | CAGR | MaxDD | PF | N | Sharpe | Calmar | P(DD>20%) |
+|---|---|---|---|---|---|---|---|---|
+| S32, 3 sleeves | 1.5 | **38.6%** | −19.0% | 1.27 | 724 | 1.34 | **2.03** | — |
+| S33, 4 sleeves | 1.7 | 35.6% | −18.9% | 1.30 | 1090 | **1.41** | 1.88 | 68% |
+| S33, 4 sleeves | 1.8 | 37.8% | −19.9% | 1.30 | 1090 | **1.41** | 1.90 | 75% |
+
+S33 at knob 1.8 yearly: 2021 +50%, 2022 **−3%**, 2023 +56%, 2024 +55%, 2025 +18%, 2026 +48%.
+
+**Verdict: essentially a tie on return, a clear win on risk.** At matched drawdown the two are
+within a point of each other on CAGR (38.6% vs 37.8%), but the four-sleeve version carries a
+higher Sharpe (1.41 vs 1.34), higher profit factor (1.30 vs 1.27), 50% more trades and a
+shallower worst year (−3% vs −8%). The three-sleeve version keeps a marginally better Calmar.
+Either is defensible; neither is close to the target.
 
 The useful generalisation: **a sleeve with almost no standalone edge but near-zero correlation
 is worth more to a portfolio than a strong sleeve correlated 0.7 with what you already hold.**
