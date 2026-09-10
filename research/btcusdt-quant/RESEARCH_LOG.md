@@ -1871,3 +1871,44 @@ Symmetric treatment stands.
 
 This is the cleanest example in the study of why the discipline matters: the idea was plausible,
 economically motivated, and produced a large improvement on a direct test. It was still noise.
+
+## Running it live — and why not a PineScript
+Asked for a PineScript, the honest answer is that Pine cannot express this strategy. Three of the
+five signals are unavailable on TradingView in any form:
+
+| signal | needs | Pine |
+|---|---|---|
+| `s_cmpx` | BTCUSD_PERP ÷ BTCUSDT.P | ✅ two `request.security()` calls |
+| `s_btcdom` | BTC ÷ (BTC + 15 alts) turnover | ⚠️ 16 security calls, near Pine's limit |
+| `s_flow` | Binance taker-buy volume split, then a monthly-refit regression | ❌ not exposed |
+| `s_fundz` | the funding-rate series | ❌ not a usable Pine series |
+| `s_posn` | top-trader position + retail account ratios | ❌ not on TradingView |
+| adaptive exponent | quarterly re-optimisation over 40 configurations | ❌ Pine cannot self-optimise |
+
+So `live/` holds a Python runner instead: `fetch.py` (archive seed + REST top-up) and `runner.py`
+(signals → target position → order). The seed/top-up split is forced by the data: the positioning
+endpoints serve only ~30 days while the signals need 240-day z-scores.
+
+**The verification is the point of the exercise, and it caught two real bugs.** Compared against
+the backtest on 4,020 identical bars:
+
+| signal | corr | max abs diff | sign agreement |
+|---|---|---|---|
+| flow / cmpx / btcdom | 1.0000 | 0.0000 | 100.00% |
+| fundz | 1.0000 | 0.0258 | 99.98% |
+| posn | 1.0000 | 0.0030 | 99.88% |
+| **net** | **0.9947** | 0.4005 | **99.28%** |
+| atr14 | 1.0000 | 0.0000 | — |
+
+End to end, a backtest driven by the live code returns **53.9% / −14.9% / PF 2.04 / Sharpe 2.16**
+against the published **54.9% / −14.9% / PF 2.03 / Sharpe 2.20**.
+
+The two bugs, both of which would have silently changed the strategy while looking fine:
+**ATR must be Wilder's RMA** — a simple rolling mean diverges by up to 1,100 USDT — and the
+**positioning composite must be computed on 4-hour bars and sampled to 12h.** Computing it on 12h
+bars stretches its z-windows from 80 days to 240 and drops sign agreement with the backtest from
+100% to **69%**. Neither would have shown up without a bar-by-bar comparison against the original.
+
+Not tested: the Binance REST endpoints are unreachable from this environment, so `fetch.py`'s
+live paths are written against the documented API but never executed. The archive path and all of
+`runner.py` are verified against real data.
