@@ -1872,43 +1872,55 @@ Symmetric treatment stands.
 This is the cleanest example in the study of why the discipline matters: the idea was plausible,
 economically motivated, and produced a large improvement on a direct test. It was still noise.
 
-## Running it live — and why not a PineScript
-Asked for a PineScript, the honest answer is that Pine cannot express this strategy. Three of the
-five signals are unavailable on TradingView in any form:
+## S68–S69 — Selecting on the thing you are actually maximising
+The quarterly re-selection picked the configuration with the best trailing **Sharpe**. Sharpe is
+close to size-invariant, so it chose the shape of the bet and was blind to drawdown — while the
+target this whole study is chasing is **Calmar**. That mismatch sat unexamined for the entire
+adaptive phase.
 
-| signal | needs | Pine |
-|---|---|---|
-| `s_cmpx` | BTCUSD_PERP ÷ BTCUSDT.P | ✅ two `request.security()` calls |
-| `s_btcdom` | BTC ÷ (BTC + 15 alts) turnover | ⚠️ 16 security calls, near Pine's limit |
-| `s_flow` | Binance taker-buy volume split, then a monthly-refit regression | ❌ not exposed |
-| `s_fundz` | the funding-rate series | ❌ not a usable Pine series |
-| `s_posn` | top-trader position + retail account ratios | ❌ not on TradingView |
-| adaptive exponent | quarterly re-optimisation over 40 configurations | ❌ Pine cannot self-optimise |
+Eighteen selection rules were compared — objective × lookback × interval — by caching each of the
+40 configurations' full-period returns once and treating a switching rule as a concatenation of
+slices (40 backtests instead of 40 × folds × rules):
 
-So `live/` holds a Python runner instead: `fetch.py` (archive seed + REST top-up) and `runner.py`
-(signals → target position → order). The seed/top-up split is forced by the data: the positioning
-endpoints serve only ~30 days while the signals need 240-day z-scores.
+| objective | lookback / interval | CAGR | Calmar | P(DD>20%) |
+|---|---|---|---|---|
+| sharpe | 18m / 3m *(the rule in use)* | 112.1% | 6.55 | 49% |
+| sharpe | 24m / 6m | 116.8% | 6.39 | 40% |
+| **calmar** | **24m / 3m** | **142.6%** | **8.11** | **22%** |
+| **calmar** | **24m / 6m** | **142.7%** | **8.11** | **22%** |
+| sharpe × calmar | 24m / 3m | 131.0% | 7.76 | 30% |
 
-**The verification is the point of the exercise, and it caught two real bugs.** Compared against
-the backtest on 4,020 identical bars:
+The **whole 24-month drawdown-aware family wins together** — 8.11, 8.11, 7.76 — rather than one
+lucky cell, which is the main defence against having simply overfitted the meta-parameters.
 
-| signal | corr | max abs diff | sign agreement |
-|---|---|---|---|
-| flow / cmpx / btcdom | 1.0000 | 0.0000 | 100.00% |
-| fundz | 1.0000 | 0.0258 | 99.98% |
-| posn | 1.0000 | 0.0030 | 99.88% |
-| **net** | **0.9947** | 0.4005 | **99.28%** |
-| atr14 | 1.0000 | 0.0000 | — |
+**Blending beats picking — except here it doesn't.** Averaging the top 2, 3 or 5 configurations
+instead of adopting the single best is the standard answer when a choice is noisy, and the
+fold-by-fold picks were visibly noisy. It lost every time (Calmar 6.45 / 6.02 / 5.94 against 6.55
+for the single pick). Recorded as a negative against the textbook expectation.
 
-End to end, a backtest driven by the live code returns **53.9% / −14.9% / PF 2.04 / Sharpe 2.16**
-against the published **54.9% / −14.9% / PF 2.03 / Sharpe 2.20**.
+### Verified honestly, block by block
+The slice-concatenation approximation overstated things, as it should — it carries a position
+across a switch boundary rather than re-entering. Re-run with every block a separate backtest:
 
-The two bugs, both of which would have silently changed the strategy while looking fine:
-**ATR must be Wilder's RMA** — a simple rolling mean diverges by up to 1,100 USDT — and the
-**positioning composite must be computed on 4-hour bars and sampled to 12h.** Computing it on 12h
-bars stretches its z-windows from 80 days to 240 and drops sign agreement with the backtest from
-100% to **69%**. Neither would have shown up without a bar-by-bar comparison against the original.
+| risk | CAGR | MaxDD | PF | N | Sharpe | **Calmar** | boot median | P(DD>20%) |
+|---|---|---|---|---|---|---|---|---|
+| 6% | 64.0% | −11.3% | **3.26** | 537 | 2.43 | 5.68 | −9.9% | **1%** |
+| 8% | 90.7% | −14.8% | **3.26** | 538 | 2.43 | 6.12 | −13.0% | **6%** |
+| **10%** | **120.3%** | **−18.3%** | **3.26** | 543 | **2.44** | **6.58** | −16.0% | **22%** |
+| 12% | 154.6% | −21.6% | 3.31 | 549 | 2.46 | 7.14 | −18.8% | 41% |
+| *sharpe-selected control, 10%* | *116.9%* | *−22.1%* | *2.71* | *572* | *2.39* | *5.30* | *−19.5%* | *46%* |
 
-Not tested: the Binance REST endpoints are unreachable from this environment, so `fetch.py`'s
-live paths are written against the documented API but never executed. The archive path and all of
-`runner.py` are verified against real data.
+**Same return as the old rule at half the risk** — 120.3% against 116.9%, but a −18.3% drawdown
+against −22.1% and a 22% chance of breaching 20% against 46%. Profit factor 2.71 → **3.26**, the
+highest of any headline book in this study.
+
+Costs, stated rather than buried. The 24-month lookback pushes the start of the tradeable record
+to **2023-03**, so this is 3.5 years where the previous book had 4 and the linear book 5.5 — less
+history to judge on, and none of the 2022 bear market. And the yearly profile is front-loaded and
+declining: at 10% risk, 2023 +229%, 2024 +133%, 2025 +44%, 2026 +44%. The last two years are a
+third of the first.
+
+**And the generalisable lesson: the selection objective has to match the objective.** Sharpe was
+chosen for the re-selection because it is the conventional thing to rank by, not because it was
+the target. Fixing that one line was worth more than the last several structural experiments
+combined.
