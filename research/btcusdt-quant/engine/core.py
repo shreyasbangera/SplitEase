@@ -197,13 +197,18 @@ def _loop(o, h, l, c, entry, exitf, stopd, tpd, traild, fund,
     return eqc, t_ei[:nt], t_xi[:nt], t_side[:nt], t_epx[:nt], t_xpx[:nt], t_pnl[:nt], t_rsn[:nt], t_qty[:nt], expo, fpaid
 
 
-def funding_array(exec_df, real=True):
-    """Funding rate to apply at each execution bar (0 elsewhere)."""
+def funding_array(exec_df, real=True, funding_df=None):
+    """Funding rate to apply at each execution bar (0 elsewhere).
+
+    `funding_df` supplies the instrument's own settlements. Without it this
+    loaded BTCUSDT funding for every instrument, which is harmless while the
+    study is BTCUSDT-only and wrong the moment it is not.
+    """
     n = len(exec_df)
     out = np.zeros(n)
     if not real:
         return out
-    fr = load("funding")
+    fr = load("funding") if funding_df is None else funding_df
     ed = exec_df.dt.to_numpy()
     fd = fr.dt.to_numpy()
     idx = np.searchsorted(ed, fd)
@@ -215,14 +220,15 @@ def funding_array(exec_df, real=True):
 class Engine:
     """fee_bps/slip_bps are PER SIDE."""
     def __init__(self, exec_df, fee_bps=5.0, slip_bps=3.0, eq0=10_000.0,
-                 max_leverage=5.0, real_funding=True, min_notional=100.0):
+                 max_leverage=5.0, real_funding=True, min_notional=100.0,
+                 funding_df=None):
         self.df = exec_df.reset_index(drop=True)
         self.fee = fee_bps / 1e4
         self.slip = slip_bps / 1e4
         self.eq0 = eq0
         self.maxlev = max_leverage
         self.min_notional = min_notional
-        self.fund = funding_array(self.df, real_funding)
+        self.fund = funding_array(self.df, real_funding, funding_df)
         self.bar_h = pd.Series(self.df.dt).diff().median().total_seconds() / 3600.0
 
     def run(self, entry, exit_flag=None, stop_dist=None, tp_dist=None,

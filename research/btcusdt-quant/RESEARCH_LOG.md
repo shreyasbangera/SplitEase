@@ -2060,3 +2060,75 @@ in hindsight.
 **Consequence for the target.** 300% at a 20% drawdown requires a permanently 2024-like market,
 and the one variable that would let you size into such a market is not forecastable at the
 horizon required. The 408% is available only to someone who already knows which year they are in.
+
+## S74–S75 — Expanding to five instruments, and two bugs that had been silent
+The correlation ceiling capping this study at Sharpe ~3 is a *single-instrument* limit. Every
+signal available on BTCUSDT is ultimately a view on the same price. A cross-section escapes it
+only if the INSTRUMENTS decorrelate — not obvious in crypto, where BTC and ETH returns correlate
+around 0.85. Brief widened to ETHUSDT, SOLUSDT, ZECUSDT and XRPUSDT.
+
+### Two bugs, found because the first result was obviously wrong
+The first run returned **identical** −77.3% CAGR with −99.9% drawdown on all four alts, profit
+factors of 0.00 to 0.54. Four different instruments cannot produce the same number; that is a bug
+signature, not a result. Two were behind it, and both had been harmless while the study was
+BTCUSDT-only:
+
+1. **`exec_grid()` always loaded BTCUSDT 15m bars.** Every alt backtest computed alt signals and
+   then executed them against *BTC prices*, with stop distances taken from the alt's ATR. Fixed by
+   threading an `exec_df` through `backtest()` and `_ctx()`.
+2. **`funding_array()` always loaded BTCUSDT funding.** Every alt position was charged BTC's
+   funding rate. Fixed by threading a `funding_df` through `Engine`.
+
+Both fixes were regression-checked against S31's published numbers — CAGR 22.4%, DD −19.6%,
+PF 1.60, N 234 — reproduced exactly, so nothing in the existing record moves.
+
+### The same signals work on other instruments
+| instrument | signals | CAGR | MaxDD | PF | Sharpe |
+|---|---|---|---|---|---|
+| BTCUSDT | 5 | 52.9% | −14.9% | 2.02 | **2.14** |
+| ZECUSDT | 3 | 44.7% | −21.5% | 1.92 | 1.45 |
+| ETHUSDT | 4 | 28.8% | −27.7% | 1.55 | 1.36 |
+| XRPUSDT | 4 | 21.7% | −19.1% | 1.43 | 1.06 |
+| SOLUSDT | 4 | 5.4% | −42.5% | 1.12 | 0.35 |
+
+ZEC has no coin-margined perpetual, so it runs on three signals and still reaches Sharpe 1.45.
+That the construction transfers to instruments it was never designed on is the strongest evidence
+so far that the signals are real rather than fitted.
+
+**Mean pairwise correlation between the books: 0.154** — higher than the 0.10 between signals
+within BTCUSDT, but far below the ~0.85 the underlying prices share. The books decorrelate even
+though the instruments do not, because each is trading its own instrument's flow and positioning.
+
+### A subset looks much better, and picking it would be cheating
+At matched bootstrap drawdown, dropping SOL lifts the book substantially: BTC+ETH+ZEC+XRP reaches
+Sharpe **2.56** and 89.3% CAGR against BTC-alone's 2.14 and 65.7%. **But that subset was chosen by
+looking at the full sample.** Run the instrument choice through the same quarterly trailing-Calmar
+selection everything else uses, and **it keeps all five every single quarter** — SOL's trailing
+Calmar always clears the floor. The +20% Sharpe from dropping SOL is not available ex ante.
+
+### The honest cross-sectional result
+Quarterly Calmar-ranked selection of the conviction curve per instrument, all five always on, one
+account with the risk budget split across them. Window 2024-01 → 2026-08, set by the 24-month
+lookback on positioning data that begins 2021-12.
+
+| book | size | CAGR | MaxDD | Sharpe | Calmar | boot median | P(DD>20%) |
+|---|---|---|---|---|---|---|---|
+| **BTCUSDT alone** | ×1.0 | **52.8%** | −18.9% | **1.67** | 2.80 | −20.8% | 54% |
+| five instruments | ×1.0 | 47.8% | −10.1% | **2.40** | 4.72 | −10.1% | **1%** |
+| five instruments | ×1.5 | 75.6% | −14.8% | 2.38 | 5.11 | −14.8% | 14% |
+| five instruments | ×2.0 | 104.9% | −19.2% | 2.34 | 5.45 | −19.3% | 45% |
+| **five instruments** | **×2.1** | **111.4%** | **−20.1%** | 2.34 | **5.54** | −20.2% | 52% |
+| five instruments | ×2.25 | 120.2% | −21.4% | 2.32 | 5.62 | −21.6% | 63% |
+
+**On a common window the cross-section doubles the return at matched drawdown — 52.8% → ~110% —
+and lifts Sharpe from 1.67 to 2.34.** That is the largest single improvement since netting the
+signals into one position.
+
+Two things to keep straight. This window is 2.7 years, shorter than anything else in the study,
+because alt positioning data begins 2021-12 and the lookback eats two years of it. And the
+absolute 110% is *not* comparable with the single-instrument 136.2% from S69, which was measured
+on a different and more favourable window — the like-for-like comparison is the 52.8% vs 110%
+inside this run.
+
+Still 2.7× short of the target, but the ceiling that blocked the single-instrument book is
+genuinely a single-instrument ceiling, and the cross-section moves it.
