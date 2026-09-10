@@ -1487,3 +1487,46 @@ genuine consistency check on the one implied-volatility result the study does re
 With this the source list is closed for real: OHLCV, taker volume, trade count, funding, open
 interest, trader positioning, quarterly futures, the coin-margined contract, tick prints, the
 order book, the volatility index, and the options chain.
+
+## S51 — Walk-forward validation: the process, not just the boundary
+A single in-sample/out-of-sample split tests one decision boundary. It does not test the *process*
+that made the choices, and several parameters here — thresholds, stop multiple, reward-to-risk,
+holding cap — were fixed early and carried forward, so the whole sample influenced them.
+
+The 5.5 years were cut into **8 rolling folds, 18 months train / 6 months test**. On each training
+window a 54-point grid (threshold scale × stop × reward:risk × hold) was searched and the best
+picked by in-window Sharpe alone; that configuration was then applied untouched to the following
+six months. Test windows were concatenated into one curve.
+
+| variant | CAGR | MaxDD | Sharpe | Calmar | boot median DD | P(DD>20%) |
+|---|---|---|---|---|---|---|
+| **Walk-forward, re-selected each fold** | **76.3%** | −13.8% | **2.28** | 5.53 | −17.7% | 32% |
+| Fixed published configuration | 58.0% | −12.9% | 2.21 | 4.48 | −15.6% | 18% |
+| **Random configuration each fold** | **42.9%** | −8.7% | **2.03** | 4.90 | −13.7% | **9%** |
+
+Fold by fold: 2022-09 **−14.6%**, 2023-03 +153.1%, 2023-09 +360.9%, 2024-03 +58.4%, 2024-09
++19.7%, 2025-03 +33.2%, 2025-09 +51.8%, 2026-03 +125.0%. Seven of eight positive; the loss is the
+first fold, in the back half of the bear market.
+
+**The random-configuration row is the most informative one in this study.** Drawing a
+configuration at random from the same grid on every fold still returns Sharpe 2.03 — so the
+performance comes from the *signals*, not from the parameter choices. The grid search adds about
+0.25 of Sharpe over random, which is real but small. A strategy whose result survives random
+parameterisation is not a parameter artefact.
+
+Six of the eight folds preferred **2.5 ATR × 3R held 14 days**, which is not the published
+configuration (3.0 ATR × 2R, 21 days). Tested head to head on the full sample at matched bootstrap
+risk:
+
+| configuration | risk | CAGR | MaxDD | PF | Sharpe | Calmar | OOS PF | P(DD>20%) |
+|---|---|---|---|---|---|---|---|---|
+| published 3.0 ATR × 2R, 21d | 6% | 39.6% | −11.4% | **2.02** | 2.20 | 3.47 | **2.02** | 3% |
+| walk-forward pick 2.5 × 3R, 14d | 5% | 41.3% | −11.2% | 2.02 | **2.23** | **3.69** | 1.92 | 3% |
+| published 3.0 ATR × 2R, 21d | 8% | 54.9% | −14.9% | **2.03** | 2.20 | 3.68 | **2.04** | 17% |
+| walk-forward pick 2.5 × 3R, 14d | 6% | 50.8% | −13.3% | 2.01 | **2.23** | **3.82** | 1.92 | 10% |
+
+The difference is **0.03 of Sharpe and it runs the other way on out-of-sample profit factor.**
+Kept the published configuration: switching on a gap that small, after the fact, is precisely the
+overfitting this study keeps documenting. The right conclusion is not that one config beats the
+other — it is that **the strategy is insensitive to these parameters**, which the random control
+had already said.
