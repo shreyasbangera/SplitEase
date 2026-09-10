@@ -153,27 +153,30 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
     <span class="eyebrow">2021-01 → 2026-08</span>
   </div>
   <h1>The 300% Problem</h1>
-  <p class="lede">Fifty-four strategies on the BTCUSDT perpetual, against a target of 300% net
+  <p class="lede">Seventy-nine strategies on the BTCUSDT perpetual, against a target of 300% net
   annual profit at under 20% drawdown. One account, one position at a time. This is the record of
-  what was tested, what survived walk-forward validation, and the measured reason the target is
-  unreachable — which is not a shortage of good signals but how few of them are independent.</p>
+  what was tested, what survived walk-forward validation, and the measured reason the target stays
+  out of reach — which turns out not to be signal quality at all, but which year you are standing
+  in.</p>
 
   <div class="verdict">
     <div class="verdict-top"><span class="verdict-label">Verdict</span></div>
     <h2>No strategy qualified.</h2>
-    <p>The best strategy returns <strong>111.4% net annual at an 18.9% drawdown</strong> — five
-    signals reduced to one position, with the conviction curve re-chosen every quarter from the
-    trailing eighteen months. Profit factor 2.80, 673 trades, Sharpe 2.21. It passes every gate
-    the brief sets except the return, and misses that one by <strong>2.7×</strong>. Backed off to a
-    size the bootstrap calls genuinely safe it returns <strong>84.6%</strong>. The gains came from
-    two places and neither was a better signal: first from <em>less correlated</em> ones, then from
-    the <em>shape</em> of the bet. Section&nbsp;11 shows why both run out.</p>
+    <p>The best strategy returns <strong>105.2% net annual at a 20.0% drawdown</strong> over four
+    and a half years <em>including</em> the 2022 bear market — five signals reduced to one position,
+    with the conviction curve re-chosen every quarter on trailing data. Profit factor 2.64, 775
+    trades, Sharpe 2.10. It passes every gate except the return, and misses that by
+    <strong>2.9×</strong>. On the shorter post-bear window the same machinery reaches 136.2%; at a
+    size the bootstrap calls genuinely safe it returns <strong>73.2%</strong>. The gains came from
+    three places and none was a better signal: <em>less correlated</em> signals, the <em>shape</em>
+    of the bet, and matching the selection objective to the target. Section&nbsp;11 shows why all
+    three run out.</p>
     <div class="gap-row">
       <div class="gap-item"><div class="k">Required net / year</div><div class="v">300%</div></div>
-      <div class="gap-item"><div class="k">Best under 20% drawdown</div><div class="v" style="color:var(--fail)">111.4%</div></div>
-      <div class="gap-item"><div class="k">At a genuinely safe size</div><div class="v">84.6%</div></div>
-      <div class="gap-item"><div class="k">Strategies tested</div><div class="v">67</div></div>
-      <div class="gap-item"><div class="k">Parameter sets run</div><div class="v">12,000+</div></div>
+      <div class="gap-item"><div class="k">Best under 20% drawdown</div><div class="v" style="color:var(--fail)">105.2%</div></div>
+      <div class="gap-item"><div class="k">At a genuinely safe size</div><div class="v">73.2%</div></div>
+      <div class="gap-item"><div class="k">Strategies tested</div><div class="v">79</div></div>
+      <div class="gap-item"><div class="k">Parameter sets run</div><div class="v">28,000+</div></div>
     </div>
   </div>
 </header>
@@ -183,31 +186,32 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
     <div class="stack-sm">
       <span class="eyebrow">1 — Qualification gates</span>
       <h2>The best qualifying-shaped strategy, gate by gate</h2>
-      <p class="prose" style="color:var(--ash)">Measured on S60 — five signals reduced to one net
+      <p class="prose" style="color:var(--ash)">Measured on S77 — five signals reduced to one net
       number every 12 hours, one BTCUSDT position at a time in a single account, with the
-      conviction curve re-chosen every quarter from the trailing eighteen months. No sub-accounts,
-      no rebalancing, no spot leg. Net of fees, slippage and real funding. The quarterly
-      re-selection consumes eighteen months of warm-up, so the window is 2022-09 → 2026-08.</p>
+      conviction curve re-chosen every quarter by trailing <em>Calmar</em> on the previous twelve
+      months. No sub-accounts, no rebalancing, no spot leg. Net of fees, slippage and real funding.
+      Window 2022-03 → 2026-08, which <strong>includes the 2022 bear market</strong> — the shorter
+      lookback is chosen precisely so that it does.</p>
     </div>
     <div class="gates">
       <div class="gate">
         <div class="req">Net yearly profit &gt; 300%</div>
-        <div class="got" style="color:var(--fail)">111.4%</div>
+        <div class="got" style="color:var(--fail)">105.2%</div>
         <span class="tag f">Fail</span>
       </div>
       <div class="gate">
         <div class="req">At least 100 completed trades</div>
-        <div class="got">673</div>
+        <div class="got">775</div>
         <span class="tag p">Pass</span>
       </div>
       <div class="gate">
         <div class="req">Profit factor &gt; 1.10</div>
-        <div class="got">2.80</div>
+        <div class="got">2.64</div>
         <span class="tag p">Pass</span>
       </div>
       <div class="gate">
         <div class="req">Maximum drawdown &lt; 20%</div>
-        <div class="got">18.9%</div>
+        <div class="got">20.0%</div>
         <span class="tag p">Pass</span>
       </div>
       <div class="gate">
@@ -222,18 +226,19 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
       </div>
     </div>
     <p class="note"><strong>Read the drawdown from the bootstrap, not from the sample.</strong> A
-    stationary block bootstrap of the same daily returns puts the median drawdown at −19.6% and the
-    chance of breaching 20% at <strong>46%</strong> — so the measured −18.9% is one draw from that
-    distribution, and a favourable one. This gate passes on a technicality. Backed off to 8% risk
-    the book returns <strong>84.6% at −14.8%</strong> with a 21% breach probability, and at 6% risk
-    <strong>60.1% at −11.2%</strong> with <strong>4%</strong>. Those are the numbers to plan
-    around. Every gate passes except the return, and that one misses by 2.7×.</p>
-    <p class="note">The window is shorter than the rest of this report because the quarterly
-    re-selection needs eighteen months of history before it can choose anything, which costs the
-    whole of 2021 and most of 2022. On the full 5.5 years the same signals without the adaptive
-    conviction return 54.9% at −14.9%, profit factor 2.03 over 1,005 trades, positive in every
-    calendar year including the bear market, and 54.1% in sample against 55.7% out. Both books are
-    specified in section&nbsp;6.</p>
+    stationary block bootstrap puts the median drawdown at −22.0% and the chance of breaching 20%
+    at <strong>65%</strong>, so the measured −20.0% is a favourable draw and this gate passes on a
+    technicality. Backed off to 8% risk the book returns <strong>73.2% at −14.8%</strong> with a
+    22% breach probability. That is the number to plan around. Every gate passes except the return,
+    and that one misses by 2.9×.</p>
+    <p class="note"><strong>Yearly: 2022 −8%, 2023 +250%, 2024 +134%, 2025 +56%, 2026 +66%.</strong>
+    Losing eight percent through the 2022 bear market is the most reassuring figure in this report —
+    more so than any of the returns. It is also why this window was chosen. The panel cannot begin
+    before 2021-03, because BTC dominance and positioning data both start 2021-01, so a 24-month
+    selection lookback would push the first tradeable quarter to 2023-03 and drop the bear market
+    entirely into the warm-up. That longer lookback selects better and reports
+    <strong>136.2%</strong> — on a window with no drawdown regime in it. The smaller number is the
+    one measured against a harder sample.</p>
   </div>
 </section>
 <section>
@@ -386,6 +391,45 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
       that column while out-of-sample rises — a divergence that is a warning, not a bonus. At high
       exponents the book bets almost only on rare unanimity, so few such events fall in any one
       period and the variance between periods is large.</p>
+    </div>
+
+    <div class="why">
+      <h3>The third lever: rank by what you are actually maximising</h3>
+      <p class="prose">For the whole adaptive phase the quarterly re-selection ranked
+      configurations by their trailing <strong>Sharpe</strong>. Sharpe is close to size-invariant,
+      so it chose the shape of the bet and was blind to drawdown — while the target being chased is
+      <em>Calmar</em>. That mismatch sat unexamined in one line of code, and fixing it was worth
+      more than the last several structural experiments put together.</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Selection rule</th><th>CAGR</th><th>Max DD</th><th>PF</th><th>Sharpe</th>
+            <th>Calmar</th><th>P(DD&gt;20%)</th></tr></thead>
+          <tbody>
+            <tr><td>rank by Sharpe (the rule in use)</td><td class="n">116.9%</td>
+              <td class="n">−22.1%</td><td class="n">2.71</td><td class="n">2.39</td>
+              <td class="n">5.30</td><td class="n">46%</td></tr>
+            <tr class="best"><td>rank by Calmar, 24-month lookback</td><td class="n pos">120.3%</td>
+              <td class="n">−18.3%</td><td class="n"><strong>3.26</strong></td>
+              <td class="n"><strong>2.44</strong></td><td class="n"><strong>6.58</strong></td>
+              <td class="n pos">22%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">Same return at <em>half</em> the risk, and profit factor 2.71 → 3.26 — the
+      highest of any headline book here. Eighteen selection rules were compared and the whole
+      24-month drawdown-aware family won together (Calmar 8.11, 8.11, 7.76 on the fast screen)
+      rather than one lucky cell, which is the main defence against having merely overfitted the
+      meta-parameters. Blending the top 2, 3 or 5 configurations instead of taking the best lost
+      every time — the third occasion in this study where blending lost to picking.</p>
+      <p class="note">One thing this rule could <em>not</em> choose is position size. Since Calmar,
+      unlike Sharpe, is not size-invariant, letting the search pick the risk level should locate
+      the growth-optimal size from data. It picked the top of the grid in all fourteen quarters,
+      producing 345% CAGR at a <strong>−37% drawdown</strong> with a 99% chance of breaching the
+      limit. That is leverage, not edge, and it fails the brief by nearly 2×. The saturation is a
+      window artefact: on a stretch with no bear market, Calmar rises with leverage and never turns
+      over, so a drawdown-based objective cannot find the optimum on data that never punishes
+      leverage. <strong>Size is the one parameter that cannot be delegated</strong> — it has to come
+      from the drawdown the operator can actually tolerate.</p>
     </div>
 
     <div class="why">
@@ -656,67 +700,73 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
           <th>Sharpe</th><th>Calmar</th><th>IS CAGR</th><th>OOS CAGR</th><th>Gate missed</th></tr></thead>
         <tbody>
           <tr class="best">
-            <td><span class="rk">1</span> <span class="name">S60 · Adaptive conviction</span><br>
-              <span class="sub">5 signals → one position · conviction curve re-chosen quarterly · 10% risk · 2022-09→2026-08</span></td>
-            <td class="n pos">111.4%</td><td class="n">−18.9%</td><td class="n">2.80</td><td class="n">673</td>
-            <td class="n">2.21</td><td class="n"><strong>5.89</strong></td><td class="n">—</td><td class="n">—</td>
+            <td><span class="rk">1</span> <span class="name">S77 · Calmar-selected, bear-inclusive</span><br>
+              <span class="sub">5 signals → one position · re-chosen quarterly by trailing Calmar · 11% risk · 2022-03→2026-08, includes the bear</span></td>
+            <td class="n pos">105.2%</td><td class="n">−20.0%</td><td class="n">2.64</td><td class="n">775</td>
+            <td class="n">2.10</td><td class="n">5.27</td><td class="n">—</td><td class="n">—</td>
             <td>profit only</td></tr>
           <tr class="rank">
-            <td><span class="rk">2</span> <span class="name">S60 · Adaptive conviction, safe size</span><br>
-              <span class="sub">same book at 8% risk · 21% bootstrap chance of breaching 20%</span></td>
-            <td class="n pos">84.6%</td><td class="n">−14.8%</td><td class="n">2.78</td><td class="n">672</td>
-            <td class="n">2.21</td><td class="n">5.71</td><td class="n">—</td><td class="n">—</td>
+            <td><span class="rk">2</span> <span class="name">S69 · Calmar-selected, post-bear window</span><br>
+              <span class="sub">same rule, 24-month lookback · 11% risk · 2023-03→2026-08, no bear market in it</span></td>
+            <td class="n pos">136.2%</td><td class="n">−20.0%</td><td class="n"><strong>3.26</strong></td><td class="n">546</td>
+            <td class="n"><strong>2.44</strong></td><td class="n"><strong>6.82</strong></td><td class="n">—</td><td class="n">—</td>
             <td>profit only</td></tr>
           <tr class="rank">
-            <td><span class="rk">3</span> <span class="name">S46 · Net-signal book, fixed linear</span><br>
+            <td><span class="rk">3</span> <span class="name">S77 · Same book, safe size</span><br>
+              <span class="sub">8% risk · 22% bootstrap chance of breaching 20% · bear-inclusive</span></td>
+            <td class="n pos">73.2%</td><td class="n">−14.8%</td><td class="n">2.64</td><td class="n">771</td>
+            <td class="n">2.12</td><td class="n">4.94</td><td class="n">—</td><td class="n">—</td>
+            <td>profit only</td></tr>
+          <tr class="rank">
+            <td><span class="rk">4</span> <span class="name">S46 · Net-signal book, fixed linear</span><br>
               <span class="sub">5 signals · 8% risk · the full 5.5 years incl. the 2022 bear market</span></td>
             <td class="n pos">54.9%</td><td class="n">−14.9%</td><td class="n">2.03</td><td class="n">1,005</td>
             <td class="n"><strong>2.20</strong></td><td class="n">3.68</td><td class="n">54.1%</td><td class="n pos">55.7%</td>
             <td>profit only</td></tr>
           <tr class="rank">
-            <td><span class="rk">4</span> <span class="name">S46 · + implied volatility</span><br>
+            <td><span class="rk">5</span> <span class="name">S46 · + implied volatility</span><br>
               <span class="sub">6 signals · 9% risk · 2023-06→2026-08, no bear market in the window</span></td>
             <td class="n pos">56.2%</td><td class="n">−13.1%</td><td class="n">2.08</td><td class="n">580</td>
             <td class="n">2.05</td><td class="n">4.30</td><td class="n">64.6%</td><td class="n">52.2%</td>
             <td>profit only</td></tr>
           <tr class="rank">
-            <td><span class="rk">5</span> <span class="name">S46 · Net-signal book, safe size</span><br>
+            <td><span class="rk">6</span> <span class="name">S46 · Net-signal book, safe size</span><br>
               <span class="sub">5 signals · 6% risk · 3% bootstrap chance of a 20% drawdown</span></td>
             <td class="n pos">39.6%</td><td class="n">−11.4%</td><td class="n">2.02</td><td class="n">1,001</td>
             <td class="n"><strong>2.20</strong></td><td class="n">3.47</td><td class="n">39.2%</td><td class="n pos">40.3%</td>
             <td>profit only</td></tr>
           <tr class="rank">
-            <td><span class="rk">6</span> <span class="name">S36 · Implied-volatility momentum</span><br>
+            <td><span class="rk">7</span> <span class="name">S36 · Implied-volatility momentum</span><br>
               <span class="sub">single signal · 12h · short window only</span></td>
             <td class="n pos">29.8%</td><td class="n">−13.0%</td><td class="n">1.71</td><td class="n">201</td>
             <td class="n">1.58</td><td class="n">2.30</td><td class="n">47.7%</td><td class="n">22.0%</td>
             <td>profit only</td></tr>
           <tr class="rank">
-            <td><span class="rk">7</span> <span class="name">S31 · Short-window orthogonal flow</span><br>
+            <td><span class="rk">8</span> <span class="name">S31 · Short-window orthogonal flow</span><br>
               <span class="sub">single signal · 12h · found by the stability screen</span></td>
             <td class="n pos">18.7%</td><td class="n">−14.6%</td><td class="n">1.69</td><td class="n">229</td>
             <td class="n">1.26</td><td class="n">1.28</td><td class="n">16.6%</td><td class="n pos">22.7%</td>
             <td>profit only</td></tr>
           <tr class="rank">
-            <td><span class="rk">8</span> <span class="name">S38 · Stablecoin basis</span><br>
+            <td><span class="rk">9</span> <span class="name">S38 · Stablecoin basis</span><br>
               <span class="sub">single signal · the implied USDT/USD rate</span></td>
             <td class="n pos">21.0%</td><td class="n">−23.1%</td><td class="n">1.61</td><td class="n">369</td>
             <td class="n">1.21</td><td class="n">0.91</td><td class="n">13.4%</td><td class="n pos">33.6%</td>
             <td>profit + drawdown</td></tr>
           <tr class="rank">
-            <td><span class="rk">9</span> <span class="name">S40 · BTC dominance</span><br>
+            <td><span class="rk">10</span> <span class="name">S40 · BTC dominance</span><br>
               <span class="sub">single signal · share of turnover across 16 perps</span></td>
             <td class="n pos">20.6%</td><td class="n">−15.6%</td><td class="n">1.40</td><td class="n">536</td>
             <td class="n">1.13</td><td class="n">1.32</td><td class="n">24.9%</td><td class="n">13.8%</td>
             <td>profit only</td></tr>
           <tr class="rank">
-            <td><span class="rk">10</span> <span class="name">S7 · Smart-money vs retail</span><br>
+            <td><span class="rk">11</span> <span class="name">S7 · Smart-money vs retail</span><br>
               <span class="sub">single signal · positioning composite</span></td>
             <td class="n pos">12.8%</td><td class="n">−15.7%</td><td class="n">1.36</td><td class="n">232</td>
             <td class="n">0.82</td><td class="n">0.81</td><td class="n">13.0%</td><td class="n">12.0%</td>
             <td>profit only</td></tr>
           <tr class="rank">
-            <td><span class="rk">11</span> <span class="name">S15 · Convex trend</span><br>
+            <td><span class="rk">12</span> <span class="name">S15 · Convex trend</span><br>
               <span class="sub">4h · pyramid 3 · no target — highest profit factor of any single book</span></td>
             <td class="n pos">37.2%</td><td class="n">−36.0%</td><td class="n">1.91</td><td class="n">261</td>
             <td class="n">0.95</td><td class="n">1.03</td><td class="n">—</td><td class="n pos">56.4%</td>
@@ -747,7 +797,7 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
       <h2>Complete specifications</h2>
       <p class="prose" style="color:var(--ash)">Everything needed to rebuild the top books.
       Rolling windows are counted in decision bars. Costs and execution rules are identical across
-      every strategy and listed once in section&nbsp;11. An earlier version of this work ran the
+      every strategy and listed once in section&nbsp;12. An earlier version of this work ran the
       signals as separate sub-accounts rebalancing monthly; that structure is not tradable in one
       account and, when rebuilt as a single net position, was beaten outright — profit factor 1.51
       against 2.09. The sub-account results are kept in the research log but are not specified
@@ -1394,7 +1444,93 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
 <section>
   <div class="stack-lg">
     <div class="stack-sm">
-      <span class="eyebrow">9 — Validation</span>
+      <span class="eyebrow">9 — What actually drives the returns</span>
+      <h2>Not decay. Regime.</h2>
+      <p class="prose" style="color:var(--ash)">Every version of this book shows returns falling
+      year on year — at the headline size, 2023 +250%, 2024 +134%, 2025 +56%, 2026 +66%. Two
+      readings with opposite consequences: an unusually trending 2023-24, or signals being
+      arbitraged away. They can be told apart, and the answer determines whether any of this is
+      worth running.</p>
+    </div>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Measured on 54 rolling 12-month windows</th><th>First third</th>
+          <th>Last third</th><th>Slope / year</th></tr></thead>
+        <tbody>
+          <tr class="best"><td>mean signal rank-IC <span class="sub">(raw predictive power, owes nothing to the trading rules)</span></td>
+            <td class="n">0.0347</td><td class="n pos">0.0394</td><td class="n">—</td></tr>
+          <tr><td>book Sharpe</td><td class="n">1.698</td><td class="n">1.515</td>
+            <td class="n">−0.085</td></tr>
+          <tr><td>book CAGR</td><td class="n">35.2%</td><td class="n">32.7%</td>
+            <td class="n">−1.8pp</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note"><strong>The raw predictive power of the signals is higher in the last third of
+    the sample than the first.</strong> Sharpe and CAGR drift down marginally, well inside the
+    noise of 54 overlapping windows. This is not decay.</p>
+
+    <div class="why">
+      <h3>What the returns track is how trending the market is</h3>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Relationship across the same 54 windows</th><th>Pearson</th>
+            <th>Spearman</th></tr></thead>
+          <tbody>
+            <tr class="best"><td>market trendiness vs book CAGR</td><td class="n pos">+0.609</td>
+              <td class="n">+0.478</td></tr>
+            <tr class="best"><td>mean signal IC vs book Sharpe</td><td class="n pos">+0.662</td>
+              <td class="n">+0.523</td></tr>
+            <tr><td>market trendiness vs book Sharpe</td><td class="n">+0.500</td>
+              <td class="n">+0.472</td></tr>
+            <tr><td>market <em>volatility</em> vs book CAGR</td><td class="n neg">−0.259</td>
+              <td class="n">−0.316</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="prose">The negative volatility row is the retrospective explanation for one of this
+      study's earlier failures: portfolio volatility targeting came out Calmar-neutral because it
+      was scaling by a variable <em>negatively</em> related to the book's returns. The right
+      variable was trendiness the whole time.</p>
+      <p class="prose"><strong>And the number that reframes the target.</strong> The best
+      12-month window in six and a half years returned <strong>152% at 8% risk with a −7.5%
+      drawdown</strong> — sized to the 20% limit, roughly <strong>408%</strong>. Over the full
+      period, sized to the same limit, the book does about 105%. <em>The entire gap is regime.</em>
+      300% is not beyond this strategy; it is what this strategy does in a 2024.</p>
+    </div>
+
+    <div class="why">
+      <h3>So size to trendiness — the most promising idea in the study, and it fails</h3>
+      <p class="prose">If returns track trendiness at +0.61 and trendiness were persistent, scaling
+      risk by trailing trendiness would capture more of the 408% windows and fewer of the flat
+      ones. It needs only persistence, not deep predictability.</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Trendiness: lookback → forward horizon</th><th>Correlation</th></tr></thead>
+          <tbody>
+            <tr><td>180 days → 30 days</td><td class="n">+0.620</td></tr>
+            <tr><td>180 days → 90 days</td><td class="n">+0.029</td></tr>
+            <tr class="best"><td>60 days → 60 days</td><td class="n neg">−0.117</td></tr>
+            <tr class="best"><td>90 days → 90 days</td><td class="n neg">−0.211</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="prose"><strong>At matched horizons it is negatively autocorrelated.</strong> A
+      trending ninety days is followed by a less trending ninety days. The +0.62 at 180→30 is the
+      long window's own inertia, not forecasting power. Every scaled variant loses, on every
+      lookback and clip range — Calmar 4.29 flat against 3.67 for the best scaled version.
+      Scaling up after a trend buys a regime that is about to end.</p>
+      <p class="note">This is the same lesson as the order book wearing different clothes. There, a
+      strong and stable statistical relationship was worth less than the spread. Here, a strong and
+      real economic driver arrives only in hindsight. <strong>A relationship you cannot act on in
+      advance is not an edge</strong>, however well it explains the past.</p>
+    </div>
+  </div>
+</section>
+<section>
+  <div class="stack-lg">
+    <div class="stack-sm">
+      <span class="eyebrow">10 — Validation</span>
       <h2>Does it survive being chosen honestly?</h2>
       <p class="prose" style="color:var(--ash)">A single in-sample/out-of-sample split tests one
       decision boundary. It does not test the <em>process</em> that made the choices — and by this
@@ -1515,7 +1651,7 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
 <section>
   <div class="stack">
     <div class="stack-sm">
-      <span class="eyebrow">10 — Why the target is out of reach</span>
+      <span class="eyebrow">11 — Why the target is out of reach</span>
       <h2>The arithmetic behind the shortfall</h2>
     </div>
 
@@ -1581,10 +1717,16 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
       <div class="stack-sm">
         <h3>What 300% at 20% drawdown would actually require</h3>
         <p style="color:var(--ash)">A Calmar ratio of 15. The best measured here is
-        <strong>5.89</strong>, and it took both levers to get there — five near-independent signals
-        to reach Sharpe 2.21, then an adaptive conviction curve to push the Calmar/Sharpe ratio
-        from 1.68 to 2.67. On the full 5.5 years including the 2022 bear market, without the
-        adaptive curve, the same signals run at 3.68.</p>
+        <strong>6.82</strong>, and it took three levers to get there — five near-independent signals
+        to reach Sharpe 2.44, an adaptive conviction curve to push the Calmar/Sharpe ratio from
+        1.68 to 2.8, and ranking the quarterly selection by Calmar rather than Sharpe. On the
+        window that includes the 2022 bear market the same machinery runs at <strong>5.27</strong>.</p>
+        <p style="color:var(--ash)"><strong>But section&nbsp;9 reframes what the shortfall even
+        is.</strong> The book's return tracks market trendiness at +0.61, and in its best twelve
+        months — sized to the same 20% limit — it returned about <strong>408%</strong>. The target
+        is not beyond the strategy. It is beyond the strategy's <em>average year</em>, and the one
+        variable that would let you size into the good years mean-reverts at exactly the horizon
+        you would need it (90-day trendiness against the next 90 days: <strong>−0.211</strong>).</p>
         <p style="color:var(--ash)">Decomposed, 15 needs <em>Sharpe × ratio = 15</em>. The ratio
         reached 2.67 and the exponent sweep shows it flattening above 2.2 for any fixed curve. At
         that ratio the required Sharpe is <strong>5.6</strong>, against a measured 2.21 and a
@@ -1609,7 +1751,7 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
 <section>
   <div class="stack-lg">
     <div class="stack-sm">
-      <span class="eyebrow">11 — Method</span>
+      <span class="eyebrow">12 — Method</span>
       <h2>Data, costs and the controls against self-deception</h2>
     </div>
 
