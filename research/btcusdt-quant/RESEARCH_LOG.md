@@ -1588,3 +1588,44 @@ screen of standalone performance would ever have found them.
 
 **Practical consequence: candidates cannot be screened by standalone statistics or by correlation.
 They have to be run inside the book.** That is more expensive and it is the only thing that works.
+
+## S54 — Re-screening all 116 candidates the valid way, and finding the book saturated
+S40 screened features by building each into a standalone book and keeping those with a decent
+profit factor and low correlation. S53 proved that screen invalid for a netted strategy. So the
+same 116 features were re-screened the only way that works: **add each one to the five-signal net
+position and measure what the book does**, ranked on in-sample marginal Sharpe alone.
+
+Base book: in-sample Sharpe 2.31, full-sample 2.20, out-of-sample 2.04.
+
+**Only 8 of 116 improve the book in sample — 7%.** Median marginal Sharpe **−0.278**, worst
+−1.046, best +0.168.
+
+That number is the finding. If additions were neutral you would expect about half to help. Seven
+percent means **adding almost anything to a well-formed netted book actively hurts it**, and this
+is the exact mirror image of the sub-account result: there, going 3 → 5 → 6 → 8 sleeves raised
+Sharpe monotonically. Under netting each extra signal dilutes the weight of the good ones and adds
+veto noise, so **netting has a saturation point and five signals is it.**
+
+Of the eight in-sample improvers, seven degrade the full sample. One does not:
+
+| book | risk | CAGR | MaxDD | PF | Sharpe | Calmar | OOS PF | boot med DD | P(DD>20%) |
+|---|---|---|---|---|---|---|---|---|---|
+| five signals | 8% | **54.9%** | −14.9% | 2.03 | 2.20 | 3.68 | 2.04 | −15.8% | 17% |
+| **+ dc_pos** | 8% | 51.8% | −13.1% | **2.13** | **2.25** | **3.95** | **2.13** | −14.4% | **11%** |
+| **+ dc_pos** | 10% | **67.1%** | −16.1% | **2.15** | **2.25** | **4.16** | **2.16** | −17.6% | 31% |
+
+`dc_pos` is Donchian channel position — where price sits inside its trailing 55-bar range, long
+near the top. At matched bootstrap risk it is worth roughly **+5 points of CAGR**, and it lifts
+out-of-sample profit factor from 2.04 to 2.16 and Calmar from 3.68 to 4.16.
+
+Two things about it are worth stating plainly. First, **its out-of-sample improvement (+0.10
+Sharpe) is larger than its in-sample one (+0.023)**, which is the signature you want and the
+opposite of an overfit. Second, it was the **7th-ranked of 232 tested variants on a +0.023
+in-sample margin** — squarely inside the multiple-testing zone, and the study's own repeated
+lesson is not to switch headline configurations on margins that small after the fact. So it is
+recorded as a verified-but-marginal sixth signal and the five-signal book remains the headline.
+
+There is a pleasing detail in which signal it is. The book is built entirely of **non-price**
+reads — aggressive flow, the stablecoin basis, turnover rotation, funding, positioning — and out
+of 116 candidates the single thing that adds to it is the simplest price signal there is: where
+price sits in its own recent range.
