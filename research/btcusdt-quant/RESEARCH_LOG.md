@@ -304,3 +304,88 @@ a BTCUSDT-only brief) or sub-second market making (not evaluable from OHLCV — 
 order-book reconstruction and a queue model, and its return is a function of latency and fee
 tier, not of a signal). **Within the brief, the ceiling observed here is about 40% net annual
 at a 16% drawdown.**
+
+---
+# Round 2 — futures-only, and attacking the drawdown constraint directly
+
+**Scope correction.** This is futures-only research. S1–S4, S7 and S15–S20 were already pure
+Binance USDⓈ-M perpetual BTCUSDT (perp klines, perp funding, futures positioning metrics,
+perp execution). **S5, the long-spot / short-perp carry, is out of scope** and is removed —
+which matters, because it was 47.8% of the portfolio behind the 39.5% headline.
+
+## Futures-native carry: tested and rejected
+Downloaded 24 BTCUSDT **quarterly delivery** contracts (2021-02 → 2026-08, 75,823 hourly bars)
+to replace the spot leg with a perp-vs-quarterly calendar trade.
+
+| quantity | mean | sd | positive |
+|---|---|---|---|
+| quarterly annualised carry | +8.6% | 8.5% | 98% |
+| perp funding annualised | +9.9% | 16.8% | — |
+| **spread (quarterly − perp)** | **−1.3%** | 10.9% | **49%** |
+
+**Verdict: no edge.** The spot-perp carry earned its 15% by harvesting funding against a leg
+that pays none. Once both legs are futures, funding sits on both sides and the spread prices
+to zero — exactly as arbitrage should. There is no futures-native replacement for that sleeve.
+
+## New engine capability
+Added two mechanisms aimed squarely at the drawdown constraint rather than at returns:
+* **High-water-mark throttle** — nominal risk is full while drawdown is shallower than
+  `dd_soft`, tapering linearly to `dd_floor` × nominal at `dd_hard`.
+* **Pyramiding** — up to N extra units added as a trade advances, each after a further step of
+  R, with the stop pulled to the new average entry so the enlarged package never risks more
+  than the original unit.
+
+## S15 — Convex Positioning Trend
+Deliberately breaks the symmetric return distribution: no take-profit (winners ride an ATR
+trail), pyramiding, and the HWM throttle.
+* Pyramiding raised profit factor from 1.46 to **2.21** and cut win rate to ~20% — the intended
+  convex shape.
+* Best unthrottled: risk 5%, pyramid 3 → CAGR 59.6%, DD −70.4%, PF 1.71, **OOS CAGR 110.6%**.
+* **The throttle works but locks out.** Tapering to zero caps drawdown at exactly −20.0% but
+  collapses trade count from 266 to 15 and CAGR to −0.4%. With a floor of 0.15 it keeps 263
+  trades: CAGR 30.6%, DD −40.9%, PF 1.89. Bounding drawdown by shrinking size costs more
+  return than it saves.
+
+## S18 — Growth-optimal leverage curve  ← the decisive result
+Compound growth is **not monotone in size**. Traced for each book:
+
+| book | peak CAGR | at risk/trade | drawdown at peak | at 22–30% risk |
+|---|---|---|---|---|
+| S15 convex, pyramid 3 | **59.6%** | 5.0% | −70.4% | **−71.6%** CAGR |
+| S15 convex, no pyramid | **63.1%** | 12.0% | −83.6% | −43.2% CAGR |
+| S4 adaptive trend | 35.9% | 9.0% | −64.2% | +9.0% CAGR |
+
+Past the growth-optimal point, more size buys **less** compound return and strictly more
+drawdown. This is a property of the return distribution, not a tuning failure: no leverage
+setting reaches 300%. Under a 20% drawdown budget the same curves sit at roughly 1% risk and
+~20% CAGR.
+
+## S17 — Meta-labelling: inconclusive, not disproven
+Lopez de Prado meta-labelling (secondary classifier predicting whether each primary signal
+wins, expanding window, purge gap = max holding period). Base win rate 48.3% on **232 labelled
+trades** — far too few to train a classifier. Higher probability thresholds dropped trade
+counts below the 40-trade reporting floor. The technique is sound; this signal does not
+generate enough events to use it.
+
+## S20 — Continuous Positioning Signal
+Target exposure proportional to signal strength, volatility-targeted, rebalanced every 4h,
+costs charged only on the change in position. Higher breadth at lower turnover per bet.
+* Best: CAGR **100.6%**, DD −73.9%, Sharpe 1.20, Calmar 1.36, OOS CAGR 50.5%.
+* At a 20% drawdown budget: ~25% CAGR.
+Sharpe improves slightly over the discrete implementation (1.20 vs 1.13) — the breadth
+argument is real but small.
+
+## S19 — Futures-only portfolio (corrected headline)
+Four directional perp books, monthly rebalance, IS-derived risk-parity weights.
+Sleeve correlations are high because they are all directional on one asset:
+SMRD↔CONVEX **0.70**, CONVEX↔AVT 0.60, SMRD↔AVT 0.44, OFS↔others 0.25–0.41.
+
+| knob | IS CAGR / DD | OOS CAGR / DD | ALL CAGR / DD | PF | Sharpe | Calmar | N |
+|---|---|---|---|---|---|---|---|
+| 1 | 9.0% / −6.7% | 11.6% / −8.9% | 9.9% / −8.9% | 1.24 | 1.12 | 1.11 | 811 |
+| 2 | 17.9% / −12.9% | 23.3% / −17.1% | **19.8% / −17.1%** | 1.23 | 1.12 | 1.16 | 811 |
+| 3 | 25.3% / −18.8% | 34.6% / −24.5% | 28.6% / −24.5% | 1.22 | 1.10 | 1.17 | 813 |
+
+**Removing the spot leg costs most of the diversification**: Sharpe 1.93 → 1.12, Calmar
+2.45 → 1.17. The futures-only answer under a 20% drawdown budget is **≈20% net annual**, not
+39.5%.

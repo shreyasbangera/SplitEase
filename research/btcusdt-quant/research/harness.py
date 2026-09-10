@@ -82,7 +82,8 @@ def _ctx(start, end, fee, slip, eq0, max_lev, sig_df):
 
 def backtest(sig_df, arrays, tf, period=("all"), risk=0.01, max_lev=5.0,
              fee=5.0, slip=3.0, be_r=0.0, trail_after_r=0.0, max_bars_h=0,
-             start=None, end=None, eq0=10_000.0):
+             start=None, end=None, eq0=10_000.0,
+             dd_soft=1.0, dd_hard=1.0, dd_floor=0.0, pyramid=0, pyramid_step=1.0):
     """
     arrays: dict with keys 'entry','exit','stop','tp','trail' on the DECISION grid.
     Values from decision bar t become active at the open of decision bar t+1.
@@ -96,7 +97,9 @@ def backtest(sig_df, arrays, tf, period=("all"), risk=0.01, max_lev=5.0,
                    stop_dist=al.get("stop"), tp_dist=al.get("tp"),
                    trail_dist=al.get("trail"),
                    risk=risk, be_r=be_r, trail_after_r=trail_after_r,
-                   max_bars=int(max_bars_h / bar_h) if max_bars_h else 0)
+                   max_bars=int(max_bars_h / bar_h) if max_bars_h else 0,
+                   dd_soft=dd_soft, dd_hard=dd_hard, dd_floor=dd_floor,
+                   pyramid=pyramid, pyramid_step=pyramid_step)
 
 def report(name, sig_df, arrays, tf, **kw):
     out = {}

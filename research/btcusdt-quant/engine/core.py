@@ -31,11 +31,14 @@ FUND_HOURS = (0, 8, 16)
 
 @njit(cache=True)
 def _loop(o, h, l, c, entry, exitf, stopd, tpd, traild, fund,
-          fee, slip, eq0, risk, maxlev, be_r, trail_after_r, maxbars, min_notional):
+          fee, slip, eq0, risk, maxlev, be_r, trail_after_r, maxbars, min_notional,
+          dd_soft, dd_hard, dd_floor, pyr_max, pyr_step):
     n = o.shape[0]
     eq = eq0
     eqc = np.empty(n)
+    hwm = eq0
     pos = 0
+    npyr = 0
     blown = False
     qty = 0.0; epx = 0.0; spx = 0.0; tpx = 0.0; runit = 0.0; ei = 0
     # trade records
@@ -80,6 +83,8 @@ def _loop(o, h, l, c, entry, exitf, stopd, tpd, traild, fund,
             eqc[i] = eq + pos * (c[i] - epx) * qty
         else:
             eqc[i] = eq
+        if eqc[i] > hwm:
+            hwm = eqc[i]
         if eqc[i] <= 0.0:                       # account blown / liquidated
             for j in range(i, n):
                 eqc[j] = 0.0
@@ -128,18 +133,50 @@ def _loop(o, h, l, c, entry, exitf, stopd, tpd, traild, fund,
                 t_rsn[nt] = 3; t_qty[nt] = qty; nt += 1
                 pos = 0; qty = 0.0; tpx = 0.0
 
+        # ---- pyramid: add to a winner that has advanced pyr_step R ----
+        if pos != 0 and pyr_max > 0 and npyr < pyr_max and runit > 0.0:
+            lvl = epx + pos * (npyr + 1) * pyr_step * runit
+            reached = (pos == 1 and h[i] >= lvl) or (pos == -1 and l[i] <= lvl)
+            if reached and i + 1 < n:
+                dd_now = eqc[i] / hwm - 1.0
+                rm = 1.0
+                if dd_now < -dd_soft:
+                    rm = (dd_hard + dd_now) / (dd_hard - dd_soft)
+                    if rm < dd_floor: rm = dd_floor
+                    if rm > 1.0: rm = 1.0
+                addpx = nxt * (1.0 + pos * slip)
+                aq = (eqc[i] * risk * rm) / runit
+                if (qty + aq) * addpx > eqc[i] * maxlev:
+                    aq = eqc[i] * maxlev / addpx - qty
+                if aq > 0.0:
+                    eq -= fee * addpx * aq
+                    epx = (epx * qty + addpx * aq) / (qty + aq)
+                    qty += aq
+                    npyr += 1
+                    # never let a pyramid put the whole package at risk: stop to breakeven
+                    if pos == 1 and epx > spx: spx = epx
+                    if pos == -1 and epx < spx: spx = epx
+
         # ---- new entry ----
         if pos == 0 and entry[i] != 0.0 and eq > 0.0:
             sd = stopd[i]
             if sd == sd and sd > 0.0:
                 side = 1 if entry[i] > 0 else -1
                 px = nxt * (1.0 + side * slip)
-                q = (eq * risk) / sd
+                # high-water-mark throttle: full size until dd_soft, tapering to
+                # dd_floor of nominal size at dd_hard.
+                dd_now = eq / hwm - 1.0
+                rm = 1.0
+                if dd_now < -dd_soft:
+                    rm = (dd_hard + dd_now) / (dd_hard - dd_soft)
+                    if rm < dd_floor: rm = dd_floor
+                    if rm > 1.0: rm = 1.0
+                q = (eq * risk * rm) / sd
                 if q * px > eq * maxlev:
                     q = eq * maxlev / px
                 if q * px >= min_notional:
                     eq -= fee * px * q
-                    pos = side; qty = q; epx = px; ei = i + 1
+                    pos = side; qty = q; epx = px; ei = i + 1; npyr = 0
                     runit = sd
                     spx = px - side * sd
                     td = tpd[i]
@@ -186,7 +223,15 @@ class Engine:
         self.bar_h = pd.Series(self.df.dt).diff().median().total_seconds() / 3600.0
 
     def run(self, entry, exit_flag=None, stop_dist=None, tp_dist=None,
-            trail_dist=None, risk=0.01, be_r=0.0, trail_after_r=0.0, max_bars=0):
+            trail_dist=None, risk=0.01, be_r=0.0, trail_after_r=0.0, max_bars=0,
+            dd_soft=1.0, dd_hard=1.0, dd_floor=0.0, pyramid=0, pyramid_step=1.0):
+        """dd_soft / dd_hard / dd_floor implement a high-water-mark throttle:
+        full nominal risk while the drawdown is shallower than `dd_soft`, tapering
+        linearly to `dd_floor` x nominal at `dd_hard`. Defaults disable it.
+        `pyramid` adds up to N extra units to a winning position, each after a
+        further `pyramid_step` R of favourable movement, with the stop pulled to
+        the new average entry so the package is never risking more than the
+        original unit."""
         n = len(self.df)
         z = lambda x, d=0.0: (np.full(n, d) if x is None else
                               np.nan_to_num(np.asarray(x, float), nan=d))
@@ -197,7 +242,8 @@ class Engine:
         tpd = np.asarray(tp_dist, float) if tp_dist is not None else np.full(n, np.nan)
         res = _loop(o, h, l, c, z(entry), z(exit_flag), stopd, tpd, traild, self.fund,
                     self.fee, self.slip, self.eq0, risk, self.maxlev,
-                    be_r, trail_after_r, int(max_bars), self.min_notional)
+                    be_r, trail_after_r, int(max_bars), self.min_notional,
+                    dd_soft, dd_hard, dd_floor, int(pyramid), pyramid_step)
         return self._metrics(*res)
 
     def _metrics(self, eqc, ei, xi, side, epx, xpx, pnl, rsn, qty, expo, fpaid):
