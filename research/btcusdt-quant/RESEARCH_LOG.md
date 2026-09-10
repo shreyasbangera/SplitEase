@@ -2132,3 +2132,92 @@ inside this run.
 
 Still 2.7× short of the target, but the ceiling that blocked the single-instrument book is
 genuinely a single-instrument ceiling, and the cross-section moves it.
+
+## S76 — Other instruments as signals for a BTCUSDT-only book: nothing
+Back to one instrument by choice. The alt data pulled for S74 does not have to be *traded* to be
+useful, so six constructions were added to the five-signal net one at a time — mean alt flow, mean
+alt positioning, mean alt funding, the cross-sectional dispersion of alt flow, and BTC's own flow
+and positioning *minus* the alt average (the part of BTC's behaviour the rest of the market is not
+doing).
+
+| candidate | IS marginal Calmar | ALL CAGR | Calmar | OOS Calmar |
+|---|---|---|---|---|
+| **base (no addition)** | — | **83.5%** | **4.50** | **4.69** |
+| alt_posn (best in-sample) | **+0.819** | 58.4% | 3.87 | **2.35** |
+| alt_flow | −1.805 | 59.6% | 4.61 | 3.36 |
+| rel_flow (BTC − alts) | −1.117 | 64.0% | 3.95 | 4.09 |
+| alt_fund | −1.815 | 70.1% | 3.50 | 3.65 |
+
+**All eight variants lose**, and the one with the best in-sample marginal Calmar has the worst
+out-of-sample Calmar of the leaders — a textbook selection illusion, caught because in-sample rank
+was used only to order the queue. This extends S53 (aggregate alt positioning) to alt flow, alt
+funding, dispersion and relative constructions. The door is closed.
+
+## S77 — Buying back the bear market, and what it costs
+Every headline since S69 has been measured on a window with **no bear market in it**, and the
+reason is structural rather than chosen: BTC dominance and positioning data both begin 2021-01, so
+the panel cannot start before 2021-03, and the 24-month selection lookback that won the S68
+meta-search pushes the first tradeable quarter to 2023-03. The whole of 2022 falls inside the
+warm-up.
+
+A 12-month lookback selects worse but starts trading 2022-03:
+
+| lookback | window | risk | CAGR | MaxDD | PF | Sharpe | Calmar | P(DD>20%) |
+|---|---|---|---|---|---|---|---|---|
+| 12m | **2022-03 → 2026-08 (4.5y, incl. bear)** | 8% | 73.2% | −14.8% | 2.64 | 2.12 | 4.94 | 22% |
+| 12m | same | 10% | **93.7%** | −18.3% | 2.64 | 2.10 | 5.13 | 52% |
+| 12m | same | 12% | 117.2% | −21.6% | 2.65 | 2.10 | 5.42 | 76% |
+| 24m | 2023-03 → 2026-08 (3.5y, no bear) | 10% | 120.3% | −18.3% | 3.26 | 2.44 | 6.58 | 22% |
+
+Yearly at 10% risk: **2022 −8%**, 2023 +250%, 2024 +134%, 2025 +56%, 2026 +66%.
+
+**Losing 8% through the 2022 bear market is the most reassuring number in this study** — more so
+than any of the returns. It also prices the flattery in the headline: the bear-inclusive book is
+93.7% where the post-bear one is 120.3%, and at the 20% gate the honest figure is about **105%**,
+not 136%.
+
+An ensemble holding an equal blend of what the 12, 18 and 24-month selections each choose gained
+nothing — 89.4% against 93.7% at the same size, with somewhat better bootstrap risk but no edge at
+matched risk. That is the third time blending has lost to picking in this study.
+
+## S78–S79 — Three corners closed: the exponent ceiling, hysteresis, and the slow side
+**The exponent grid stops at 3.0 for a reason.** Extended to 6.0, the Calmar selection does reach
+for it — 4.0 in four quarters, 6.0 in three — and pays:
+
+| grid | CAGR | MaxDD | PF | Sharpe | Calmar |
+|---|---|---|---|---|---|
+| exponent ≤ 3.0 | **120.3%** | −18.3% | 3.26 | **2.44** | **6.58** |
+| exponent ≤ 6.0 | 100.1% | −19.2% | **3.72** | 2.10 | 5.22 |
+
+Profit factor rises to 3.72 and both Sharpe and Calmar fall. Concentrating into fewer, larger bets
+keeps improving the win/loss ratio long after it has stopped improving the risk-adjusted return —
+a useful reminder that profit factor alone is not a fitness function. The shape lever is genuinely
+exhausted around 2.5–3.0.
+
+**Per-signal hysteresis does nothing but harm.** Each signal switches on above its threshold and
+off the moment it falls back through the same level, so a signal oscillating near 1.0 flickers and
+moves the net. Letting it stay on until |z| drops to k × threshold should remove that churn:
+
+| hysteresis k | CAGR | MaxDD | PF | Sharpe | Calmar |
+|---|---|---|---|---|---|
+| **1.0 (none)** | **77.8%** | −18.3% | 2.69 | **2.16** | **4.25** |
+| 0.8 | 75.4% | −19.4% | 2.89 | 2.08 | 3.89 |
+| 0.6 | 61.0% | −17.6% | 3.22 | 1.84 | 3.48 |
+| 0.4 | 43.9% | −21.8% | 2.56 | 1.47 | 2.01 |
+
+Monotone degradation. The flickering near thresholds is **information, not noise** — a signal that
+crosses back below its band has genuinely stopped saying anything, and holding it on is holding a
+stale view.
+
+**And the slow side of the frequency sweep is as bad as the fast side.** S55 tested 6h, 4h, 2h and
+1h and found a clean collapse; the other direction was never tried:
+
+| decisions | CAGR | MaxDD | PF | N | Sharpe | Calmar |
+|---|---|---|---|---|---|---|
+| **12h** | **79.5%** | −18.5% | 2.70 | 935 | **2.18** | **4.31** |
+| 1 day | 7.7% | −47.2% | 1.21 | 478 | 0.48 | 0.16 |
+| 2 days | 19.4% | −14.3% | 2.77 | 246 | 1.29 | 1.36 |
+
+Across seven frequencies from 1 hour to 2 days, **12h is a verified interior optimum**, not the
+arbitrary default it started as. Faster manufactures threshold crossings out of noise; slower
+averages the flow signal into uselessness and leaves too few bets.
