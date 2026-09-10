@@ -1064,3 +1064,146 @@ criterion even though the backtest's realised number passes it.
 confirms the study's central lesson for the third time: *a sleeve's correlation to what you
 already hold matters more than its standalone quality.* IVOL is the weakest book here on
 standalone CAGR and the most valuable one in the portfolio.
+
+## S38–S41 — Stop looking for a better signal, look for a different one
+Going from three sleeves to six took the portfolio's Sharpe from 1.36 to 2.13 purely through
+decorrelation. So the search was reframed: **not "what is the best signal" but "what else is
+different".** Four input families the study had data for but had never built a sleeve from:
+
+| candidate | what it reads | IS CAGR / PF | OOS CAGR / PF | verdict |
+|---|---|---|---|---|
+| **CMPX** | log(BTCUSD_PERP / BTCUSDT_PERP) momentum — BTC cancels, leaving the implied **USDT/USD rate** | 5.4% / 1.20 | **20.0% / 1.82** | kept |
+| CMDIV | coin-margined funding minus USDT funding | 6.4% / 1.47 | −2.6% / 0.97 | rejected |
+| TERM | annualised front-quarterly basis over the perp | 0.6% / 1.07 | 2.2% / 1.14 | too weak |
+| **ETHREL** | fade ETH's 3-day outperformance of BTC | 2.0% / 1.08 | **10.9% / 1.50** | kept, with reservations |
+| BREADTH | share of the alt complex participating | −2.7% / 0.98 | −15.3% / 0.76 | rejected outright |
+
+Then **every one of the 116 panel features** was put through the *same* standard book — 12h
+decision, 15m execution, 1.0 z threshold, 3 ATR stop, 2R target, 7-day cap — with nothing tuned
+per feature and the sign chosen in-sample only. 50 produced enough trades to judge; 22 beat OOS
+PF 1.10; 13 beat 1.30. **Multiple-testing warning stated before, not after, the results:** at a
+5% false-positive rate ~10 of these are luck, so in-sample rank was used only to order the queue
+and nothing was kept unless it also cleared out of sample.
+
+Two survivors were worth adding:
+
+| sleeve | corr to incumbent | IS PF | OOS PF | ALL CAGR / DD / Sharpe |
+|---|---|---|---|---|
+| **BTCDOM** — BTC's share of dollar turnover across the perp complex | **0.11** | 1.51 | 1.25 | 13.1% / −10.4% / **1.11** |
+| **FUNDZ** — fade the funding-rate z-score | **−0.03** | 1.21 | 1.10 | 3.8% / −14.8% / 0.44 |
+
+`btc_dom` was inherited from an earlier build script with no surviving source, so its definition
+was **verified by reconstruction**: BTC quote volume / (BTC + 15 alts quote volume) reproduces
+the stored series at correlation 1.0000, maximum absolute difference 0.000000. Sign +1 — when
+capital rotates *into* BTC and out of the alt complex, BTC leads. FUNDZ is weak and earns its
+place entirely through being the only sleeve in the study **negatively** correlated with the rest.
+
+### Look-ahead audit of every new sleeve
+Three tests on the live harness: an oracle control fed literal next-bar returns, each real
+signal shifted one bar *earlier* (peeking), and each delayed one bar.
+
+| sleeve | as traded | peek 1 bar | delayed 1 bar | reading |
+|---|---|---|---|---|
+| oracle control | Sharpe **20.12**, PF 102.5 | — | — | the harness *can* express a leak |
+| CMPX | 0.99 | **2.20** | 0.42 | textbook gradient, clean |
+| BTCDOM | 1.11 | **1.32** | 0.27 | textbook gradient, clean |
+| IVOL | 0.98 | 0.85 | 0.70 | flat — slow signal, no bar-timing content |
+| ETHREL | 0.57 | 0.01 | 0.48 | flat — weak signal, fragile |
+| FUNDZ | 0.44 | 0.24 | 0.24 | flat — a persistent tilt, not a timed entry |
+
+A flat gradient is *not* evidence of leakage (leakage shows up as peeking adding nothing because
+the future is already in the signal), but it does say those three sleeves have no sharp timing
+content and are therefore the fragile ones. Recorded as such rather than smoothed over.
+
+**Selection honesty on S36:** the winning IV configuration (thr 0.7, 3 ATR × 2R) was picked from
+a grid that printed IS, OOS and ALL side by side, so out-of-sample numbers were visible at the
+moment of choosing. Re-checking on in-sample alone: thr 0.7 wins regardless of the stop/target
+pair, and all three stop/target pairs hold up out of sample (PF 1.31 / 1.45 / 1.41). The concern
+is real but small, and it is disclosed rather than buried.
+
+### The seven- and eight-sleeve books
+Correlations across the seven sleeves available on the full window average **0.10**, with three
+pairs negative:
+
+| | FLOW | POSN | CONVEX | CMPX | ETHREL | BTCDOM | FUNDZ |
+|---|---|---|---|---|---|---|---|
+| FLOW | 1.000 | 0.384 | 0.380 | 0.144 | −0.094 | 0.086 | 0.001 |
+| POSN | | 1.000 | 0.701 | 0.258 | 0.024 | 0.057 | 0.006 |
+| CONVEX | | | 1.000 | 0.287 | −0.055 | 0.043 | −0.062 |
+| CMPX | | | | 1.000 | −0.090 | 0.042 | −0.089 |
+| ETHREL | | | | | 1.000 | 0.132 | 0.074 |
+| BTCDOM | | | | | | 1.000 | 0.042 |
+
+**Full window, 2021-03 → 2026-08 (5.5 years, includes the 2022 bear market), seven sleeves:**
+
+| knob | CAGR | MaxDD | PF | Sharpe | Calmar | N | boot median DD | P(DD>20%) |
+|---|---|---|---|---|---|---|---|---|
+| 2.0 | 26.0% | −12.6% | 1.42 | 1.84 | 2.07 | 2129 | −11.1% | **2%** |
+| **3.0** | **40.3%** | **−18.5%** | 1.42 | **1.84** | **2.18** | 2132 | −16.4% | 23% |
+| 4.0 | 47.3% | −22.8% | 1.43 | 1.86 | 2.07 | 2132 | −18.5% | 37% |
+| 5.0 | 54.3% | −27.2% | 1.43 | 1.86 | 1.99 | 2132 | −20.8% | 56% |
+
+Yearly at knob 3.0: 2021 +34%, **2022 −8%**, 2023 +71%, 2024 +46%, 2025 +40%, 2026 +50%.
+Calmar peaks at knob 3.0 and *falls* beyond it — the Kelly ceiling again, in a new place.
+
+**BVOL window, 2023-06 → 2026-08 (3.2 years, no bear market), eight sleeves:**
+
+| knob | CAGR | MaxDD | PF | Sharpe | Calmar | N | boot median DD | P(>20%) | P(>30%) |
+|---|---|---|---|---|---|---|---|---|---|
+| 4.5 | 69.6% | −13.3% | 1.52 | 2.32 | 5.22 | 1582 | −14.8% | **13%** | 0% |
+| 5.5 | 83.0% | −14.6% | 1.52 | 2.33 | 5.67 | 1582 | −16.7% | 25% | 1% |
+| 6.5 | 97.4% | −16.6% | 1.52 | 2.32 | 5.86 | 1582 | −18.9% | 40% | 4% |
+| **8.0** | **120.7%** | **−19.8%** | **1.51** | **2.32** | **6.09** | 1582 | −22.1% | 66% | 11% |
+
+In-sample 122.1% against out-of-sample 119.7% — as close as any result in this study.
+
+**The gap between the two tables is almost entirely 2022.** Calmar 2.18 on the full window
+against 6.09 on the short one, from the same machinery. The eight-sleeve book's headline number
+is real but it lives on a window that excludes the one regime that hurt it, and the honest
+reading is the pair, not the better half.
+
+**Dropping any single sleeve makes it worse** — no one book is carrying the result:
+
+| sleeve set (BVOL window, knob 2.5) | CAGR | Sharpe | P(DD>20%) |
+|---|---|---|---|
+| all six | 51.7% | **2.13** | **8%** |
+| drop ETHREL | 60.7% | 1.90 | 38% |
+| drop CMPX | 55.3% | 2.02 | 24% |
+| drop IVOL | 52.9% | 1.92 | 28% |
+| **the three NEW sleeves alone** | 35.0% | 2.00 | **2%** |
+
+The last row is the striking one: IVOL + CMPX + ETHREL on their own, with none of the original
+books, reach Sharpe 2.00 at a 2% chance of a 20% drawdown.
+
+### The ceiling this implies
+With average pairwise correlation ρ̄ and per-sleeve Sharpe s, a portfolio of k sleeves tends to
+**s / √ρ̄** as k grows. Measured here: s ≈ 0.9–1.1, ρ̄ ≈ 0.10 → **a Sharpe ceiling near 2.8–3.2**,
+against 2.32 already achieved with eight. Calmar ran at ≈ 2.6 × Sharpe on the short window, so
+the implied ceiling is **Calmar ≈ 8, i.e. roughly 160% a year at a 20% drawdown** — and only on a
+window without a bear market. On the full window the same arithmetic gives Calmar ≈ 2.2 and
+~45%. Adding sleeves nine, ten and eleven cannot close a 300% gap; the limit is set by ρ̄, and
+ρ̄ is a property of the market, not of the search.
+
+## S42 — Phase diversification: the free lunch that is not there
+A 12h book decides at 00:00 and 12:00 UTC. Nothing makes those instants special. Running the
+identical signal on bars cut at 03:00, 06:00 and 09:00 gives a different trade sequence from the
+same information — different fills, different stops, different which-side-of-the-bar luck. That
+is pure timing luck and should be diversifiable at no cost in signal quality.
+
+| IVOL phase | CAGR | DD | PF | N | Sharpe |
+|---|---|---|---|---|---|
+| 00h | 5.2% | −14.9% | 1.20 | 209 | 0.53 |
+| 03h | 2.4% | −13.1% | 1.10 | 213 | 0.27 |
+| **06h** | **8.0%** | −12.9% | **1.27** | 206 | **0.76** |
+| 09h | 2.9% | −13.9% | 1.12 | 212 | 0.32 |
+| four-phase average | 4.7% | −12.7% | — | — | 0.51 |
+
+**Cross-phase correlation is 0.70–0.82**, so there is almost nothing to diversify: the four-phase
+average lands at Sharpe 0.51 against a mean-of-singles 0.47, exactly the +0.04 that
+s√k / √(1+(k−1)ρ) predicts at ρ = 0.76. A 12h signal's persistence swamps its timing luck.
+
+Two things worth keeping from a negative result. First, **the diversification arithmetic behaves
+exactly as theory says it should**, which is a direct check on the machinery that produced the
+cross-sleeve gains. Second, the spread across phases — Sharpe 0.27 to 0.76 from *the same
+strategy on the same data* — is a blunt warning about how much of any single book's headline
+number is the accident of where the bars were cut.
