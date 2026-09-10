@@ -1924,3 +1924,52 @@ third of the first.
 chosen for the re-selection because it is the conventional thing to rank by, not because it was
 the target. Fixing that one line was worth more than the last several structural experiments
 combined.
+
+## S70 — Letting the selection choose the size: a trap, and the number that looks like the target
+Adaptive risk sizing was dismissed early because Sharpe is size-invariant, so a Sharpe-ranked
+search would just pick whatever size the grid topped out at. Now that the selection ranks on
+**Calmar**, that objection no longer applies: drawdown grows roughly linearly with size while
+compound return grows sub-linearly, so Calmar should have an interior maximum, and a Calmar-ranked
+search over size should find the growth-optimal size from data rather than assumption.
+
+**It did not. It picked the top of the grid — 16% — in all fourteen quarters.**
+
+| variant | CAGR | MaxDD | PF | Sharpe | Calmar | boot median | P(DD>20%) |
+|---|---|---|---|---|---|---|---|
+| adaptive risk (picks 16%) | 246.0% | −30.5% | 3.24 | 2.47 | 8.06 | −26.1% | **88%** |
+| adaptive risk × 1.25 | **345.2%** | **−37.0%** | 3.24 | 2.48 | 9.34 | −31.7% | **99%** |
+| adaptive risk × 1.5 | 463.2% | −43.0% | 3.23 | 2.48 | 10.77 | −36.9% | **100%** |
+
+**The 345% row exceeds the 300% target and does not qualify.** It reaches it with a **37%
+drawdown** — nearly double the 20% limit — and a 99% bootstrap chance of breaching. Reporting it
+as success would be exactly the failure mode the brief warns against; it is leverage, not edge.
+
+The reason the search saturates is a **window artifact and worth recording as such.** Over
+2023-03 → 2026-08 there is no bear market, so Calmar keeps rising with leverage right through the
+grid and never turns over. The full-sample test in S41, which contains 2022, showed Calmar peaking
+at a middling size and *falling* beyond it. On a window without a drawdown regime, a
+drawdown-based objective cannot locate the growth-optimal size, because the data it is fitted on
+never punishes leverage.
+
+**The generalisable conclusion: position size cannot be delegated to the selection.** Every other
+parameter in this book is now chosen by data. Size is the one that has to be set by the drawdown
+the operator can actually tolerate, because the only honest estimate of tail risk comes from the
+bootstrap, not from the realised path.
+
+### The ceiling under the actual constraint
+Fine risk ladder on the Calmar-selected book, honest per-block:
+
+| risk | CAGR | MaxDD | PF | Sharpe | Calmar | boot median | P(DD>20%) | gate |
+|---|---|---|---|---|---|---|---|---|
+| 9% | 105.1% | −16.6% | 3.26 | 2.44 | 6.35 | −14.6% | 12% | pass |
+| 10% | 120.3% | −18.3% | 3.26 | 2.44 | 6.58 | −16.0% | 22% | pass |
+| **11%** | **136.2%** | **−20.0%** | **3.26** | **2.44** | **6.82** | −17.5% | 31% | **pass, exactly** |
+| 12% | 154.6% | −21.6% | 3.31 | 2.46 | 7.14 | −18.8% | 41% | **fail** |
+| 14% | 190.9% | −25.0% | 3.31 | 2.46 | 7.63 | −21.6% | 62% | fail |
+| 16% | 231.0% | −28.2% | 3.31 | 2.46 | 8.19 | −24.3% | 80% | fail |
+
+**Best qualifying result: 136.2% net annual at a −20.0% measured maximum drawdown**, profit
+factor 3.26 over 546 trades, Sharpe 2.44. Short of the 300% target by **2.2×**.
+
+That is the honest ceiling on this window. Everything above it in the table buys return with
+drawdown that breaches the brief's own limit.
