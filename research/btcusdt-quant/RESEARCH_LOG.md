@@ -827,3 +827,28 @@ drawdown −19.7% — and misses net yearly profit at **35.8% against 300%**. Th
 improvement on the previous futures-only best (22.4%) at the same drawdown, and still 8.4×
 short of the target. Bootstrap P(DD>20%) is 98% at knob 2, so knob 1.5 is the practical ceiling
 and even there the drawdown margin is thin.
+
+## S33 — Adding the open-interest sleeve
+`oi_rank` (open-interest percentile, faded) is the strongest *stable* feature in the panel
+(IS −0.137 / OOS −0.073) but a weak book alone: 8.1% CAGR, PF 1.13, −32% drawdown. The
+question was whether a weak-but-different read still earns portfolio weight.
+
+**Correlation with the existing sleeves: 0.078 (FLOW), 0.111 (POSN), 0.131 (CONVEX)** —
+near-orthogonal to all three, because it reads the *size of the levered book* rather than flow
+or account positioning.
+
+| knob | IS CAGR / DD | OOS CAGR / DD | ALL CAGR / DD | PF | Sharpe | Calmar | N | P(DD>20%) |
+|---|---|---|---|---|---|---|---|---|
+| 1 | 17.9% / −11.5% | 25.3% / −10.1% | 20.5% / −11.5% | 1.31 | **1.41** | 1.78 | 1090 | — |
+| 1.5 | 27.3% / −16.9% | 38.6% / −14.8% | 31.2% / −16.9% | 1.30 | **1.41** | 1.85 | 1090 | **52%** |
+| 2 | 35.4% / −21.9% | 52.1% / −19.3% | 41.1% / −21.9% | 1.29 | 1.39 | 1.87 | 1092 | — |
+
+**Verdict: it earns its place on risk, not on return.** Against the three-sleeve S32 it raises
+Sharpe (1.41 vs 1.34), profit factor (1.30 vs 1.27) and trade count (1090 vs 724), and lowers
+drawdown at matched size. But on the study's binding measure — highest CAGR with drawdown under
+20% — the three-sleeve version still wins (38.6% at −19.0% against roughly 36% at −19%).
+
+The useful generalisation: **a sleeve with almost no standalone edge but near-zero correlation
+is worth more to a portfolio than a strong sleeve correlated 0.7 with what you already hold.**
+That is why the original four-sleeve portfolio (four correlated directional books, Sharpe 1.12)
+was beaten by a two-book pair reading different things (Sharpe 1.43).
