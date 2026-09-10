@@ -1,0 +1,807 @@
+<title>The 300% Problem</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,500;0,600;1,400&display=swap">
+<style>
+:root{
+  --ground:#F2F4F6; --surface:#FFFFFF; --sunk:#E9ECF0;
+  --ink:#12151B; --ash:#59636F; --faint:#8A939F;
+  --line:#D9DEE4; --hair:#E7EBEF;
+  --signal:#B67818; --signal-soft:#F6E7C9;
+  --pass:#26795A; --fail:#B33C33; --warn:#A96A12;
+  --s1:#B67818; --s2:#2D5F8A; --s3:#26795A; --s4:#8A4E86; --s5:#9A6234; --btc:#9AA4B0;
+  --shadow:0 1px 2px rgba(18,21,27,.05),0 8px 24px -12px rgba(18,21,27,.16);
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;
+  --serif:"IBM Plex Serif",Georgia,"Times New Roman",serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0C0F14; --surface:#141920; --sunk:#0F141A;
+    --ink:#E6EAEF; --ash:#939DA9; --faint:#6B7683;
+    --line:#242C36; --hair:#1C232C;
+    --signal:#E0AD53; --signal-soft:#2E2517;
+    --pass:#4FB287; --fail:#E0736A; --warn:#D9A040;
+    --s1:#E0AD53; --s2:#6BA3D6; --s3:#4FB287; --s4:#C08BBC; --s5:#C79463; --btc:#5E6975;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0C0F14; --surface:#141920; --sunk:#0F141A;
+  --ink:#E6EAEF; --ash:#939DA9; --faint:#6B7683;
+  --line:#242C36; --hair:#1C232C;
+  --signal:#E0AD53; --signal-soft:#2E2517;
+  --pass:#4FB287; --fail:#E0736A; --warn:#D9A040;
+  --s1:#E0AD53; --s2:#6BA3D6; --s3:#4FB287; --s4:#C08BBC; --s5:#C79463; --btc:#5E6975;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--sans);
+  font-size:15.5px;line-height:1.62;-webkit-font-smoothing:antialiased;
+  padding-block:0;padding-left:20px;padding-right:20px}
+.wrap{max-width:1080px;margin:0 auto}
+.prose{max-width:68ch}
+h1,h2,h3{font-family:var(--serif);text-wrap:balance;margin:0}
+h1{font-weight:600;font-size:clamp(2.1rem,5.2vw,3.4rem);line-height:1.06;letter-spacing:-.015em}
+h2{font-weight:600;font-size:clamp(1.32rem,2.6vw,1.72rem);line-height:1.2;letter-spacing:-.01em}
+h3{font-weight:600;font-size:1.03rem;line-height:1.3}
+p{margin:0}
+a{color:var(--ink);text-underline-offset:3px;text-decoration-color:var(--line)}
+.eyebrow{font-family:var(--mono);font-size:.68rem;font-weight:500;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--faint)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:500}
+section{padding-block:clamp(38px,6vw,64px);border-top:1px solid var(--hair)}
+section:first-of-type{border-top:0}
+.stack{display:flex;flex-direction:column;gap:18px}
+.stack-sm{display:flex;flex-direction:column;gap:10px}
+.stack-lg{display:flex;flex-direction:column;gap:30px}
+
+/* ---------- masthead ---------- */
+.mast{padding-block:clamp(40px,7vw,80px) clamp(30px,4vw,44px)}
+.mast .kicker{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:baseline;margin-bottom:22px}
+.lede{font-size:clamp(1.02rem,2vw,1.16rem);color:var(--ash);max-width:62ch;margin-top:20px}
+.verdict{margin-top:34px;background:var(--surface);border:1px solid var(--line);
+  border-left:3px solid var(--fail);border-radius:3px;padding:22px 24px;box-shadow:var(--shadow)}
+.verdict-top{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline}
+.verdict-label{font-family:var(--mono);font-size:.7rem;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--fail);font-weight:600}
+.verdict h2{margin-top:8px;font-size:clamp(1.15rem,2.4vw,1.5rem)}
+.verdict p{margin-top:12px;color:var(--ash);max-width:66ch}
+.gap-row{display:flex;flex-wrap:wrap;gap:28px;margin-top:22px;padding-top:20px;
+  border-top:1px solid var(--hair)}
+.gap-item .k{font-family:var(--mono);font-size:.66rem;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--faint)}
+.gap-item .v{font-family:var(--mono);font-size:1.72rem;font-weight:600;
+  font-variant-numeric:tabular-nums;line-height:1.15;margin-top:3px}
+
+/* ---------- gates ---------- */
+.gates{display:grid;grid-template-columns:repeat(auto-fit,minmax(178px,1fr));gap:1px;
+  background:var(--line);border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.gate{background:var(--surface);padding:15px 16px 16px;display:flex;flex-direction:column;gap:7px}
+.gate .got{margin-top:auto}
+.gate .req{font-family:var(--mono);font-size:.7rem;color:var(--faint);line-height:1.45}
+.gate .got{font-family:var(--mono);font-size:1.2rem;font-weight:600;font-variant-numeric:tabular-nums}
+.tag{align-self:flex-start;font-family:var(--mono);font-size:.62rem;font-weight:600;
+  letter-spacing:.11em;text-transform:uppercase;padding:2px 7px;border-radius:2px;border:1px solid}
+.tag.p{color:var(--pass);border-color:var(--pass)}
+.tag.f{color:var(--surface);background:var(--fail);border-color:var(--fail)}
+
+/* ---------- tables ---------- */
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:3px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.83rem}
+th,td{text-align:right;padding:9px 10px;white-space:nowrap;border-bottom:1px solid var(--hair)}
+th:first-child,td:first-child{text-align:left}
+thead th{font-family:var(--mono);font-size:.66rem;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--faint);font-weight:500;background:var(--sunk);border-bottom:1px solid var(--line);
+  position:sticky;top:0}
+tbody tr:last-child td{border-bottom:0}
+td.n{font-family:var(--mono);font-variant-numeric:tabular-nums}
+tr.rank td{background:var(--surface)}
+tr.best td{background:var(--signal-soft)}
+.pos{color:var(--pass)} .neg{color:var(--fail)}
+td .name{font-weight:600}
+td .sub{color:var(--faint);font-size:.76rem;font-family:var(--mono)}
+.rk{font-family:var(--mono);color:var(--faint);font-weight:500}
+
+/* ---------- chart ---------- */
+.chart-card{background:var(--surface);border:1px solid var(--line);border-radius:3px;
+  padding:18px 18px 12px;box-shadow:var(--shadow)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:12px;padding-top:12px;
+  border-top:1px solid var(--hair)}
+.lg{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:.72rem;color:var(--ash)}
+.sw{width:16px;height:2.5px;border-radius:2px;flex:none}
+.lg:last-child .sw{background:none!important;border-top:2.5px dashed var(--btc);height:0}
+svg text{font-family:var(--mono)}
+
+/* ---------- spec cards ---------- */
+.spec{background:var(--surface);border:1px solid var(--line);border-radius:3px;
+  box-shadow:var(--shadow);overflow:hidden}
+.spec-head{padding:16px 20px;border-bottom:1px solid var(--line);background:var(--sunk);
+  display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline;justify-content:space-between}
+.spec-head .id{font-family:var(--mono);font-size:.7rem;letter-spacing:.13em;color:var(--faint)}
+.spec-body{padding:18px 20px;display:flex;flex-direction:column;gap:16px}
+dl.kv{display:grid;grid-template-columns:minmax(120px,auto) 1fr;gap:7px 20px;margin:0;font-size:.855rem}
+dl.kv dt{font-family:var(--mono);font-size:.7rem;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--faint);padding-top:2px}
+dl.kv dd{margin:0}
+code{font-family:var(--mono);font-size:.855em;background:var(--sunk);padding:1px 5px;
+  border-radius:2px;border:1px solid var(--hair)}
+.pill-row{display:flex;flex-wrap:wrap;gap:6px}
+.pill{font-family:var(--mono);font-size:.7rem;padding:3px 9px;border:1px solid var(--line);
+  border-radius:2px;color:var(--ash);background:var(--sunk)}
+
+/* ---------- ledger ---------- */
+.why{background:var(--surface);border:1px solid var(--line);border-radius:3px;padding:20px 22px}
+.eq{font-family:var(--mono);font-size:.9rem;background:var(--sunk);border:1px solid var(--hair);
+  border-radius:3px;padding:13px 16px;overflow-x:auto;line-height:1.75}
+.note{font-size:.85rem;color:var(--faint);max-width:70ch}
+footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--faint);font-size:.8rem}
+@media (max-width:560px){
+  dl.kv{grid-template-columns:1fr;gap:2px 0}
+  dl.kv dd{margin-bottom:9px}
+  .gap-row{gap:18px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+<div class="wrap">
+
+<header class="mast">
+  <div class="kicker">
+    <span class="eyebrow">Quantitative research</span>
+    <span class="eyebrow">Binance USDⓈ-M perpetual · BTCUSDT</span>
+    <span class="eyebrow">2020-01-01 → 2026-08-31</span>
+  </div>
+  <h1>The 300% Problem</h1>
+  <p class="lede">Fourteen strategies, 9 years of tick-clean Binance data, and a target of
+  300% net annual profit at under 20% drawdown. This is the record of what was tested, what
+  survived, and the arithmetic that says the target itself is out of reach.</p>
+
+  <div class="verdict">
+    <div class="verdict-top"><span class="verdict-label">Verdict</span></div>
+    <h2>No strategy qualified.</h2>
+    <p>The best configuration found clears four of the five numeric gates — 622 trades,
+    profit factor 1.29, maximum drawdown 16.2%, realistic sizing — and misses the profit
+    gate by a factor of about seven and a half. Nothing in the search came close, and
+    section&nbsp;7 shows why nothing was going to.</p>
+    <div class="gap-row">
+      <div class="gap-item"><div class="k">Required net / year</div><div class="v">300%</div></div>
+      <div class="gap-item"><div class="k">Best achieved</div><div class="v" style="color:var(--fail)">39.5%</div></div>
+      <div class="gap-item"><div class="k">Shortfall</div><div class="v">7.6×</div></div>
+      <div class="gap-item"><div class="k">Strategies tested</div><div class="v">14</div></div>
+      <div class="gap-item"><div class="k">Parameter sets run</div><div class="v">1,200+</div></div>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="stack">
+    <div class="stack-sm">
+      <span class="eyebrow">1 — Qualification gates</span>
+      <h2>Where the best strategy stands against each gate</h2>
+      <p class="prose" style="color:var(--ash)">Measured on the multi-strategy portfolio at
+      the largest position size that still respects the drawdown limit. Full period,
+      net of all fees, slippage and funding.</p>
+    </div>
+    <div class="gates">
+      <div class="gate">
+        <div class="req">Net yearly profit &gt; 300%</div>
+        <div class="got" style="color:var(--fail)">39.5%</div>
+        <span class="tag f">Fail</span>
+      </div>
+      <div class="gate">
+        <div class="req">At least 100 completed trades</div>
+        <div class="got">622</div>
+        <span class="tag p">Pass</span>
+      </div>
+      <div class="gate">
+        <div class="req">Profit factor &gt; 1.10</div>
+        <div class="got">1.29</div>
+        <span class="tag p">Pass</span>
+      </div>
+      <div class="gate">
+        <div class="req">Maximum drawdown &lt; 20%</div>
+        <div class="got">16.2%</div>
+        <span class="tag p">Pass</span>
+      </div>
+      <div class="gate">
+        <div class="req">Realistic risk management</div>
+        <div class="got">Yes</div>
+        <span class="tag p">Pass</span>
+      </div>
+      <div class="gate">
+        <div class="req">No look-ahead bias</div>
+        <div class="got">Verified</div>
+        <span class="tag p">Pass</span>
+      </div>
+    </div>
+    <p class="note">The drawdown pass is thinner than it looks. A stationary block bootstrap
+    of the same daily returns (1,500 resamples, 5-day blocks) puts the median maximum
+    drawdown at 17.4% and the 5th percentile at 27.1% — a 29% chance of breaching the 20%
+    limit on a different draw of the same process. The realised 16.2% is a favourable
+    sample, not a guarantee.</p>
+  </div>
+</section>
+<section>
+  <div class="stack">
+    <div class="stack-sm">
+      <span class="eyebrow">2 — Equity curves</span>
+      <h2>Every finalist, against buy &amp; hold</h2>
+      <p class="prose" style="color:var(--ash)">Log scale, 10,000 USDT start, weekly points,
+      net of fees, slippage and real funding. The shaded region is the out-of-sample window —
+      no parameter was chosen with sight of it.</p>
+    </div>
+    <div class="chart-card">
+<svg viewBox="0 0 1040 400" width="100%" role="img" aria-label="Equity curves, log scale, 10,000 USDT start, 2020 to 2026" style="display:block;max-width:100%;height:auto">
+<line x1="52" y1="358.0" x2="1026" y2="358.0" stroke="var(--hair)" stroke-width="1"/>
+<text x="44" y="361.5" text-anchor="end" font-size="10.5" fill="var(--faint)">10k</text>
+<line x1="52" y1="278.8" x2="1026" y2="278.8" stroke="var(--hair)" stroke-width="1"/>
+<text x="44" y="282.3" text-anchor="end" font-size="10.5" fill="var(--faint)">20k</text>
+<line x1="52" y1="174.3" x2="1026" y2="174.3" stroke="var(--hair)" stroke-width="1"/>
+<text x="44" y="177.8" text-anchor="end" font-size="10.5" fill="var(--faint)">50k</text>
+<line x1="52" y1="95.1" x2="1026" y2="95.1" stroke="var(--hair)" stroke-width="1"/>
+<text x="44" y="98.6" text-anchor="end" font-size="10.5" fill="var(--faint)">100k</text>
+<line x1="52" y1="16.0" x2="1026" y2="16.0" stroke="var(--hair)" stroke-width="1"/>
+<text x="44" y="19.5" text-anchor="end" font-size="10.5" fill="var(--faint)">200k</text>
+<line x1="52.0" y1="16" x2="52.0" y2="370" stroke="var(--hair)" stroke-width="1"/>
+<text x="56.0" y="385.0" font-size="10.5" fill="var(--faint)">2020</text>
+<line x1="197.5" y1="16" x2="197.5" y2="370" stroke="var(--hair)" stroke-width="1"/>
+<text x="201.5" y="385.0" font-size="10.5" fill="var(--faint)">2021</text>
+<line x1="343.1" y1="16" x2="343.1" y2="370" stroke="var(--hair)" stroke-width="1"/>
+<text x="347.1" y="385.0" font-size="10.5" fill="var(--faint)">2022</text>
+<line x1="488.6" y1="16" x2="488.6" y2="370" stroke="var(--hair)" stroke-width="1"/>
+<text x="492.6" y="385.0" font-size="10.5" fill="var(--faint)">2023</text>
+<line x1="637.0" y1="16" x2="637.0" y2="370" stroke="var(--hair)" stroke-width="1"/>
+<text x="641.0" y="385.0" font-size="10.5" fill="var(--faint)">2024</text>
+<line x1="782.5" y1="16" x2="782.5" y2="370" stroke="var(--hair)" stroke-width="1"/>
+<text x="786.5" y="385.0" font-size="10.5" fill="var(--faint)">2025</text>
+<line x1="928.0" y1="16" x2="928.0" y2="370" stroke="var(--hair)" stroke-width="1"/>
+<text x="932.0" y="385.0" font-size="10.5" fill="var(--faint)">2026</text>
+<rect x="709.7" y="16" width="316.3" height="354" fill="var(--ink)" opacity="0.035"/>
+<line x1="709.7" y1="16" x2="709.7" y2="370" stroke="var(--ash)" stroke-width="1" stroke-dasharray="3 3"/>
+<text x="715.7" y="29.0" font-size="10.5" fill="var(--ash)" letter-spacing="0.08em">OUT OF SAMPLE</text>
+<path d="M52.0 358.0 L54.8 358.4 L57.6 357.2 L60.4 356.5 L63.2 353.7 L66.0 351.4 L68.8 349.1 L71.6 348.1 L74.4 346.4 L77.2 347.3 L80.0 342.4 L82.8 344.1 L85.6 345.6 L88.4 345.7 L91.2 345.8 L94.0 346.1 L96.8 346.4 L99.6 343.3 L102.4 342.7 L105.2 342.6 L108.0 342.0 L110.8 343.9 L113.6 342.4 L116.4 342.3 L119.2 343.4 L122.0 344.6 L124.8 345.1 L127.6 346.3 L130.4 346.2 L133.2 343.7 L136.0 338.0 L138.8 337.1 L141.6 336.3 L144.4 335.3 L147.2 335.0 L150.0 334.2 L152.8 334.0 L155.6 334.7 L158.4 335.5 L161.2 337.0 L164.0 337.1 L166.8 337.2 L169.6 334.6 L172.4 334.6 L175.1 331.7 L177.9 331.6 L180.7 327.7 L183.5 326.0 L186.3 326.5 L189.1 327.1 L191.9 318.4 L194.7 318.2 L197.5 314.3 L200.3 307.5 L203.1 303.9 L205.9 301.0 L208.7 299.9 L211.5 295.1 L214.3 284.4 L217.1 276.6 L219.9 274.9 L222.7 275.1 L225.5 271.0 L228.3 269.3 L231.1 268.3 L233.9 264.1 L236.7 261.8 L239.5 255.4 L242.3 252.2 L245.1 250.3 L247.9 248.5 L250.7 243.1 L253.5 238.8 L256.3 238.8 L259.1 239.7 L261.9 238.4 L264.7 241.8 L267.5 241.7 L270.3 243.0 L273.1 244.6 L275.9 246.2 L278.7 241.0 L281.5 237.5 L284.3 239.5 L287.1 238.1 L289.9 238.9 L292.7 239.9 L295.5 238.9 L298.3 240.9 L301.1 240.9 L303.9 240.1 L306.7 239.1 L309.5 232.3 L312.3 228.3 L315.1 225.2 L317.9 224.8 L320.7 223.8 L323.5 223.4 L326.3 220.4 L329.1 218.7 L331.9 215.7 L334.7 216.0 L337.5 216.7 L340.3 215.9 L343.1 218.6 L345.9 216.7 L348.7 217.4 L351.5 218.3 L354.3 218.8 L357.1 217.1 L359.9 218.3 L362.7 220.0 L365.5 220.0 L368.3 221.1 L371.1 222.0 L373.9 222.6 L376.7 219.0 L379.5 219.5 L382.3 220.8 L385.1 219.5 L387.9 222.0 L390.7 222.4 L393.5 222.6 L396.3 219.8 L399.1 220.1 L401.9 220.1 L404.7 221.0 L407.5 220.3 L410.3 217.6 L413.1 217.6 L415.9 217.7 L418.6 217.9 L421.4 220.4 L424.2 219.0 L427.0 221.1 L429.8 221.7 L432.6 221.5 L435.4 222.4 L438.2 221.2 L441.0 221.9 L443.8 223.2 L446.6 225.3 L449.4 225.3 L452.2 226.2 L455.0 229.1 L457.8 230.4 L460.6 231.9 L463.4 232.3 L466.2 233.1 L469.0 232.5 L471.8 232.5 L474.6 233.3 L477.4 233.5 L480.2 233.9 L483.0 230.8 L485.8 231.7 L488.6 233.7 L491.4 233.7 L494.2 214.3 L497.0 211.4 L499.8 211.2 L502.6 212.2 L505.4 211.8 L508.2 207.5 L511.0 208.5 L513.8 207.9 L516.6 206.6 L519.4 203.6 L522.2 204.3 L525.0 204.3 L527.8 204.3 L530.6 201.1 L533.4 203.5 L536.2 208.2 L539.0 211.8 L541.8 212.3 L544.6 212.9 L547.4 215.2 L550.2 217.6 L553.0 218.0 L555.8 219.4 L558.6 207.9 L561.4 208.3 L564.2 209.3 L567.0 210.5 L569.8 212.8 L572.6 210.9 L575.4 212.8 L578.2 215.7 L581.0 206.2 L583.8 206.6 L586.6 210.5 L589.4 210.4 L592.2 212.2 L595.0 213.0 L597.8 208.0 L600.6 207.1 L603.4 209.9 L606.2 198.0 L609.0 190.6 L611.8 190.0 L614.6 188.5 L617.4 192.0 L620.2 192.7 L623.0 187.4 L625.8 178.4 L628.6 181.6 L631.4 182.9 L634.2 181.5 L637.0 183.6 L639.8 183.7 L642.6 183.2 L645.4 183.1 L648.2 183.5 L651.0 175.0 L653.8 167.0 L656.6 168.0 L659.4 155.6 L662.1 151.0 L664.9 150.2 L667.7 149.5 L670.5 147.5 L673.3 147.9 L676.1 150.6 L678.9 150.6 L681.7 151.9 L684.5 152.7 L687.3 154.1 L690.1 155.8 L692.9 153.6 L695.7 154.3 L698.5 156.2 L701.3 159.2 L704.1 158.2 L706.9 155.5 L709.7 154.2 L712.5 153.6 L715.3 145.3 L718.1 146.0 L720.9 148.0 L723.7 148.7 L726.5 149.5 L729.3 147.3 L732.1 150.4 L734.9 148.7 L737.7 149.8 L740.5 144.4 L743.3 141.5 L746.1 148.5 L748.9 152.5 L751.7 145.1 L754.5 147.0 L757.3 146.5 L760.1 137.9 L762.9 132.9 L765.7 129.1 L768.5 133.0 L771.3 136.8 L774.1 134.3 L776.9 136.2 L779.7 135.3 L782.5 135.9 L785.3 139.7 L788.1 141.1 L790.9 140.5 L793.7 142.1 L796.5 141.8 L799.3 141.4 L802.1 143.2 L804.9 139.3 L807.7 139.8 L810.5 140.4 L813.3 141.4 L816.1 142.7 L818.9 145.4 L821.7 148.5 L824.5 147.6 L827.3 139.8 L830.1 139.5 L832.9 131.7 L835.7 130.7 L838.5 128.9 L841.3 132.2 L844.1 132.8 L846.9 135.8 L849.7 134.9 L852.5 136.3 L855.3 135.5 L858.1 126.0 L860.9 127.6 L863.7 127.8 L866.5 125.9 L869.3 127.6 L872.1 131.4 L874.9 130.5 L877.7 129.9 L880.5 131.6 L883.3 132.4 L886.1 132.3 L888.9 130.9 L891.7 122.5 L894.5 129.1 L897.3 127.7 L900.1 129.5 L902.9 132.3 L905.6 130.9 L908.4 129.1 L911.2 126.4 L914.0 127.9 L916.8 131.1 L919.6 132.7 L922.4 133.8 L925.2 134.7 L928.0 132.5 L930.8 132.7 L933.6 132.2 L936.4 134.2 L939.2 131.1 L942.0 128.1 L944.8 128.1 L947.6 128.1 L950.4 129.9 L953.2 132.5 L956.0 129.5 L958.8 133.7 L961.6 132.3 L964.4 133.4 L967.2 131.1 L970.0 127.6 L972.8 123.2 L975.6 123.2 L978.4 120.5 L981.2 123.8 L984.0 125.2 L986.8 125.9 L989.6 118.8 L992.4 118.9 L995.2 118.5 L998.0 116.0 L1000.8 117.2 L1003.6 117.9 L1006.4 118.0 L1009.2 121.8 L1012.0 123.9 L1014.8 122.7 L1017.6 126.0 L1020.4 104.8 L1023.2 104.8 L1026.0 104.6" fill="none" stroke="var(--s1)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M197.5 358.0 L200.3 358.0 L203.1 358.0 L205.9 358.0 L208.7 358.0 L211.5 358.0 L214.3 358.0 L217.1 358.0 L219.9 358.0 L222.7 358.0 L225.5 358.0 L228.3 358.0 L231.1 356.8 L233.9 354.3 L236.7 355.1 L239.5 350.8 L242.3 347.1 L245.1 344.1 L247.9 343.5 L250.7 335.1 L253.5 329.5 L256.3 328.8 L259.1 328.7 L261.9 326.1 L264.7 328.3 L267.5 327.7 L270.3 327.8 L273.1 328.7 L275.9 328.8 L278.7 323.9 L281.5 321.0 L284.3 322.7 L287.1 321.4 L289.9 322.6 L292.7 324.5 L295.5 324.3 L298.3 328.4 L301.1 327.5 L303.9 324.3 L306.7 322.5 L309.5 317.1 L312.3 311.7 L315.1 307.7 L317.9 308.2 L320.7 309.8 L323.5 311.9 L326.3 306.2 L329.1 304.0 L331.9 297.8 L334.7 298.4 L337.5 301.1 L340.3 299.6 L343.1 302.0 L345.9 302.0 L348.7 302.0 L351.5 302.0 L354.3 302.0 L357.1 302.0 L359.9 302.0 L362.7 302.0 L365.5 302.0 L368.3 302.0 L371.1 302.0 L373.9 302.0 L376.7 302.0 L379.5 302.0 L382.3 301.9 L385.1 298.8 L387.9 301.1 L390.7 300.0 L393.5 300.9 L396.3 296.0 L399.1 296.0 L401.9 296.0 L404.7 296.0 L407.5 296.0 L410.3 296.0 L413.1 296.0 L415.9 296.0 L418.6 296.0 L421.4 296.0 L424.2 296.0 L427.0 296.0 L429.8 296.0 L432.6 296.0 L435.4 296.0 L438.2 296.0 L441.0 296.3 L443.8 299.0 L446.6 298.2 L449.4 297.1 L452.2 297.9 L455.0 300.2 L457.8 303.1 L460.6 304.8 L463.4 306.1 L466.2 306.1 L469.0 306.1 L471.8 306.1 L474.6 306.1 L477.4 306.1 L480.2 306.1 L483.0 306.1 L485.8 306.1 L488.6 306.1 L491.4 306.1 L494.2 306.1 L497.0 306.1 L499.8 306.1 L502.6 306.1 L505.4 306.1 L508.2 306.1 L511.0 306.1 L513.8 306.3 L516.6 305.3 L519.4 300.9 L522.2 301.2 L525.0 301.0 L527.8 300.6 L530.6 296.5 L533.4 296.3 L536.2 300.4 L539.0 307.0 L541.8 305.9 L544.6 306.6 L547.4 309.7 L550.2 309.8 L553.0 306.9 L555.8 309.0 L558.6 301.3 L561.4 301.3 L564.2 302.4 L567.0 302.7 L569.8 305.7 L572.6 303.2 L575.4 306.0 L578.2 311.1 L581.0 296.9 L583.8 296.7 L586.6 303.0 L589.4 302.7 L592.2 305.9 L595.0 306.2 L597.8 300.8 L600.6 299.8 L603.4 302.4 L606.2 292.3 L609.0 287.2 L611.8 286.5 L614.6 283.5 L617.4 289.8 L620.2 291.0 L623.0 287.1 L625.8 280.2 L628.6 282.7 L631.4 286.8 L634.2 284.3 L637.0 289.4 L639.8 289.7 L642.6 289.6 L645.4 290.1 L648.2 292.4 L651.0 286.1 L653.8 280.4 L656.6 281.3 L659.4 270.9 L662.1 268.6 L664.9 269.3 L667.7 268.7 L670.5 268.7 L673.3 270.7 L676.1 271.2 L678.9 270.4 L681.7 269.5 L684.5 271.0 L687.3 270.5 L690.1 273.6 L692.9 273.4 L695.7 276.7 L698.5 278.2 L701.3 284.3 L704.1 282.2 L706.9 277.7 L709.7 271.9 L712.5 272.3 L715.3 265.9 L718.1 266.1 L720.9 264.7 L723.7 265.5 L726.5 265.2 L729.3 263.6 L732.1 266.2 L734.9 263.9 L737.7 266.9 L740.5 262.9 L743.3 260.9 L746.1 266.3 L748.9 269.7 L751.7 263.1 L754.5 265.0 L757.3 264.2 L760.1 254.3 L762.9 248.8 L765.7 244.8 L768.5 247.7 L771.3 254.5 L774.1 252.9 L776.9 251.9 L779.7 250.9 L782.5 253.9 L785.3 256.5 L788.1 258.8 L790.9 256.8 L793.7 258.8 L796.5 258.1 L799.3 257.3 L802.1 259.0 L804.9 254.8 L807.7 255.9 L810.5 256.4 L813.3 258.9 L816.1 258.4 L818.9 263.3 L821.7 265.8 L824.5 265.4 L827.3 256.4 L830.1 255.9 L832.9 249.2 L835.7 247.8 L838.5 245.1 L841.3 245.8 L844.1 247.0 L846.9 251.7 L849.7 249.7 L852.5 253.5 L855.3 253.9 L858.1 245.2 L860.9 246.5 L863.7 248.1 L866.5 245.0 L869.3 248.4 L872.1 251.4 L874.9 248.9 L877.7 245.7 L880.5 248.0 L883.3 250.9 L886.1 250.9 L888.9 250.3 L891.7 249.5 L894.5 257.2 L897.3 254.9 L900.1 257.5 L902.9 257.5 L905.6 254.2 L908.4 250.5 L911.2 246.9 L914.0 249.1 L916.8 252.1 L919.6 255.1 L922.4 255.8 L925.2 256.2 L928.0 256.1 L930.8 256.8 L933.6 255.7 L936.4 257.4 L939.2 251.3 L942.0 248.0 L944.8 248.0 L947.6 248.1 L950.4 246.5 L953.2 250.1 L956.0 246.7 L958.8 250.2 L961.6 247.9 L964.4 249.0 L967.2 247.2 L970.0 243.5 L972.8 239.5 L975.6 239.6 L978.4 236.5 L981.2 240.3 L984.0 243.2 L986.8 243.8 L989.6 234.2 L992.4 234.4 L995.2 232.0 L998.0 227.4 L1000.8 229.5 L1003.6 229.5 L1006.4 229.9 L1009.2 230.6 L1012.0 234.3 L1014.8 233.0 L1017.6 236.1 L1020.4 224.9 L1023.2 225.0 L1026.0 224.8" fill="none" stroke="var(--s2)" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M52.0 358.0 L54.8 358.9 L57.6 357.2 L60.4 357.2 L63.2 352.3 L66.0 351.4 L68.8 358.0 L71.6 358.0 L74.4 355.4 L77.2 361.4 L80.0 342.4 L82.8 348.2 L85.6 351.2 L88.4 351.9 L91.2 351.0 L94.0 351.0 L96.8 350.5 L99.6 340.6 L102.4 342.1 L105.2 342.1 L108.0 340.7 L110.8 345.9 L113.6 342.8 L116.4 342.8 L119.2 345.8 L122.0 350.3 L124.8 352.6 L127.6 358.0 L130.4 358.0 L133.2 348.5 L136.0 336.4 L138.8 336.4 L141.6 336.4 L144.4 337.8 L147.2 338.0 L150.0 336.8 L152.8 337.0 L155.6 338.6 L158.4 341.5 L161.2 346.5 L164.0 344.5 L166.8 345.4 L169.6 336.5 L172.4 339.5 L175.1 338.8 L177.9 338.8 L180.7 338.1 L183.5 342.2 L186.3 345.2 L189.1 348.1 L191.9 333.8 L194.7 336.0 L197.5 333.1 L200.3 338.3 L203.1 338.3 L205.9 338.3 L208.7 341.1 L211.5 341.7 L214.3 339.2 L217.1 337.4 L219.9 339.7 L222.7 342.9 L225.5 339.4 L228.3 341.0 L231.1 343.9 L233.9 344.6 L236.7 344.9 L239.5 345.5 L242.3 341.1 L245.1 341.8 L247.9 343.0 L250.7 341.8 L253.5 336.1 L256.3 336.4 L259.1 340.6 L261.9 341.5 L264.7 344.5 L267.5 344.3 L270.3 347.3 L273.1 347.3 L275.9 347.1 L278.7 342.7 L281.5 340.0 L284.3 345.2 L287.1 341.9 L289.9 343.7 L292.7 346.7 L295.5 346.7 L298.3 348.9 L301.1 351.1 L303.9 353.4 L306.7 353.1 L309.5 347.0 L312.3 347.6 L315.1 347.7 L317.9 349.6 L320.7 349.6 L323.5 350.2 L326.3 349.1 L329.1 347.4 L331.9 348.5 L334.7 348.8 L337.5 346.9 L340.3 346.6 L343.1 347.3 L345.9 340.6 L348.7 342.2 L351.5 344.4 L354.3 344.9 L357.1 344.1 L359.9 346.6 L362.7 347.3 L365.5 346.2 L368.3 346.3 L371.1 349.2 L373.9 350.2 L376.7 342.8 L379.5 343.9 L382.3 341.1 L385.1 340.1 L387.9 340.1 L390.7 343.1 L393.5 340.9 L396.3 337.3 L399.1 337.3 L401.9 337.3 L404.7 337.9 L407.5 336.2 L410.3 325.3 L413.1 325.3 L415.9 325.5 L418.6 325.2 L421.4 328.1 L424.2 328.9 L427.0 333.2 L429.8 334.8 L432.6 336.3 L435.4 338.1 L438.2 333.2 L441.0 335.5 L443.8 336.9 L446.6 337.4 L449.4 338.1 L452.2 340.3 L455.0 343.4 L457.8 341.1 L460.6 344.1 L463.4 343.1 L466.2 345.5 L469.0 342.0 L471.8 342.0 L474.6 345.0 L477.4 344.8 L480.2 344.9 L483.0 341.1 L485.8 344.1 L488.6 344.4 L491.4 344.1 L494.2 307.8 L497.0 311.2 L499.8 311.1 L502.6 314.8 L505.4 314.6 L508.2 316.5 L511.0 317.8 L513.8 314.7 L516.6 310.2 L519.4 307.0 L522.2 308.6 L525.0 308.6 L527.8 308.6 L530.6 304.5 L533.4 306.4 L536.2 311.3 L539.0 311.3 L541.8 310.0 L544.6 311.0 L547.4 313.9 L550.2 317.0 L553.0 317.0 L555.8 317.0 L558.6 304.0 L561.4 306.2 L564.2 306.2 L567.0 309.3 L569.8 309.8 L572.6 306.5 L575.4 306.8 L578.2 310.0 L581.0 292.7 L583.8 293.2 L586.6 296.3 L589.4 296.3 L592.2 299.3 L595.0 302.4 L597.8 302.2 L600.6 303.6 L603.4 304.0 L606.2 298.2 L609.0 289.7 L611.8 290.1 L614.6 290.1 L617.4 294.0 L620.2 294.0 L623.0 290.3 L625.8 281.0 L628.6 286.4 L631.4 286.4 L634.2 289.3 L637.0 292.4 L639.8 292.4 L642.6 291.7 L645.4 290.6 L648.2 290.5 L651.0 282.2 L653.8 273.8 L656.6 276.3 L659.4 268.4 L662.1 267.9 L664.9 269.9 L667.7 268.9 L670.5 268.8 L673.3 271.4 L676.1 276.9 L678.9 278.3 L681.7 281.7 L684.5 279.4 L687.3 281.8 L690.1 282.0 L692.9 279.2 L695.7 279.2 L698.5 282.3 L701.3 282.7 L704.1 282.7 L706.9 280.0 L709.7 279.2 L712.5 279.2 L715.3 269.9 L718.1 273.2 L720.9 269.8 L723.7 266.7 L726.5 266.7 L729.3 266.7 L732.1 265.0 L734.9 262.3 L737.7 263.0 L740.5 257.8 L743.3 255.6 L746.1 257.7 L748.9 260.7 L751.7 257.2 L754.5 261.8 L757.3 262.1 L760.1 260.4 L762.9 253.5 L765.7 248.0 L768.5 253.1 L771.3 253.1 L774.1 253.1 L776.9 252.9 L779.7 252.0 L782.5 252.1 L785.3 254.2 L788.1 253.3 L790.9 256.3 L793.7 255.7 L796.5 256.1 L799.3 256.1 L802.1 256.1 L804.9 246.0 L807.7 244.5 L810.5 246.2 L813.3 246.2 L816.1 247.6 L818.9 250.0 L821.7 257.2 L824.5 256.2 L827.3 250.2 L830.1 249.6 L832.9 249.7 L835.7 251.9 L838.5 252.1 L841.3 255.6 L844.1 254.2 L846.9 257.3 L849.7 254.8 L852.5 255.5 L855.3 254.8 L858.1 246.6 L860.9 246.5 L863.7 246.5 L866.5 245.4 L869.3 246.3 L872.1 249.7 L874.9 249.7 L877.7 252.7 L880.5 255.7 L883.3 256.2 L886.1 256.3 L888.9 251.8 L891.7 240.7 L894.5 241.8 L897.3 239.2 L900.1 241.7 L902.9 245.8 L905.6 244.5 L908.4 243.7 L911.2 239.6 L914.0 240.4 L916.8 245.6 L919.6 245.6 L922.4 248.6 L925.2 248.6 L928.0 247.0 L930.8 246.4 L933.6 248.5 L936.4 249.7 L939.2 247.7 L942.0 240.4 L944.8 240.4 L947.6 240.4 L950.4 243.3 L953.2 243.3 L956.0 246.3 L958.8 248.4 L961.6 252.4 L964.4 255.3 L967.2 253.1 L970.0 253.6 L972.8 253.6 L975.6 253.6 L978.4 255.0 L981.2 259.7 L984.0 260.2 L986.8 261.0 L989.6 248.5 L992.4 248.5 L995.2 251.5 L998.0 250.4 L1000.8 250.3 L1003.6 252.9 L1006.4 252.9 L1009.2 259.0 L1012.0 259.0 L1014.8 259.8 L1017.6 260.2 L1020.4 229.6 L1023.2 229.9 L1026.0 229.9" fill="none" stroke="var(--s3)" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M52.0 358.0 L54.8 358.0 L57.6 358.0 L60.4 358.0 L63.2 358.0 L66.0 358.0 L68.8 358.0 L71.6 358.0 L74.4 358.0 L77.2 358.0 L80.0 358.0 L82.8 358.0 L85.6 358.0 L88.4 358.0 L91.2 358.0 L94.0 358.0 L96.8 358.0 L99.6 358.0 L102.4 358.0 L105.2 358.0 L108.0 358.0 L110.8 358.0 L113.6 358.0 L116.4 358.0 L119.2 358.0 L122.0 358.0 L124.8 358.0 L127.6 358.0 L130.4 358.0 L133.2 358.0 L136.0 358.0 L138.8 358.0 L141.6 358.0 L144.4 358.0 L147.2 358.0 L150.0 358.0 L152.8 358.0 L155.6 358.0 L158.4 358.0 L161.2 358.0 L164.0 358.0 L166.8 358.0 L169.6 358.0 L172.4 356.3 L175.1 352.4 L177.9 352.4 L180.7 348.7 L183.5 347.3 L186.3 347.3 L189.1 347.5 L191.9 341.9 L194.7 341.9 L197.5 341.9 L200.3 341.9 L203.1 341.9 L205.9 341.9 L208.7 341.9 L211.5 340.1 L214.3 336.7 L217.1 336.7 L219.9 336.7 L222.7 336.7 L225.5 336.7 L228.3 336.7 L231.1 336.7 L233.9 336.7 L236.7 336.7 L239.5 336.7 L242.3 336.7 L245.1 336.0 L247.9 336.3 L250.7 336.3 L253.5 336.3 L256.3 336.3 L259.1 336.3 L261.9 335.4 L264.7 337.3 L267.5 337.3 L270.3 337.1 L273.1 338.7 L275.9 341.1 L278.7 338.2 L281.5 335.5 L284.3 335.5 L287.1 335.5 L289.9 335.5 L292.7 335.5 L295.5 335.5 L298.3 335.5 L301.1 335.5 L303.9 335.5 L306.7 335.2 L309.5 331.4 L312.3 330.1 L315.1 330.1 L317.9 330.1 L320.7 330.1 L323.5 330.1 L326.3 330.1 L329.1 330.1 L331.9 330.1 L334.7 330.1 L337.5 330.1 L340.3 330.3 L343.1 332.5 L345.9 332.5 L348.7 332.5 L351.5 332.5 L354.3 332.5 L357.1 330.5 L359.9 330.7 L362.7 332.6 L365.5 332.6 L368.3 334.0 L371.1 333.7 L373.9 333.7 L376.7 331.1 L379.5 331.8 L382.3 335.0 L385.1 335.0 L387.9 337.4 L390.7 337.4 L393.5 337.4 L396.3 337.4 L399.1 337.4 L401.9 337.4 L404.7 338.3 L407.5 338.0 L410.3 338.0 L413.1 338.0 L415.9 338.0 L418.6 338.1 L421.4 340.4 L424.2 338.2 L427.0 339.8 L429.8 340.0 L432.6 339.2 L435.4 339.2 L438.2 339.2 L441.0 339.2 L443.8 338.5 L446.6 341.6 L449.4 341.6 L452.2 341.6 L455.0 343.2 L457.8 344.0 L460.6 344.0 L463.4 344.0 L466.2 344.0 L469.0 344.0 L471.8 344.0 L474.6 344.0 L477.4 344.3 L480.2 344.8 L483.0 341.3 L485.8 341.3 L488.6 343.8 L491.4 343.8 L494.2 331.6 L497.0 327.5 L499.8 327.5 L502.6 327.5 L505.4 327.5 L508.2 321.1 L511.0 322.1 L513.8 322.3 L516.6 322.3 L519.4 322.3 L522.2 322.3 L525.0 322.3 L527.8 322.3 L530.6 322.0 L533.4 324.7 L536.2 326.9 L539.0 328.2 L541.8 329.7 L544.6 329.7 L547.4 330.0 L550.2 332.6 L553.0 334.7 L555.8 335.3 L558.6 328.5 L561.4 328.4 L564.2 329.4 L567.0 329.6 L569.8 330.8 L572.6 330.8 L575.4 332.0 L578.2 332.0 L581.0 334.0 L583.8 334.0 L586.6 334.0 L589.4 334.0 L592.2 333.4 L595.0 333.4 L597.8 329.7 L600.6 328.2 L603.4 330.3 L606.2 322.0 L609.0 318.1 L611.8 318.0 L614.6 318.0 L617.4 318.0 L620.2 318.7 L623.0 314.9 L625.8 310.6 L628.6 311.5 L631.4 311.5 L634.2 311.5 L637.0 311.5 L639.8 311.5 L642.6 311.5 L645.4 311.7 L648.2 311.2 L651.0 306.1 L653.8 302.2 L656.6 302.5 L659.4 298.4 L662.1 297.1 L664.9 297.6 L667.7 298.5 L670.5 297.5 L673.3 297.5 L676.1 300.0 L678.9 300.0 L681.7 301.4 L684.5 302.5 L687.3 303.9 L690.1 304.6 L692.9 302.7 L695.7 302.4 L698.5 303.6 L701.3 304.9 L704.1 304.9 L706.9 304.9 L709.7 307.3 L712.5 306.4 L715.3 301.9 L718.1 301.9 L720.9 306.6 L723.7 308.1 L726.5 308.9 L729.3 306.7 L732.1 310.4 L734.9 310.4 L737.7 309.8 L740.5 306.5 L743.3 304.7 L746.1 309.7 L748.9 311.9 L751.7 306.6 L754.5 306.6 L757.3 306.7 L760.1 301.3 L762.9 301.3 L765.7 301.5 L768.5 303.5 L771.3 306.3 L774.1 304.5 L776.9 308.7 L779.7 308.7 L782.5 308.1 L785.3 311.2 L788.1 312.5 L790.9 312.1 L793.7 313.7 L796.5 313.7 L799.3 313.7 L802.1 315.1 L804.9 316.1 L807.7 316.1 L810.5 316.1 L813.3 316.0 L816.1 317.5 L818.9 317.5 L821.7 317.8 L824.5 317.2 L827.3 313.5 L830.1 313.9 L832.9 306.4 L835.7 305.3 L838.5 304.7 L841.3 307.2 L844.1 307.4 L846.9 307.5 L849.7 308.2 L852.5 307.8 L855.3 307.0 L858.1 302.0 L860.9 303.3 L863.7 302.7 L866.5 302.7 L869.3 302.7 L872.1 305.2 L874.9 305.2 L877.7 305.2 L880.5 305.2 L883.3 304.3 L886.1 304.0 L888.9 304.0 L891.7 297.0 L894.5 301.1 L897.3 301.1 L900.1 301.1 L902.9 303.5 L905.6 303.5 L908.4 303.5 L911.2 303.5 L914.0 303.5 L916.8 304.0 L919.6 304.2 L922.4 304.2 L925.2 305.1 L928.0 302.6 L930.8 302.3 L933.6 301.3 L936.4 302.4 L939.2 302.4 L942.0 302.4 L944.8 302.4 L947.6 302.4 L950.4 304.7 L953.2 306.2 L956.0 303.0 L958.8 306.0 L961.6 304.1 L964.4 304.1 L967.2 302.8 L970.0 299.7 L972.8 296.5 L975.6 296.5 L978.4 294.1 L981.2 294.7 L984.0 294.7 L986.8 294.7 L989.6 294.7 L992.4 294.7 L995.2 294.7 L998.0 294.7 L1000.8 294.7 L1003.6 294.7 L1006.4 294.7 L1009.2 297.1 L1012.0 297.9 L1014.8 296.7 L1017.6 299.1 L1020.4 287.8 L1023.2 287.9 L1026.0 287.8" fill="none" stroke="var(--s4)" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M52.0 355.1 L54.8 343.0 L57.6 336.0 L60.4 337.1 L63.2 328.0 L66.0 318.4 L68.8 321.1 L71.6 320.8 L74.4 338.2 L77.2 345.1 L80.0 370.0 L82.8 370.0 L85.6 370.0 L88.4 364.6 L91.2 362.4 L94.0 358.9 L96.8 350.0 L99.6 333.5 L102.4 335.7 L105.2 323.8 L108.0 335.7 L110.8 326.6 L113.6 323.0 L116.4 327.9 L119.2 328.5 L122.0 330.7 L124.8 331.3 L127.6 328.4 L130.4 329.5 L133.2 320.9 L136.0 308.5 L138.8 302.4 L141.6 300.1 L144.4 302.7 L147.2 302.1 L150.0 317.2 L152.8 316.4 L155.6 310.1 L158.4 311.6 L161.2 312.7 L164.0 305.5 L166.8 304.1 L169.6 289.9 L172.4 283.7 L175.1 270.3 L177.9 266.8 L180.7 250.4 L183.5 251.8 L186.3 244.7 L189.1 245.8 L191.9 222.8 L194.7 209.8 L197.5 183.8 L200.3 167.3 L203.1 174.4 L205.9 186.4 L208.7 183.5 L211.5 165.3 L214.3 139.7 L217.1 120.6 L219.9 148.1 L222.7 134.2 L225.5 117.6 L228.3 120.7 L231.1 123.9 L233.9 119.0 L236.7 115.6 L239.5 123.1 L242.3 138.5 L245.1 122.3 L247.9 119.0 L250.7 144.8 L253.5 178.2 L256.3 175.0 L259.1 174.5 L261.9 164.7 L264.7 175.2 L267.5 178.1 L270.3 176.2 L273.1 179.5 L275.9 188.1 L278.7 175.9 L281.5 162.3 L284.3 151.5 L287.1 143.5 L289.9 138.1 L292.7 139.2 L295.5 132.4 L298.3 145.8 L301.1 142.9 L303.9 153.2 L306.7 140.6 L309.5 126.2 L312.3 112.7 L315.1 114.0 L317.9 113.1 L320.7 109.5 L323.5 105.5 L326.3 118.2 L329.1 120.9 L331.9 137.8 L334.7 136.3 L337.5 144.2 L340.3 134.6 L343.1 142.8 L345.9 156.7 L348.7 153.4 L351.5 173.1 L354.3 168.1 L357.1 155.3 L359.9 156.1 L362.7 166.6 L365.5 168.6 L368.3 166.5 L371.1 168.4 L373.9 158.3 L376.7 143.9 L379.5 144.9 L382.3 155.9 L385.1 162.8 L387.9 163.4 L390.7 166.3 L393.5 180.3 L396.3 189.7 L399.1 193.6 L401.9 196.7 L404.7 195.0 L407.5 208.5 L410.3 237.8 L413.1 235.2 L415.9 245.0 L418.6 236.2 L421.4 236.5 L424.2 227.1 L427.0 223.6 L429.8 224.2 L432.6 218.7 L435.4 232.6 L438.2 243.5 L441.0 241.0 L443.8 231.0 L446.6 244.4 L449.4 248.0 L452.2 246.5 L455.0 244.2 L457.8 245.3 L460.6 243.5 L463.4 237.5 L466.2 235.9 L469.0 264.1 L471.8 264.5 L474.6 263.4 L477.4 258.8 L480.2 259.0 L483.0 261.3 L485.8 260.7 L488.6 262.1 L491.4 258.7 L494.2 236.1 L497.0 226.5 L499.8 221.4 L502.6 225.4 L505.4 231.2 L508.2 218.9 L511.0 222.3 L513.8 227.9 L516.6 230.1 L519.4 202.7 L522.2 202.7 L525.0 201.9 L527.8 201.3 L530.6 193.5 L533.4 204.3 L536.2 197.7 L539.0 200.8 L541.8 207.1 L544.6 207.8 L547.4 202.3 L550.2 206.2 L553.0 211.4 L555.8 209.6 L558.6 193.0 L561.4 192.4 L564.2 194.1 L567.0 193.8 L569.8 194.4 L572.6 197.5 L575.4 198.2 L578.2 197.4 L581.0 210.2 L583.8 210.6 L586.6 211.2 L589.4 211.7 L592.2 208.7 L595.0 209.9 L597.8 202.6 L600.6 202.9 L603.4 206.1 L606.2 194.7 L609.0 178.7 L611.8 177.1 L614.6 170.6 L617.4 169.7 L620.2 169.4 L623.0 161.9 L625.8 151.5 L628.6 158.0 L631.4 153.6 L634.2 155.5 L637.0 151.2 L639.8 157.0 L642.6 157.4 L645.4 156.2 L648.2 154.7 L651.0 140.3 L653.8 131.6 L656.6 132.5 L659.4 109.8 L662.1 99.7 L664.9 100.6 L667.7 102.6 L670.5 95.9 L673.3 99.0 L676.1 105.3 L678.9 106.5 L681.7 109.8 L684.5 108.2 L687.3 112.8 L690.1 104.2 L692.9 100.4 L695.7 101.7 L698.5 98.6 L701.3 103.5 L704.1 109.6 L706.9 110.4 L709.7 123.7 L712.5 114.1 L715.3 101.0 L718.1 100.9 L720.9 119.1 L723.7 118.0 L726.5 118.6 L729.3 107.8 L732.1 120.8 L734.9 125.8 L737.7 117.2 L740.5 109.0 L743.3 105.4 L746.1 110.3 L748.9 110.2 L751.7 99.6 L754.5 101.2 L757.3 100.0 L760.1 82.2 L762.9 69.5 L765.7 59.7 L768.5 60.5 L771.3 56.0 L774.1 52.3 L776.9 62.9 L779.7 64.6 L782.5 59.1 L785.3 63.7 L788.1 55.8 L790.9 54.3 L793.7 59.9 L796.5 61.4 L799.3 61.8 L802.1 61.6 L804.9 64.0 L807.7 81.7 L810.5 79.1 L813.3 74.4 L816.1 79.4 L818.9 85.0 L821.7 77.5 L824.5 75.6 L827.3 64.6 L830.1 64.0 L832.9 52.7 L835.7 50.1 L838.5 47.4 L841.3 51.0 L844.1 50.9 L846.9 51.0 L849.7 56.2 L852.5 48.1 L855.3 47.2 L858.1 37.3 L860.9 39.1 L863.7 37.0 L866.5 42.1 L869.3 37.1 L872.1 38.9 L874.9 42.8 L877.7 48.2 L880.5 45.2 L883.3 41.0 L886.1 41.1 L888.9 44.2 L891.7 33.2 L894.5 41.3 L897.3 47.8 L900.1 41.7 L902.9 45.8 L905.6 52.0 L908.4 64.0 L911.2 73.4 L914.0 68.8 L916.8 68.8 L919.6 71.6 L922.4 71.0 L925.2 71.9 L928.0 67.4 L930.8 68.0 L933.6 64.7 L936.4 73.6 L939.2 87.1 L942.0 97.4 L944.8 99.9 L947.6 101.9 L950.4 105.1 L953.2 104.7 L956.0 93.5 L958.8 101.5 L961.6 104.7 L964.4 99.6 L967.2 96.8 L970.0 91.9 L972.8 84.7 L975.6 84.8 L978.4 79.6 L981.2 86.4 L984.0 87.0 L986.8 92.1 L989.6 109.4 L992.4 105.1 L995.2 109.4 L998.0 116.4 L1000.8 108.8 L1003.6 108.6 L1006.4 106.9 L1009.2 105.7 L1012.0 109.0 L1014.8 106.6 L1017.6 110.2 L1020.4 86.0 L1023.2 86.1 L1026.0 84.8" fill="none" stroke="var(--btc)" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="4 3"/>
+</svg>
+      <div class="legend">
+<div class="lg"><span class="sw" style="background:var(--s1)"></span>Portfolio · risk parity · size 6</div>
+<div class="lg"><span class="sw" style="background:var(--s2)"></span>S7 Smart-money vs retail · 2.5% risk</div>
+<div class="lg"><span class="sw" style="background:var(--s3)"></span>S4 Adaptive trend · 2.5% risk</div>
+<div class="lg"><span class="sw" style="background:var(--s4)"></span>S3 Order-flow swing · 2.0% risk</div>
+<div class="lg"><span class="sw" style="background:var(--btc)"></span>BTC spot buy & hold</div>
+      </div>
+    </div>
+    <p class="note"><strong>Read this honestly:</strong> BTC buy &amp; hold ends higher than
+    every strategy here. Over this particular window bitcoin rose about eleven-fold, and no
+    risk-controlled system beat that in absolute terms. What the portfolio buys is the shape
+    of the line, not its endpoint — a 16.2% worst drawdown against buy &amp; hold's 77.2%, and
+    a Sharpe ratio of 1.93 against 0.90. That is a real and useful difference, and it is not
+    the same thing as making more money.</p>
+  </div>
+</section>
+<section>
+  <div class="stack">
+    <div class="stack-sm">
+      <span class="eyebrow">3 — Ranking</span>
+      <h2>The finalists, ranked by robustness</h2>
+      <p class="prose" style="color:var(--ash)">Ranked on how much of the edge survives
+      scrutiny — out-of-sample agreement first, then cost tolerance, then bootstrap drawdown
+      risk, then raw return. <strong>None of these qualify;</strong> this is a ranking of
+      near-misses.</p>
+    </div>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Strategy</th><th>Period</th><th>CAGR</th><th>Max DD</th><th>PF</th>
+            <th>Trades</th><th>Win %</th><th>Sharpe</th><th>Calmar</th>
+            <th>OOS CAGR</th><th>PF @2× cost</th><th>P(DD&gt;20%)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="best">
+            <td><span class="rk">1</span> <span class="name">Multi-strategy portfolio</span><br>
+              <span class="sub">risk parity · size 6</span></td>
+            <td class="n">2020-01→2026-08</td>
+            <td class="n pos">39.5%</td><td class="n">−16.2%</td><td class="n">1.29</td>
+            <td class="n">622</td><td class="n">—</td><td class="n">1.93</td><td class="n">2.45</td>
+            <td class="n pos">22.8%</td><td class="n">—</td><td class="n">29%</td>
+          </tr>
+          <tr class="rank">
+            <td><span class="rk">2</span> <span class="name">S7 · Smart-money vs retail</span><br>
+              <span class="sub">1.0% risk / trade</span></td>
+            <td class="n">2021-01→2026-08</td>
+            <td class="n pos">9.1%</td><td class="n">−7.8%</td><td class="n">1.54</td>
+            <td class="n">229</td><td class="n">46.3%</td><td class="n">1.13</td><td class="n">1.17</td>
+            <td class="n pos">9.7%</td><td class="n">1.48</td><td class="n pos">2%</td>
+          </tr>
+          <tr class="rank">
+            <td><span class="rk">3</span> <span class="name">S7 · Smart-money vs retail</span><br>
+              <span class="sub">2.5% risk / trade</span></td>
+            <td class="n">2021-01→2026-08</td>
+            <td class="n pos">22.9%</td><td class="n">−18.7%</td><td class="n">1.49</td>
+            <td class="n">229</td><td class="n">46.3%</td><td class="n">1.14</td><td class="n">1.23</td>
+            <td class="n pos">24.1%</td><td class="n">1.43</td><td class="n neg">76%</td>
+          </tr>
+          <tr class="rank">
+            <td><span class="rk">4</span> <span class="name">S4 · Adaptive trend</span><br>
+              <span class="sub">1.0% risk / trade</span></td>
+            <td class="n">2020-01→2026-08</td>
+            <td class="n pos">8.0%</td><td class="n">−9.5%</td><td class="n">1.53</td>
+            <td class="n">251</td><td class="n">42.6%</td><td class="n">0.77</td><td class="n">0.85</td>
+            <td class="n pos">9.6%</td><td class="n">1.45</td><td class="n">24%</td>
+          </tr>
+          <tr class="rank">
+            <td><span class="rk">5</span> <span class="name">S3 · Order-flow swing</span><br>
+              <span class="sub">2.0% risk / trade</span></td>
+            <td class="n">2020-01→2026-08</td>
+            <td class="n pos">9.7%</td><td class="n">−18.1%</td><td class="n">1.71</td>
+            <td class="n">113</td><td class="n">48.7%</td><td class="n">0.88</td><td class="n">0.53</td>
+            <td class="n pos">7.2%</td><td class="n">1.65</td><td class="n">28%</td>
+          </tr>
+          <tr class="rank">
+            <td><span class="rk">6</span> <span class="name">S5 · Funding carry</span><br>
+              <span class="sub">delta-neutral · gross 1×</span></td>
+            <td class="n">2020-01→2026-08</td>
+            <td class="n pos">15.4%</td><td class="n pos">−3.9%</td><td class="n">—</td>
+            <td class="n neg">29</td><td class="n">—</td><td class="n pos">6.72</td><td class="n pos">3.97</td>
+            <td class="n">—</td><td class="n">—</td><td class="n">—</td>
+          </tr>
+          <tr class="rank" style="opacity:.72">
+            <td><span class="rk">—</span> <span class="name">BTC spot buy &amp; hold</span><br>
+              <span class="sub">benchmark</span></td>
+            <td class="n">2020-01→2026-08</td>
+            <td class="n">43.2%</td><td class="n neg">−77.2%</td><td class="n">—</td>
+            <td class="n">1</td><td class="n">—</td><td class="n">0.90</td><td class="n">0.56</td>
+            <td class="n">—</td><td class="n">—</td><td class="n neg">100%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">Rank 6, the delta-neutral carry, has by far the best risk-adjusted numbers
+    in the study — Sharpe 6.72, a 3.9% worst drawdown — and fails the gate on trade count: it
+    only finds 29 distinct carry episodes in six and a half years. It is also the one strategy
+    whose edge is visibly decaying (section&nbsp;6).</p>
+  </div>
+</section>
+<section>
+  <div class="stack-lg">
+    <div class="stack-sm">
+      <span class="eyebrow">4 — Reproduction</span>
+      <h2>Complete specifications</h2>
+      <p class="prose" style="color:var(--ash)">Everything needed to rebuild each finalist.
+      All z-score and rolling windows are counted in decision bars. Costs and execution rules
+      are identical across every strategy and are listed once in section&nbsp;8.</p>
+    </div>
+
+    <article class="spec">
+      <div class="spec-head">
+        <h3>Multi-strategy portfolio · risk parity</h3>
+        <span class="id">RANK 1 · CAGR 39.5% · DD −16.2% · PF 1.29 · N 622</span>
+      </div>
+      <div class="spec-body">
+        <p>Four sub-accounts run in parallel and are rebalanced to target weights monthly.
+        The delta-neutral carry is nearly uncorrelated with the three directional books
+        (ρ = +0.02, −0.01, −0.03), which is the entire source of the portfolio's advantage
+        over any single sleeve.</p>
+        <dl class="kv">
+          <dt>Sleeves</dt>
+          <dd><code>CARRY 47.8%</code> · <code>OFS 18.4%</code> · <code>SMRD 18.2%</code> ·
+            <code>AVT 15.6%</code> — inverse-volatility weights computed on the in-sample
+            window only, then held fixed through the out-of-sample period</dd>
+          <dt>Rebalance</dt><dd>Monthly, back to target weights. Between rebalances each sleeve compounds its own slice.</dd>
+          <dt>Size (knob 6)</dt>
+          <dd>SMRD 6.0% risk/trade · OFS 7.8% risk/trade · AVT 4.2% risk/trade ·
+            CARRY gross 3.75× notional</dd>
+          <dt>Leverage cap</dt><dd>10× notional on the directional sleeves; carry capped at 6× gross</dd>
+          <dt>Yearly</dt>
+          <dd class="mono">2020 +44% · 2021 +136% · 2022 −12% · 2023 +58% · 2024 +50% ·
+            2025 +0% · 2026 +31%</dd>
+        </dl>
+        <p class="note">The 2021 figure carries the record. That was the year the perpetual
+        funding premium ran at a 42% annualised rate; it has since fallen to roughly 3%.
+        See section&nbsp;6.</p>
+      </div>
+    </article>
+
+    <article class="spec">
+      <div class="spec-head">
+        <h3>S7 · Smart-money vs retail positioning divergence</h3>
+        <span class="id">RANK 2/3 · CAGR 9.1% @1% risk · 22.9% @2.5% · PF 1.54 · N 229</span>
+      </div>
+      <div class="spec-body">
+        <p>Binance publishes, every five minutes, the long/short <em>account</em> ratio of its
+        top traders by margin balance, their long/short <em>position</em> ratio, and the
+        long/short account ratio of all accounts. The gap between what large positions are
+        doing and what the retail account count is doing was the strongest single predictor
+        found anywhere in this study: rank-IC <strong>+0.108</strong> against 96-hour forward
+        returns.</p>
+        <dl class="kv">
+          <dt>Timeframes</dt><dd>4h decision bars · 15m execution bars</dd>
+          <dt>Data</dt>
+          <dd><code>sum_toptrader_long_short_ratio</code> (tt_pos),
+            <code>count_toptrader_long_short_ratio</code> (tt_acct),
+            <code>count_long_short_ratio</code> (retail) from
+            <code>futures/um/daily/metrics/BTCUSDT</code>, taken as the last 5-minute
+            observation inside each 4h bar</dd>
+          <dt>Features</dt>
+          <dd class="mono">A = z(ln(tt_pos ÷ retail), 480)<br>
+            B = z(retail, 480)<br>
+            C = z(tt_acct, 480)</dd>
+          <dt>Signal</dt>
+          <dd class="mono">composite = mean( clip(A,±3), −clip(B,±3), −clip(C,±3) )</dd>
+          <dt>Entry</dt>
+          <dd>Long when composite &gt; <code>+0.7</code>, short when &lt; <code>−0.7</code>.
+            Fills at the open of the first 15m bar after the 4h bar closes.</dd>
+          <dt>Stop</dt><dd><code>3.5 × ATR(14)</code> of the 4h bar, fixed at entry</dd>
+          <dt>Target</dt><dd><code>2.5R</code> (= 8.75 × ATR)</dd>
+          <dt>Time stop</dt><dd>10 days</dd>
+          <dt>Reversal</dt><dd>An opposite signal flattens at the next open before re-entering</dd>
+          <dt>Sizing</dt>
+          <dd><code>qty = risk × equity ÷ stop_distance</code>, notional capped at 10× equity.
+            Risk 1.0% (rank 2) or 2.5% (rank 3).</dd>
+          <dt>Period</dt><dd>2021-01-03 onward — the metrics feed does not exist before 2021</dd>
+        </dl>
+        <div class="pill-row">
+          <span class="pill">IS CAGR 8.8% · PF 1.59</span>
+          <span class="pill">OOS CAGR 9.7% · PF 1.49</span>
+          <span class="pill">PF 1.48 at double costs</span>
+          <span class="pill">P(DD&gt;20%) = 2%</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="spec">
+      <div class="spec-head">
+        <h3>S4 · Adaptive trend</h3>
+        <span class="id">RANK 4 · CAGR 8.0% · DD −9.5% · PF 1.53 · N 251</span>
+      </div>
+      <div class="spec-body">
+        <p>A Donchian breakout that only fires when the market is actually trending, exited by
+        a trailing stop rather than a fixed target.</p>
+        <dl class="kv">
+          <dt>Timeframes</dt><dd>4h decision · 15m execution</dd>
+          <dt>Channel</dt>
+          <dd class="mono">hi = max(close, 40 bars) shifted 1<br>lo = min(close, 40 bars) shifted 1</dd>
+          <dt>Regime gate</dt>
+          <dd><code>ADX(14) &gt; 20</code> <em>and</em> efficiency ratio
+            <code>&gt; 0.30</code>, where ER = |Δln close over 24 bars| ÷ Σ|Δln close| over the
+            same 24 bars</dd>
+          <dt>Entry</dt><dd>Long on close above <code>hi</code>, short on close below <code>lo</code>, gate satisfied</dd>
+          <dt>Stop</dt><dd>Initial <code>2.5 × ATR(14)</code></dd>
+          <dt>Trail</dt><dd><code>3.0 × ATR(14)</code> from the bar close, armed once the trade reaches +1R. No fixed target.</dd>
+          <dt>Sizing</dt><dd>1.0% risk/trade, notional cap 10×</dd>
+        </dl>
+        <p class="note">Negative result worth keeping: widening the trailing stop in
+        high-volatility regimes — the headline idea of the AdaptiveTrend literature — hurt in
+        11 of 12 pairings tested here (Calmar 0.97 → 0.75). The ATR already carries the regime
+        information; scaling it again double-counts.</p>
+      </div>
+    </article>
+
+    <article class="spec">
+      <div class="spec-head">
+        <h3>S3 · Orthogonal order-flow swing</h3>
+        <span class="id">RANK 5 · CAGR 9.7% · DD −18.1% · PF 1.71 · N 113</span>
+      </div>
+      <div class="spec-body">
+        <p>Raw taker-buy imbalance is contaminated by short-horizon price reversal. Projecting
+        it off recent returns — the construction from the order-flow-and-crypto-returns
+        literature — leaves a residual whose predictive power <em>rises</em> with horizon,
+        from IC +0.013 at 1h to +0.067 at 48h.</p>
+        <dl class="kv">
+          <dt>Timeframes</dt><dd>4h decision · 15m execution</dd>
+          <dt>Imbalance</dt><dd class="mono">imb = 2 × (taker_buy_base ÷ volume − 0.5)</dd>
+          <dt>Flow</dt><dd class="mono">ofi24 = mean(imb, 24 bars)</dd>
+          <dt>Orthogonalisation</dt>
+          <dd>Residual of <code>ofi24</code> regressed on past returns over 1, 2, 4, 6, 12 and
+            24 bars. Coefficients come from an <strong>expanding window refit monthly using
+            strictly past data</strong> — never a full-sample fit.</dd>
+          <dt>Score</dt><dd>Rolling z-score of the residual over 4 months</dd>
+          <dt>Entry</dt><dd>Long only: score <code>&gt; 0.75</code> <em>and</em> close above EMA(100)</dd>
+          <dt>Stop / target</dt><dd><code>3.5 × ATR(14)</code> / <code>2.5R</code>, time stop 10 days</dd>
+          <dt>Sizing</dt><dd>2.0% risk/trade, notional cap 10×</dd>
+        </dl>
+        <div class="pill-row">
+          <span class="pill">Highest profit factor of any directional book</span>
+          <span class="pill">PF 1.65 at double costs</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="spec">
+      <div class="spec-head">
+        <h3>S5 · Dynamic funding carry (delta-neutral)</h3>
+        <span class="id">RANK 6 · CAGR 15.4% · DD −3.9% · Sharpe 6.72 · N 29</span>
+      </div>
+      <div class="spec-body">
+        <p>Long spot, short perpetual, equal size. Delta is roughly zero; the return is the
+        funding the short leg receives, plus the change in basis, minus four legs of cost per
+        round trip.</p>
+        <dl class="kv">
+          <dt>Legs</dt><dd>Long spot <code>BTCUSDT</code>, short perp <code>BTCUSDT</code>, equal BTC quantity</dd>
+          <dt>Entry</dt><dd>Trailing mean of the last <strong>9</strong> funding settlements &gt; <code>0.8 bps per 8h</code></dd>
+          <dt>Exit</dt><dd>That mean falls back below the threshold. Reverse carry disabled in the ranked variant.</dd>
+          <dt>Capital</dt>
+          <dd>The spot leg consumes full notional; the perp short is margined at 5×. Deployable
+            notional per unit of equity = <code>1 ÷ (1 + 1/5) = 0.83</code>.</dd>
+          <dt>Funding</dt><dd>Real Binance settlements at 00:00, 08:00 and 16:00 UTC on open notional</dd>
+          <dt>Costs</dt>
+          <dd>8 bps per leg per side (four legs per round trip); <strong>USDT borrow at 8% APR
+            on the levered portion</strong>; spot borrow 3% APR when running the reverse carry</dd>
+        </dl>
+        <p class="note">Two corrections moved this result a long way. Realising the basis P&amp;L
+        at unwind, and charging the USDT borrow on the levered spot leg, together cut the 3×
+        variant from 41.5% to 29.0% CAGR. A carry backtest that skips the borrow cost is not a
+        carry backtest.</p>
+      </div>
+    </article>
+  </div>
+</section>
+<section>
+  <div class="stack">
+    <div class="stack-sm">
+      <span class="eyebrow">5 — The ledger</span>
+      <h2>Every attempt, and why it died</h2>
+      <p class="prose" style="color:var(--ash)">Four ideas were killed at the signal screen
+      before a backtest was written — measuring predictive power against the 16 bps
+      round-turn first saves a great deal of wasted simulation. The rest were run in full.</p>
+    </div>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr><th>#</th><th>Strategy</th><th>Core idea</th><th>Best CAGR</th><th>Max DD</th>
+            <th>PF</th><th>N</th><th>Outcome</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="n">—</td><td class="name">Short-horizon price reversion</td>
+            <td>RSI(4), 2–6 bar momentum, close-location value</td>
+            <td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td>
+            <td>Killed at screen — IC −0.07 at 1h but decile spread <em>negative</em> net of cost</td></tr>
+          <tr><td class="n">—</td><td class="name">15-minute sign reversal</td>
+            <td>Bet against the previous candle (arXiv 2608.21888)</td>
+            <td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td>
+            <td>Killed at screen — reversal worth <strong>1.54 bps</strong> (t = 5.8) against a 16 bps cost</td></tr>
+          <tr><td class="n">—</td><td class="name">Calendar seasonality</td>
+            <td>Hour-of-day, day-of-week, funding-settlement hours</td>
+            <td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td>
+            <td>Killed at screen — best hour t = 2.39 across 24 tests; fails multiple-testing correction</td></tr>
+          <tr><td class="n">—</td><td class="name">Raw order-flow imbalance</td>
+            <td>Taker buy ÷ volume, unadjusted</td>
+            <td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td>
+            <td>Killed at screen — contaminated by reversal (IC −0.04 at 1h); fixed in S3</td></tr>
+          <tr><td class="n">S1</td><td class="name">Positioning reversal + flow</td>
+            <td>Basis extreme, confirmed by orthogonal spot flow</td>
+            <td class="n pos">7.3%</td><td class="n">−14.6%</td><td class="n">1.30</td><td class="n">341</td>
+            <td>Fail — real edge, holds OOS, but ~0.14% per trade on 51 trades/yr</td></tr>
+          <tr><td class="n">S2</td><td class="name">Crowding-reversal ensemble</td>
+            <td>Equal blend of funding, basis and two flow signals</td>
+            <td class="n pos">9.0%</td><td class="n">−16.8%</td><td class="n">1.19</td><td class="n">684</td>
+            <td>Fail — blending <em>diluted</em> the edge; the weakest component dragged PF from 1.30 to 1.19</td></tr>
+          <tr><td class="n">S3</td><td class="name">Orthogonal order-flow swing</td>
+            <td>Taker flow projected off recent returns</td>
+            <td class="n pos">9.7%</td><td class="n">−18.1%</td><td class="n">1.71</td><td class="n">113</td>
+            <td>Fail on CAGR — best profit factor of the directional books</td></tr>
+          <tr><td class="n">S4</td><td class="name">Adaptive volatility trend</td>
+            <td>Donchian gated by ADX + efficiency ratio</td>
+            <td class="n pos">8.0%</td><td class="n">−9.5%</td><td class="n">1.53</td><td class="n">251</td>
+            <td>Fail on CAGR — vol-scaled trailing stops made it worse, not better</td></tr>
+          <tr><td class="n">S5</td><td class="name">Dynamic funding carry</td>
+            <td>Delta-neutral spot/perp basis trade</td>
+            <td class="n pos">15.4%</td><td class="n pos">−3.9%</td><td class="n">—</td><td class="n neg">29</td>
+            <td>Fail on CAGR <em>and</em> trade count — but Sharpe 6.72, the best in the study</td></tr>
+          <tr><td class="n">S6</td><td class="name">Walk-forward gradient boosting</td>
+            <td>LightGBM on 75 features, purged expanding window</td>
+            <td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td>
+            <td>Fail — IC +0.037 early, <strong>−0.033 late</strong>. Sign-flipped out of sample.</td></tr>
+          <tr><td class="n">S7</td><td class="name">Smart-money vs retail</td>
+            <td>Top-trader positioning against retail account ratio</td>
+            <td class="n pos">22.9%</td><td class="n">−18.7%</td><td class="n">1.49</td><td class="n">229</td>
+            <td>Fail on CAGR — strongest and most stable single signal found</td></tr>
+          <tr><td class="n">S8</td><td class="name">Portfolio, first pass</td>
+            <td>Scaled sleeve return series by a leverage knob</td>
+            <td class="n">140.8%</td><td class="n">−14.6%</td><td class="n">1.42</td><td class="n">—</td>
+            <td><strong>Withdrawn — the method was wrong.</strong> Scaling returns gave the carry sleeve 8× leverage without its borrow cost.</td></tr>
+          <tr class="best"><td class="n">S9/S11</td><td class="name">Portfolio, honest leverage</td>
+            <td>Four sleeves re-simulated at true size, monthly rebalance</td>
+            <td class="n pos">39.5%</td><td class="n">−16.2%</td><td class="n">1.29</td><td class="n">622</td>
+            <td>Fail on CAGR only — the best result in the study</td></tr>
+          <tr><td class="n">S10</td><td class="name">Volatility-managed trend</td>
+            <td>Exposure = target vol ÷ realised vol, trend-gated</td>
+            <td class="n">69.5%</td><td class="n neg">−61.3%</td><td class="n">1.10</td><td class="n">429</td>
+            <td>Fail on drawdown — vol targeting raised return and left Calmar untouched</td></tr>
+          <tr><td class="n">S12</td><td class="name">ETH → BTC lead-lag</td>
+            <td>ETH relative strength and flow as a risk-appetite proxy</td>
+            <td class="n neg">−0.2%</td><td class="n">−12.1%</td><td class="n">1.02</td><td class="n">486</td>
+            <td>Fail — ETH does not lead BTC at 4h once costs are paid</td></tr>
+          <tr><td class="n">S13</td><td class="name">Liquidation-cascade reversal</td>
+            <td>Buy capitulation: price down while open interest collapses</td>
+            <td class="n neg">−6.9%</td><td class="n neg">−56.0%</td><td class="n">0.95</td><td class="n">331</td>
+            <td>Fail — the signal marks capitulation (IC +0.023) but the cascade takes out the stop first</td></tr>
+          <tr><td class="n">S14</td><td class="name">Volatility-squeeze expansion</td>
+            <td>Bollinger bandwidth in its bottom decile, then break</td>
+            <td class="n neg">−9.2%</td><td class="n neg">−70.2%</td><td class="n">0.98</td><td class="n">599</td>
+            <td>Fail — 27–33% win rate; BTC squeeze breaks are predominantly false</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="stack">
+    <div class="stack-sm">
+      <span class="eyebrow">6 — The caveat that matters most</span>
+      <h2>The carry premium is decaying</h2>
+    </div>
+    <div class="prose stack-sm">
+      <p>Risk parity puts 47.8% of the portfolio's capital in the delta-neutral carry sleeve,
+      because it has the highest Sharpe and almost no correlation with the rest. That
+      allocation is doing most of the work in the headline number — and the premium it
+      harvests has fallen by an order of magnitude over the test window.</p>
+    </div>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Half-year</th><th>2020 H1</th><th>2021 H1</th><th>2021 H2</th><th>2022 H2</th>
+          <th>2023</th><th>2024 H1</th><th>2025 H1</th><th>2025 H2</th><th>2026</th></tr></thead>
+        <tbody><tr><td class="name">Annualised funding run-rate</td>
+          <td class="n">23.4%</td><td class="n" style="color:var(--signal);font-weight:600">42.0%</td>
+          <td class="n">18.3%</td><td class="n">4.2%</td><td class="n">5.5%</td><td class="n">17.2%</td>
+          <td class="n">9.0%</td><td class="n">5.3%</td>
+          <td class="n" style="color:var(--fail);font-weight:600">3.0%</td></tr></tbody>
+      </table>
+    </div>
+    <p class="prose" style="color:var(--ash)">At a 3% funding run-rate against an 8% APR USDT
+    borrow, <strong>levered carry is unprofitable today.</strong> The historical contribution
+    of that sleeve is not repeatable, which means the portfolio's forward-looking Sharpe is
+    much closer to its out-of-sample figure of 1.51 than to the 3.27 measured across the full
+    sample. Anyone reading the 39.5% as a forecast is reading it wrong.</p>
+  </div>
+</section>
+<section>
+  <div class="stack">
+    <div class="stack-sm">
+      <span class="eyebrow">7 — Why the target is out of reach</span>
+      <h2>The arithmetic behind the shortfall</h2>
+      <p class="prose" style="color:var(--ash)">The gap is not a matter of finding a better
+      indicator. Two independent calculations put the required skill an order of magnitude
+      above anything a single instrument can supply.</p>
+    </div>
+
+    <div class="why stack">
+      <div class="stack-sm">
+        <h3>Route one — the drawdown constraint fixes the ratio</h3>
+        <div class="eq">300% annual return ÷ 20% maximum drawdown  =  Calmar ratio ≥ 15</div>
+        <p style="color:var(--ash)">Across every portfolio size tested, the measured
+        relationship was <code>Calmar ≈ 1.3 × Sharpe</code> (size 1: 3.27 → 4.73; size 6:
+        1.93 → 2.45; size 8: 1.82 → 2.37). Leverage moves return and drawdown together and
+        leaves the ratio roughly where it was — which is exactly why raising the knob from 1
+        to 8 never got close. A Calmar of 15 therefore needs a <strong>Sharpe ratio around
+        11</strong>, net of costs. The best full-sample Sharpe in this study was 3.27, and
+        out of sample it was 1.51.</p>
+      </div>
+
+      <div class="stack-sm">
+        <h3>Route two — the signal-strength ceiling</h3>
+        <div class="eq">Sharpe  ≈  IC × √(independent bets per year)</div>
+        <p style="color:var(--ash)">The strongest predictor found in the entire search was
+        top-trader-versus-retail positioning, at a rank-IC of <strong>0.108</strong> against
+        96-hour forward returns. A 96-hour horizon on one instrument gives about
+        <code>8,766 ÷ 96 ≈ 91</code> non-overlapping bets a year, so
+        <code>0.108 × √91 ≈ 1.03</code> — which is almost exactly the Sharpe of 1.13 that
+        strategy actually delivered. The model is not being pessimistic; it is describing
+        what happened.</p>
+        <p style="color:var(--ash)">Reaching Sharpe 11 at that same IC would need
+        <code>(11 ÷ 0.108)² ≈ 10,400</code> independent bets a year. One asset offers 91 at
+        this horizon. Shortening the horizon to buy breadth does not work either: the same
+        feature family measured IC 0.013 at one hour, and the 16 bps round-turn eats
+        everything below roughly a 24-hour holding period.</p>
+      </div>
+
+      <div class="stack-sm">
+        <h3>What the gap would actually take</h3>
+        <p style="color:var(--ash)">Breadth of that order comes from one of two places:
+        several hundred weakly-correlated instruments traded as a cross-section, or
+        sub-second market making where the edge is the spread and the bet count runs to
+        millions a year. The first is outside the brief, which specifies BTCUSDT. The second
+        cannot be evaluated from OHLCV data at all — it needs full order-book reconstruction
+        and a queue-position model, and its returns are a function of latency and fee tier
+        rather than of any signal.</p>
+        <p style="color:var(--ash)">Within the brief as written — one instrument, honest
+        costs, real funding, no look-ahead — <strong>300% net annual at under 20% drawdown
+        does not appear to be attainable.</strong> The evidence here is that the ceiling sits
+        near 40%.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="stack-lg">
+    <div class="stack-sm">
+      <span class="eyebrow">8 — Method</span>
+      <h2>Data, costs and the controls against self-deception</h2>
+    </div>
+
+    <div class="stack">
+      <h3>Market and data</h3>
+      <div class="scroll">
+        <table>
+          <tbody>
+            <tr><td class="name">Market</td><td style="text-align:left">Binance USDⓈ-M perpetual <code>BTCUSDT</code>; Binance spot <code>BTCUSDT</code> for the basis and the buy-and-hold benchmark</td></tr>
+            <tr><td class="name">Source</td><td style="text-align:left">Official Binance public archive (<code>data.binance.vision</code>), monthly and daily kline, funding and metrics dumps</td></tr>
+            <tr><td class="name">Coverage</td><td style="text-align:left">Perp 2020-01-01 → 2026-08-31 · spot back to 2017-08-17 · positioning metrics from 2021-01-01</td></tr>
+            <tr><td class="name">Bars</td><td style="text-align:left">58,440 × 1h · 233,760 × 15m · 701,280 × 5m perp — <strong>zero gaps, zero OHLC violations</strong>. Spot 1h has 127 missing bars in 79,117 (0.16%, Binance maintenance windows).</td></tr>
+            <tr><td class="name">Funding</td><td style="text-align:left">7,305 real settlements, mean 0.0108% per 8h, positive 85.9% of the time</td></tr>
+            <tr><td class="name">Positioning</td><td style="text-align:left">595,268 five-minute observations of open interest, top-trader account and position ratios, retail account ratio, taker volume ratio</td></tr>
+            <tr><td class="name">In-sample</td><td style="text-align:left">2020-01-01 → 2024-06-30 — all signal discovery and every parameter choice</td></tr>
+            <tr><td class="name">Out-of-sample</td><td style="text-align:left">2024-07-01 → 2026-08-31 — touched only to report, never to select</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="stack">
+      <h3>Trading assumptions — applied identically to every result on this page</h3>
+      <div class="scroll">
+        <table>
+          <tbody>
+            <tr><td class="name">Commission</td><td style="text-align:left">5 bps per side (Binance USDⓈ-M taker)</td></tr>
+            <tr><td class="name">Slippage</td><td style="text-align:left">3 bps per side, always adverse — worse fill on entry, worse fill on exit, worse fill on the stop</td></tr>
+            <tr><td class="name">Round turn</td><td style="text-align:left"><strong>16 bps</strong>, the number every signal was screened against before a backtest was written</td></tr>
+            <tr><td class="name">Funding</td><td style="text-align:left">Real historical rates at 00:00 / 08:00 / 16:00 UTC on open notional. Longs pay a positive rate, shorts receive it — the actual exchange mechanic, not an approximation.</td></tr>
+            <tr><td class="name">Borrow</td><td style="text-align:left">USDT at 8% APR on any levered spot leg; spot borrow 3% APR for reverse carry</td></tr>
+            <tr><td class="name">Sizing</td><td style="text-align:left"><code>qty = risk_fraction × equity ÷ stop_distance</code>, notional capped at the stated leverage limit. Equity compounds; one position at a time; no pyramiding.</td></tr>
+            <tr><td class="name">Liquidation</td><td style="text-align:left">Marked to market every 15 minutes; equity ≤ 0 ends the run at zero and is not quietly repaired</td></tr>
+            <tr><td class="name">Cost stress</td><td style="text-align:left">Every finalist re-run at 1.5× and 2× these costs; results in section 3</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="stack">
+      <h3>Look-ahead controls</h3>
+      <ul class="prose" style="color:var(--ash);padding-left:1.1em;margin:0;display:flex;flex-direction:column;gap:7px">
+        <li>Indicators for bar <em>t</em> use only bars ≤ <em>t</em>. A signal formed at the close of a 4h bar is executed at the open of the next 15-minute bar, never earlier.</li>
+        <li>Stops and targets are resolved on 15-minute bars rather than guessed on the decision bar. Where a single 15-minute bar spans both levels, the <strong>stop</strong> is assumed to fill first.</li>
+        <li>The order-flow orthogonalisation refits monthly on an expanding window of strictly past data. A full-sample regression here would have leaked, and did in the first draft.</li>
+        <li>Machine-learning walk-forward uses a purge gap equal to the label horizon, so no training label overlaps the block being predicted.</li>
+        <li>Portfolio weights are estimated on the in-sample window alone and held fixed across the out-of-sample period.</li>
+        <li>Funding and positioning observations are keyed to the moment they became public, not the bar they describe.</li>
+      </ul>
+    </div>
+
+    <div class="stack">
+      <h3>Engine validation</h3>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Test</th><th>Expected</th><th>Result</th></tr></thead>
+          <tbody>
+            <tr><td class="name">Frictionless 1× long vs BTC price return</td><td style="text-align:left">Equal to within one bar of execution lag</td><td style="text-align:left">994.3% vs 992.1% ✓</td></tr>
+            <tr><td class="name">Random signals, zero cost</td><td style="text-align:left">Profit factor ≈ 1.00</td><td style="text-align:left">0.991 ✓</td></tr>
+            <tr><td class="name">Random signals, costs on</td><td style="text-align:left">Strictly worse as costs rise</td><td style="text-align:left">PF 0.77 → 0.58 ✓</td></tr>
+            <tr><td class="name">Signal that peeks 1h ahead</td><td style="text-align:left">Absurd — the detector must fire</td><td style="text-align:left">CAGR 3,034%, PF 4.28 ✓</td></tr>
+            <tr><td class="name">Same signal, past data only</td><td style="text-align:left">Poor</td><td style="text-align:left">CAGR −56%, PF 0.53 ✓</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">The look-ahead test is the important one. A backtester that cannot make a
+      cheating signal look obviously absurd cannot be trusted to tell you when an honest one
+      is merely good.</p>
+    </div>
+  </div>
+</section>
+
+<footer class="prose">
+  <p>Backtested on Binance USDⓈ-M perpetual BTCUSDT, 2020-01-01 to 2026-08-31, with Binance
+  spot BTCUSDT for basis and benchmark. All figures are net of 5 bps commission and 3 bps
+  slippage per side and of real historical funding. Past simulated performance is not a
+  forecast; the carry premium that drives much of the best result has already decayed by an
+  order of magnitude, and the out-of-sample Sharpe of 1.51 is a fairer guide to the future
+  than the full-sample 3.27.</p>
+</footer>
+
+</div>
