@@ -161,19 +161,19 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
   <div class="verdict">
     <div class="verdict-top"><span class="verdict-label">Verdict</span></div>
     <h2>No strategy qualified.</h2>
-    <p>The best strategy returns <strong>54.9% net annual at a 14.9% drawdown</strong> over five
-    and a half years including the 2022 bear market — profit factor 2.03, 1,005 trades, positive in
-    every calendar year, and 54.1% in sample against 55.7% out. Under walk-forward validation with
-    parameters re-chosen on every fold it holds at Sharpe 2.28; with parameters chosen
-    <em>at random</em> it still holds at 2.03. It fails the target by 5.5×. Every gain during the
-    study came from the same place: not better signals, but <em>less correlated</em> ones.
-    Section&nbsp;11 shows why that runs out.</p>
+    <p>The best strategy returns <strong>111.4% net annual at an 18.9% drawdown</strong> — five
+    signals reduced to one position, with the conviction curve re-chosen every quarter from the
+    trailing eighteen months. Profit factor 2.80, 673 trades, Sharpe 2.21. It passes every gate
+    the brief sets except the return, and misses that one by <strong>2.7×</strong>. Backed off to a
+    size the bootstrap calls genuinely safe it returns <strong>84.6%</strong>. The gains came from
+    two places and neither was a better signal: first from <em>less correlated</em> ones, then from
+    the <em>shape</em> of the bet. Section&nbsp;11 shows why both run out.</p>
     <div class="gap-row">
       <div class="gap-item"><div class="k">Required net / year</div><div class="v">300%</div></div>
-      <div class="gap-item"><div class="k">Best, 5.5y incl. bear market</div><div class="v" style="color:var(--fail)">54.9%</div></div>
-      <div class="gap-item"><div class="k">Walk-forward, 8 folds</div><div class="v">76.3%</div></div>
-      <div class="gap-item"><div class="k">Strategies tested</div><div class="v">54</div></div>
-      <div class="gap-item"><div class="k">Parameter sets run</div><div class="v">7,400+</div></div>
+      <div class="gap-item"><div class="k">Best under 20% drawdown</div><div class="v" style="color:var(--fail)">111.4%</div></div>
+      <div class="gap-item"><div class="k">At a genuinely safe size</div><div class="v">84.6%</div></div>
+      <div class="gap-item"><div class="k">Strategies tested</div><div class="v">67</div></div>
+      <div class="gap-item"><div class="k">Parameter sets run</div><div class="v">12,000+</div></div>
     </div>
   </div>
 </header>
@@ -183,30 +183,31 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
     <div class="stack-sm">
       <span class="eyebrow">1 — Qualification gates</span>
       <h2>The best qualifying-shaped strategy, gate by gate</h2>
-      <p class="prose" style="color:var(--ash)">Measured on S46 — five signals reduced to one
-      net number every 12 hours, one BTCUSDT position at a time in a single account. No
-      sub-accounts, no rebalancing, no spot leg. Net of fees, slippage and real funding, over
-      2021-03 → 2026-08.</p>
+      <p class="prose" style="color:var(--ash)">Measured on S60 — five signals reduced to one net
+      number every 12 hours, one BTCUSDT position at a time in a single account, with the
+      conviction curve re-chosen every quarter from the trailing eighteen months. No sub-accounts,
+      no rebalancing, no spot leg. Net of fees, slippage and real funding. The quarterly
+      re-selection consumes eighteen months of warm-up, so the window is 2022-09 → 2026-08.</p>
     </div>
     <div class="gates">
       <div class="gate">
         <div class="req">Net yearly profit &gt; 300%</div>
-        <div class="got" style="color:var(--fail)">54.9%</div>
+        <div class="got" style="color:var(--fail)">111.4%</div>
         <span class="tag f">Fail</span>
       </div>
       <div class="gate">
         <div class="req">At least 100 completed trades</div>
-        <div class="got">1,005</div>
+        <div class="got">673</div>
         <span class="tag p">Pass</span>
       </div>
       <div class="gate">
         <div class="req">Profit factor &gt; 1.10</div>
-        <div class="got">2.03</div>
+        <div class="got">2.80</div>
         <span class="tag p">Pass</span>
       </div>
       <div class="gate">
         <div class="req">Maximum drawdown &lt; 20%</div>
-        <div class="got">14.9%</div>
+        <div class="got">18.9%</div>
         <span class="tag p">Pass</span>
       </div>
       <div class="gate">
@@ -220,16 +221,19 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
         <span class="tag p">Pass</span>
       </div>
     </div>
-    <p class="note">In-sample 54.1% against out-of-sample <strong>55.7%</strong> at profit factor
-    2.04 — the two halves agree to within two points, on a period no parameter ever saw. Yearly:
-    2021 +54%, <strong>2022 +5%</strong>, 2023 +116%, 2024 +57%, 2025 +25%, 2026 +63% — positive
-    through the bear market. A stationary block bootstrap puts the median drawdown at −15.8% and
-    the chance of breaching 20% at <strong>17%</strong>, so the measured −14.9% is representative
-    rather than lucky; backing off to 6% risk gives 39.6% at a <strong>3%</strong> breach
-    probability. Adding a sixth signal from Binance's implied-volatility index — which only exists
-    from 2023-06, so it cannot be tested against 2022 — takes the book to <strong>103.4%</strong>
-    on that shorter window, but at a −20.7% drawdown that fails the limit outright. Every gate
-    passes except the return, and that one misses by 5.5×.</p>
+    <p class="note"><strong>Read the drawdown from the bootstrap, not from the sample.</strong> A
+    stationary block bootstrap of the same daily returns puts the median drawdown at −19.6% and the
+    chance of breaching 20% at <strong>46%</strong> — so the measured −18.9% is one draw from that
+    distribution, and a favourable one. This gate passes on a technicality. Backed off to 8% risk
+    the book returns <strong>84.6% at −14.8%</strong> with a 21% breach probability, and at 6% risk
+    <strong>60.1% at −11.2%</strong> with <strong>4%</strong>. Those are the numbers to plan
+    around. Every gate passes except the return, and that one misses by 2.7×.</p>
+    <p class="note">The window is shorter than the rest of this report because the quarterly
+    re-selection needs eighteen months of history before it can choose anything, which costs the
+    whole of 2021 and most of 2022. On the full 5.5 years the same signals without the adaptive
+    conviction return 54.9% at −14.9%, profit factor 2.03 over 1,005 trades, positive in every
+    calendar year including the bear market, and 54.1% in sample against 55.7% out. Both books are
+    specified in section&nbsp;6.</p>
   </div>
 </section>
 <section>
@@ -237,54 +241,50 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
     <div class="stack-sm">
       <span class="eyebrow">2 — Equity curves</span>
       <h2>The finalists against the perpetual itself</h2>
-      <p class="prose" style="color:var(--ash)">Log scale, 10,000 USDT start, weekly points,
-      net of fees, slippage and real funding. One account, one position at a time. Shaded region
-      is out of sample — no parameter was chosen with sight of it.</p>
+      <p class="prose" style="color:var(--ash)">Log scale, 10,000 USDT start, weekly points, net
+      of fees, slippage and real funding. Starts 2022-09, after the eighteen months of history the
+      quarterly re-selection needs. Shaded region is out of sample — no parameter was chosen with
+      sight of it.</p>
     </div>
     <div class="chart-card">
-<svg viewBox="0 0 1040 380" width="100%" role="img" aria-label="Equity curves, log scale, 10,000 USDT start, 2021 to 2026" style="display:block;max-width:100%;height:auto">
-<line x1="52.0" y1="329.4" x2="1026.0" y2="329.4" stroke="var(--hair)" stroke-width="1"/>
-<text x="44" y="332.9" text-anchor="end" font-size="10.5" fill="var(--faint)">10k</text>
-<line x1="52.0" y1="245.0" x2="1026.0" y2="245.0" stroke="var(--hair)" stroke-width="1"/>
-<text x="44" y="248.5" text-anchor="end" font-size="10.5" fill="var(--faint)">25k</text>
-<line x1="52.0" y1="164.3" x2="1026.0" y2="164.3" stroke="var(--hair)" stroke-width="1"/>
-<text x="44" y="167.8" text-anchor="end" font-size="10.5" fill="var(--faint)">60k</text>
-<line x1="52.0" y1="79.9" x2="1026.0" y2="79.9" stroke="var(--hair)" stroke-width="1"/>
-<text x="44" y="83.4" text-anchor="end" font-size="10.5" fill="var(--faint)">150k</text>
-<line x1="197.4" y1="16" x2="197.4" y2="350" stroke="var(--hair)" stroke-width="1"/>
-<text x="201.4" y="365.0" font-size="10.5" fill="var(--faint)">2022</text>
-<line x1="374.4" y1="16" x2="374.4" y2="350" stroke="var(--hair)" stroke-width="1"/>
-<text x="378.4" y="365.0" font-size="10.5" fill="var(--faint)">2023</text>
-<line x1="551.4" y1="16" x2="551.4" y2="350" stroke="var(--hair)" stroke-width="1"/>
-<text x="555.4" y="365.0" font-size="10.5" fill="var(--faint)">2024</text>
-<line x1="728.8" y1="16" x2="728.8" y2="350" stroke="var(--hair)" stroke-width="1"/>
-<text x="732.8" y="365.0" font-size="10.5" fill="var(--faint)">2025</text>
-<line x1="905.8" y1="16" x2="905.8" y2="350" stroke="var(--hair)" stroke-width="1"/>
-<text x="909.8" y="365.0" font-size="10.5" fill="var(--faint)">2026</text>
-<rect x="639.6" y="16" width="386.4" height="334" fill="var(--ink)" opacity="0.035"/>
-<line x1="639.6" y1="16" x2="639.6" y2="350" stroke="var(--ash)" stroke-width="1" stroke-dasharray="3 3"/>
-<text x="645.6" y="29.0" font-size="10.5" fill="var(--ash)" letter-spacing="0.08em">OUT OF SAMPLE</text>
-<path d="M52.0 320.4 L55.4 306.9 L58.8 309.5 L62.2 312.1 L65.6 308.2 L69.0 305.3 L72.4 311.6 L75.8 324.0 L79.1 310.8 L82.5 308.1 L85.9 329.1 L89.3 350.0 L92.7 350.0 L96.1 350.0 L99.5 345.2 L102.9 350.0 L106.3 350.0 L109.7 350.0 L113.1 350.0 L116.5 350.0 L119.9 350.0 L123.3 343.2 L126.7 334.5 L130.1 327.9 L133.4 323.6 L136.8 324.5 L140.2 319.0 L143.6 329.8 L147.0 327.4 L150.4 335.8 L153.8 325.6 L157.2 314.0 L160.6 303.1 L164.0 304.1 L167.4 303.4 L170.8 300.5 L174.2 297.3 L177.6 307.5 L181.0 309.7 L184.4 323.4 L187.7 322.1 L191.1 328.6 L194.5 320.8 L197.9 327.4 L201.3 338.6 L204.7 336.0 L208.1 350.0 L211.5 347.9 L214.9 337.5 L218.3 338.2 L221.7 346.6 L225.1 348.3 L228.5 346.6 L231.9 348.2 L235.3 339.9 L238.7 328.3 L242.0 329.1 L245.4 338.0 L248.8 343.6 L252.2 344.1 L255.6 346.5 L259.0 350.0 L262.4 350.0 L265.8 350.0 L269.2 350.0 L272.6 350.0 L276.0 350.0 L279.4 350.0 L282.8 350.0 L286.2 350.0 L289.6 350.0 L293.0 350.0 L296.3 350.0 L299.7 350.0 L303.1 350.0 L306.5 350.0 L309.9 350.0 L313.3 350.0 L316.7 350.0 L320.1 350.0 L323.5 350.0 L326.9 350.0 L330.3 350.0 L333.7 350.0 L337.1 350.0 L340.5 350.0 L343.9 350.0 L347.3 350.0 L350.6 350.0 L354.0 350.0 L357.4 350.0 L360.8 350.0 L364.2 350.0 L367.6 350.0 L371.0 350.0 L374.4 350.0 L377.8 350.0 L381.2 350.0 L384.6 350.0 L388.0 350.0 L391.4 350.0 L394.8 350.0 L398.2 350.0 L401.6 350.0 L404.9 350.0 L408.3 350.0 L411.7 350.0 L415.1 350.0 L418.5 350.0 L421.9 350.0 L425.3 350.0 L428.7 350.0 L432.1 350.0 L435.5 350.0 L438.9 350.0 L442.3 350.0 L445.7 350.0 L449.1 350.0 L452.5 350.0 L455.9 350.0 L459.2 350.0 L462.6 350.0 L466.0 350.0 L469.4 350.0 L472.8 350.0 L476.2 350.0 L479.6 350.0 L483.0 350.0 L486.4 350.0 L489.8 350.0 L493.2 350.0 L496.6 350.0 L500.0 350.0 L503.4 350.0 L506.8 350.0 L510.2 350.0 L513.5 350.0 L516.9 350.0 L520.3 350.0 L523.7 350.0 L527.1 349.8 L530.5 349.1 L533.9 348.9 L537.3 342.9 L540.7 334.4 L544.1 339.6 L547.5 336.1 L550.9 337.6 L554.3 334.2 L557.7 338.9 L561.1 339.2 L564.5 338.3 L567.8 337.1 L571.2 325.4 L574.6 318.3 L578.0 319.0 L581.4 300.7 L584.8 292.6 L588.2 293.3 L591.6 294.9 L595.0 289.5 L598.4 292.1 L601.8 297.2 L605.2 298.2 L608.6 300.8 L612.0 299.5 L615.4 303.2 L618.8 296.3 L622.1 293.2 L625.5 294.2 L628.9 291.7 L632.3 295.8 L635.7 300.7 L639.1 301.3 L642.5 312.1 L645.9 304.3 L649.3 293.7 L652.7 293.6 L656.1 308.3 L659.5 307.5 L662.9 307.9 L666.3 299.2 L669.7 309.7 L673.1 313.7 L676.4 306.8 L679.8 300.1 L683.2 297.3 L686.6 301.3 L690.0 301.2 L693.4 292.5 L696.8 293.9 L700.2 292.9 L703.6 278.5 L707.0 268.2 L710.4 260.3 L713.8 260.9 L717.2 257.3 L720.6 254.3 L724.0 262.9 L727.4 264.4 L730.7 259.9 L734.1 263.6 L737.5 257.2 L740.9 256.0 L744.3 260.5 L747.7 261.7 L751.1 262.1 L754.5 261.9 L757.9 263.9 L761.3 278.1 L764.7 276.0 L768.1 272.2 L771.5 276.3 L774.9 280.8 L778.3 274.7 L781.7 273.2 L785.0 264.4 L788.4 263.8 L791.8 254.7 L795.2 252.6 L798.6 250.5 L802.0 253.4 L805.4 253.3 L808.8 253.4 L812.2 257.5 L815.6 251.0 L819.0 250.3 L822.4 242.3 L825.8 243.7 L829.2 242.0 L832.6 246.2 L836.0 242.1 L839.3 243.6 L842.7 246.7 L846.1 251.1 L849.5 248.7 L852.9 245.3 L856.3 245.3 L859.7 247.8 L863.1 239.0 L866.5 245.6 L869.9 250.8 L873.3 245.9 L876.7 249.2 L880.1 254.2 L883.5 263.9 L886.9 271.4 L890.3 267.7 L893.6 267.7 L897.0 270.0 L900.4 269.5 L903.8 270.2 L907.2 266.6 L910.6 267.1 L914.0 264.4 L917.4 271.6 L920.8 282.5 L924.2 290.9 L927.6 292.8 L931.0 294.4 L934.4 297.0 L937.8 296.8 L941.2 287.6 L944.6 294.1 L947.9 296.7 L951.3 292.6 L954.7 290.3 L958.1 286.4 L961.5 280.5 L964.9 280.6 L968.3 276.5 L971.7 281.9 L975.1 282.4 L978.5 286.5 L981.9 300.5 L985.3 297.1 L988.7 300.5 L992.1 306.1 L995.5 300.0 L998.9 299.9 L1002.2 298.5 L1005.6 297.5 L1009.0 300.1 L1012.4 298.3 L1015.8 301.1 L1019.2 281.6 L1022.6 281.7 L1026.0 280.6" fill="none" stroke="var(--btc)" stroke-width="1.6" stroke-linejoin="round" stroke-dasharray="4 3"/>
-<path d="M52.0 329.4 L55.4 329.4 L58.8 329.4 L62.2 329.4 L65.6 329.4 L69.0 329.4 L72.4 329.4 L75.8 329.4 L79.1 329.4 L82.5 329.4 L85.9 329.4 L89.3 329.4 L92.7 329.4 L96.1 329.4 L99.5 329.4 L102.9 329.4 L106.3 329.4 L109.7 329.4 L113.1 329.4 L116.5 329.4 L119.9 329.4 L123.3 329.4 L126.7 329.4 L130.1 329.4 L133.4 329.4 L136.8 329.4 L140.2 329.4 L143.6 329.4 L147.0 329.4 L150.4 329.4 L153.8 329.4 L157.2 329.4 L160.6 329.4 L164.0 329.4 L167.4 329.5 L170.8 330.0 L174.2 330.5 L177.6 327.1 L181.0 326.3 L184.4 321.6 L187.7 321.6 L191.1 321.6 L194.5 321.6 L197.9 319.9 L201.3 318.8 L204.7 318.8 L208.1 319.8 L211.5 318.0 L214.9 315.9 L218.3 316.1 L221.7 314.9 L225.1 313.5 L228.5 313.5 L231.9 313.5 L235.3 314.1 L238.7 312.6 L242.0 312.4 L245.4 312.4 L248.8 312.4 L252.2 313.9 L255.6 313.6 L259.0 313.4 L262.4 313.6 L265.8 313.4 L269.2 313.3 L272.6 312.8 L276.0 313.8 L279.4 315.5 L282.8 315.7 L286.2 316.3 L289.6 315.2 L293.0 314.2 L296.3 314.2 L299.7 314.6 L303.1 314.6 L306.5 315.2 L309.9 314.3 L313.3 314.1 L316.7 314.9 L320.1 313.4 L323.5 316.7 L326.9 316.0 L330.3 316.0 L333.7 316.8 L337.1 316.5 L340.5 317.7 L343.9 318.0 L347.3 318.0 L350.6 311.8 L354.0 311.8 L357.4 311.6 L360.8 312.1 L364.2 313.7 L367.6 315.8 L371.0 315.9 L374.4 316.8 L377.8 319.0 L381.2 304.8 L384.6 302.6 L388.0 302.8 L391.4 302.0 L394.8 302.2 L398.2 302.0 L401.6 302.3 L404.9 301.1 L408.3 298.3 L411.7 298.3 L415.1 298.8 L418.5 298.8 L421.9 300.0 L425.3 300.6 L428.7 297.3 L432.1 299.0 L435.5 299.5 L438.9 299.7 L442.3 299.8 L445.7 298.3 L449.1 300.6 L452.5 300.3 L455.9 301.4 L459.2 301.3 L462.6 301.3 L466.0 300.9 L469.4 300.3 L472.8 300.1 L476.2 300.3 L479.6 300.2 L483.0 301.0 L486.4 295.4 L489.8 295.9 L493.2 295.8 L496.6 295.8 L500.0 295.3 L503.4 297.0 L506.8 292.4 L510.2 290.4 L513.5 289.9 L516.9 289.9 L520.3 283.0 L523.7 283.6 L527.1 284.4 L530.5 284.1 L533.9 284.1 L537.3 285.7 L540.7 281.2 L544.1 281.2 L547.5 281.2 L550.9 281.9 L554.3 284.1 L557.7 283.8 L561.1 284.1 L564.5 283.8 L567.8 284.3 L571.2 283.1 L574.6 282.2 L578.0 282.2 L581.4 282.2 L584.8 282.1 L588.2 281.6 L591.6 281.5 L595.0 281.5 L598.4 282.6 L601.8 284.0 L605.2 284.0 L608.6 284.0 L612.0 284.7 L615.4 284.9 L618.8 284.9 L622.1 285.2 L625.5 285.0 L628.9 284.0 L632.3 283.9 L635.7 282.4 L639.1 280.6 L642.5 283.8 L645.9 283.2 L649.3 281.1 L652.7 281.3 L656.1 281.4 L659.5 281.0 L662.9 281.3 L666.3 281.1 L669.7 283.6 L673.1 283.0 L676.4 284.1 L679.8 284.4 L683.2 284.2 L686.6 284.2 L690.0 286.8 L693.4 283.1 L696.8 284.2 L700.2 282.5 L703.6 283.0 L707.0 283.0 L710.4 282.1 L713.8 282.0 L717.2 284.1 L720.6 281.6 L724.0 282.8 L727.4 283.8 L730.7 283.4 L734.1 284.4 L737.5 285.1 L740.9 283.5 L744.3 283.2 L747.7 282.9 L751.1 282.6 L754.5 282.6 L757.9 282.0 L761.3 280.5 L764.7 280.5 L768.1 280.2 L771.5 279.5 L774.9 279.5 L778.3 280.1 L781.7 280.4 L785.0 277.6 L788.4 277.2 L791.8 277.4 L795.2 277.4 L798.6 279.0 L802.0 278.9 L805.4 278.9 L808.8 278.3 L812.2 278.5 L815.6 277.9 L819.0 280.0 L822.4 279.6 L825.8 281.3 L829.2 283.3 L832.6 281.9 L836.0 281.7 L839.3 282.4 L842.7 280.5 L846.1 280.0 L849.5 280.0 L852.9 280.0 L856.3 280.6 L859.7 278.8 L863.1 276.4 L866.5 277.1 L869.9 276.4 L873.3 276.2 L876.7 276.4 L880.1 277.4 L883.5 277.6 L886.9 277.1 L890.3 277.0 L893.6 275.5 L897.0 274.5 L900.4 274.3 L903.8 274.0 L907.2 273.7 L910.6 275.2 L914.0 275.8 L917.4 275.8 L920.8 276.7 L924.2 276.6 L927.6 277.3 L931.0 277.6 L934.4 278.4 L937.8 279.8 L941.2 279.0 L944.6 280.3 L947.9 281.4 L951.3 283.3 L954.7 282.4 L958.1 279.3 L961.5 278.6 L964.9 277.7 L968.3 276.1 L971.7 277.1 L975.1 277.6 L978.5 278.7 L981.9 278.7 L985.3 278.4 L988.7 279.4 L992.1 279.4 L995.5 280.4 L998.9 282.3 L1002.2 283.4 L1005.6 285.1 L1009.0 283.8 L1012.4 283.4 L1015.8 283.8 L1019.2 271.1 L1022.6 271.1 L1026.0 271.1" fill="none" stroke="var(--s3)" stroke-width="1.6" stroke-linejoin="round"/>
-<path d="M459.2 256.0 L462.6 257.0 L466.0 257.8 L469.4 256.4 L472.8 257.5 L476.2 256.1 L479.6 258.0 L483.0 259.7 L486.4 253.1 L489.8 254.5 L493.2 251.0 L496.6 252.5 L500.0 254.2 L503.4 254.2 L506.8 253.8 L510.2 254.3 L513.5 254.8 L516.9 246.3 L520.3 237.8 L523.7 238.8 L527.1 239.5 L530.5 243.9 L533.9 245.8 L537.3 244.8 L540.7 238.7 L544.1 237.7 L547.5 238.2 L550.9 237.6 L554.3 235.8 L557.7 235.1 L561.1 235.1 L564.5 234.6 L567.8 235.0 L571.2 232.1 L574.6 227.9 L578.0 228.9 L581.4 220.5 L584.8 221.3 L588.2 220.3 L591.6 220.8 L595.0 220.8 L598.4 221.8 L601.8 220.6 L605.2 223.2 L608.6 221.7 L612.0 219.7 L615.4 221.7 L618.8 218.1 L622.1 213.8 L625.5 213.8 L628.9 214.2 L632.3 214.3 L635.7 212.2 L639.1 211.6 L642.5 212.4 L645.9 210.4 L649.3 205.2 L652.7 208.0 L656.1 203.3 L659.5 200.6 L662.9 202.1 L666.3 200.7 L669.7 198.0 L673.1 197.3 L676.4 201.7 L679.8 199.6 L683.2 199.4 L686.6 201.4 L690.0 202.0 L693.4 196.1 L696.8 197.6 L700.2 196.5 L703.6 198.5 L707.0 197.2 L710.4 195.1 L713.8 195.0 L717.2 196.0 L720.6 194.2 L724.0 193.7 L727.4 195.5 L730.7 197.6 L734.1 198.5 L737.5 198.9 L740.9 199.7 L744.3 199.3 L747.7 200.3 L751.1 200.3 L754.5 200.9 L757.9 191.5 L761.3 193.7 L764.7 194.1 L768.1 195.6 L771.5 195.6 L774.9 197.2 L778.3 200.2 L781.7 200.4 L785.0 196.8 L788.4 196.3 L791.8 191.9 L795.2 191.2 L798.6 190.8 L802.0 190.1 L805.4 189.9 L808.8 187.5 L812.2 186.8 L815.6 184.2 L819.0 188.8 L822.4 186.8 L825.8 188.4 L829.2 188.9 L832.6 187.2 L836.0 188.5 L839.3 187.7 L842.7 187.0 L846.1 184.8 L849.5 187.0 L852.9 189.1 L856.3 190.9 L859.7 191.9 L863.1 187.3 L866.5 185.4 L869.9 182.5 L873.3 184.6 L876.7 184.1 L880.1 183.4 L883.5 179.6 L886.9 175.2 L890.3 174.3 L893.6 172.6 L897.0 171.0 L900.4 169.9 L903.8 171.1 L907.2 172.2 L910.6 172.3 L914.0 170.5 L917.4 167.3 L920.8 162.0 L924.2 156.3 L927.6 158.4 L931.0 159.3 L934.4 163.1 L937.8 166.3 L941.2 164.6 L944.6 164.8 L947.9 164.0 L951.3 165.6 L954.7 165.0 L958.1 163.7 L961.5 161.1 L964.9 161.4 L968.3 160.8 L971.7 162.4 L975.1 162.6 L978.5 160.8 L981.9 158.5 L985.3 158.4 L988.7 158.1 L992.1 153.4 L995.5 157.0 L998.9 155.7 L1002.2 157.9 L1005.6 158.2 L1009.0 156.8 L1012.4 156.6 L1015.8 156.8 L1019.2 128.3 L1022.6 127.1 L1026.0 127.5" fill="none" stroke="var(--s2)" stroke-width="1.8" stroke-linejoin="round"/>
-<path d="M52.0 328.1 L55.4 328.5 L58.8 328.8 L62.2 328.2 L65.6 326.6 L69.0 327.2 L72.4 319.3 L75.8 319.4 L79.1 318.0 L82.5 319.3 L85.9 320.4 L89.3 321.3 L92.7 320.9 L96.1 320.9 L99.5 320.5 L102.9 322.3 L106.3 323.3 L109.7 322.9 L113.1 324.6 L116.5 325.4 L119.9 322.5 L123.3 316.4 L126.7 315.8 L130.1 315.5 L133.4 315.1 L136.8 317.1 L140.2 319.1 L143.6 316.2 L147.0 316.1 L150.4 313.5 L153.8 310.2 L157.2 307.2 L160.6 305.9 L164.0 305.0 L167.4 305.0 L170.8 305.1 L174.2 304.5 L177.6 302.0 L181.0 301.5 L184.4 290.2 L187.7 288.2 L191.1 289.5 L194.5 290.2 L197.9 289.9 L201.3 290.1 L204.7 290.1 L208.1 290.3 L211.5 289.5 L214.9 285.6 L218.3 285.9 L221.7 286.3 L225.1 285.4 L228.5 278.7 L231.9 279.0 L235.3 280.1 L238.7 279.4 L242.0 278.1 L245.4 278.9 L248.8 279.1 L252.2 281.3 L255.6 281.7 L259.0 278.7 L262.4 276.8 L265.8 277.0 L269.2 276.9 L272.6 276.4 L276.0 277.4 L279.4 281.7 L282.8 281.9 L286.2 282.3 L289.6 281.4 L293.0 280.8 L296.3 280.3 L299.7 279.9 L303.1 281.1 L306.5 281.5 L309.9 276.3 L313.3 276.1 L316.7 275.8 L320.1 277.8 L323.5 281.6 L326.9 282.9 L330.3 282.9 L333.7 283.4 L337.1 284.2 L340.5 285.4 L343.9 284.4 L347.3 284.2 L350.6 282.0 L354.0 281.9 L357.4 281.0 L360.8 281.4 L364.2 282.7 L367.6 284.4 L371.0 284.4 L374.4 285.8 L377.8 287.7 L381.2 278.3 L384.6 278.3 L388.0 277.7 L391.4 277.8 L394.8 278.0 L398.2 279.1 L401.6 279.0 L404.9 277.9 L408.3 273.0 L411.7 266.9 L415.1 266.9 L418.5 267.7 L421.9 267.5 L425.3 264.6 L428.7 262.6 L432.1 262.9 L435.5 263.1 L438.9 261.5 L442.3 262.9 L445.7 261.3 L449.1 262.4 L452.5 263.1 L455.9 264.5 L459.2 256.0 L462.6 257.0 L466.0 258.3 L469.4 256.3 L472.8 256.6 L476.2 255.1 L479.6 257.0 L483.0 257.8 L486.4 247.3 L489.8 248.3 L493.2 244.6 L496.6 245.9 L500.0 247.6 L503.4 249.8 L506.8 243.3 L510.2 243.6 L513.5 244.9 L516.9 236.8 L520.3 228.4 L523.7 229.2 L527.1 227.1 L530.5 227.0 L533.9 228.1 L537.3 225.1 L540.7 215.9 L544.1 214.4 L547.5 215.0 L550.9 214.5 L554.3 212.8 L557.7 210.6 L561.1 210.5 L564.5 209.2 L567.8 209.7 L571.2 204.4 L574.6 199.8 L578.0 200.6 L581.4 194.0 L584.8 194.8 L588.2 194.4 L591.6 195.5 L595.0 195.0 L598.4 197.1 L601.8 199.4 L605.2 200.8 L608.6 200.1 L612.0 199.1 L615.4 201.5 L618.8 200.4 L622.1 196.8 L625.5 197.2 L628.9 197.5 L632.3 199.4 L635.7 196.5 L639.1 196.5 L642.5 200.1 L645.9 196.6 L649.3 191.2 L652.7 192.2 L656.1 184.5 L659.5 178.4 L662.9 179.9 L666.3 177.5 L669.7 177.3 L673.1 176.7 L676.4 176.6 L679.8 175.9 L683.2 174.7 L686.6 175.1 L690.0 175.8 L693.4 170.5 L696.8 175.9 L700.2 174.6 L703.6 174.9 L707.0 174.8 L710.4 172.5 L713.8 172.5 L717.2 173.3 L720.6 171.4 L724.0 170.9 L727.4 172.5 L730.7 175.4 L734.1 178.7 L737.5 180.4 L740.9 179.2 L744.3 179.8 L747.7 180.1 L751.1 180.1 L754.5 180.9 L757.9 172.5 L761.3 172.3 L764.7 174.0 L768.1 176.0 L771.5 175.2 L774.9 177.7 L778.3 179.0 L781.7 178.0 L785.0 171.7 L788.4 172.8 L791.8 171.4 L795.2 170.0 L798.6 171.1 L802.0 171.1 L805.4 170.6 L808.8 168.3 L812.2 167.4 L815.6 166.9 L819.0 170.6 L822.4 168.8 L825.8 169.3 L829.2 170.3 L832.6 167.6 L836.0 171.0 L839.3 169.0 L842.7 164.5 L846.1 159.9 L849.5 163.1 L852.9 165.1 L856.3 167.5 L859.7 167.4 L863.1 163.4 L866.5 163.2 L869.9 162.1 L873.3 163.7 L876.7 162.6 L880.1 161.3 L883.5 158.2 L886.9 156.9 L890.3 154.3 L893.6 153.0 L897.0 151.8 L900.4 150.6 L903.8 151.9 L907.2 153.1 L910.6 153.2 L914.0 151.3 L917.4 147.9 L920.8 142.2 L924.2 136.1 L927.6 138.4 L931.0 139.4 L934.4 143.4 L937.8 146.8 L941.2 145.0 L944.6 145.2 L947.9 144.4 L951.3 146.0 L954.7 145.5 L958.1 144.0 L961.5 141.2 L964.9 141.6 L968.3 140.6 L971.7 141.8 L975.1 141.7 L978.5 140.7 L981.9 131.5 L985.3 132.3 L988.7 131.9 L992.1 127.0 L995.5 130.8 L998.9 129.4 L1002.2 131.7 L1005.6 132.2 L1009.0 132.8 L1012.4 132.6 L1015.8 132.5 L1019.2 107.8 L1022.6 107.3 L1026.0 107.4" fill="none" stroke="var(--s1)" stroke-width="2.4" stroke-linejoin="round"/>
+<svg viewBox="0 0 1040 380" width="100%" role="img" aria-label="Equity curves, log scale, 10,000 USDT start" style="display:block;max-width:100%;height:auto">
+<line x1="52.0" y1="332.7" x2="1026.0" y2="332.7" stroke="var(--hair)" stroke-width="1"/>
+<text x="44" y="336.2" text-anchor="end" font-size="10.5" fill="var(--faint)">10k</text>
+<line x1="52.0" y1="247.7" x2="1026.0" y2="247.7" stroke="var(--hair)" stroke-width="1"/>
+<text x="44" y="251.2" text-anchor="end" font-size="10.5" fill="var(--faint)">30k</text>
+<line x1="52.0" y1="154.6" x2="1026.0" y2="154.6" stroke="var(--hair)" stroke-width="1"/>
+<text x="44" y="158.1" text-anchor="end" font-size="10.5" fill="var(--faint)">100k</text>
+<line x1="52.0" y1="69.6" x2="1026.0" y2="69.6" stroke="var(--hair)" stroke-width="1"/>
+<text x="44" y="73.1" text-anchor="end" font-size="10.5" fill="var(--faint)">300k</text>
+<line x1="131.2" y1="16" x2="131.2" y2="350" stroke="var(--hair)" stroke-width="1"/>
+<text x="135.2" y="365.0" font-size="10.5" fill="var(--faint)">2023</text>
+<line x1="374.2" y1="16" x2="374.2" y2="350" stroke="var(--hair)" stroke-width="1"/>
+<text x="378.2" y="365.0" font-size="10.5" fill="var(--faint)">2024</text>
+<line x1="617.9" y1="16" x2="617.9" y2="350" stroke="var(--hair)" stroke-width="1"/>
+<text x="621.9" y="365.0" font-size="10.5" fill="var(--faint)">2025</text>
+<line x1="860.9" y1="16" x2="860.9" y2="350" stroke="var(--hair)" stroke-width="1"/>
+<text x="864.9" y="365.0" font-size="10.5" fill="var(--faint)">2026</text>
+<rect x="495.4" y="16" width="530.6" height="334" fill="var(--ink)" opacity="0.035"/>
+<line x1="495.4" y1="16" x2="495.4" y2="350" stroke="var(--ash)" stroke-width="1" stroke-dasharray="3 3"/>
+<text x="501.4" y="29.0" font-size="10.5" fill="var(--ash)" letter-spacing="0.08em">OUT OF SAMPLE</text>
+<path d="M52.0 333.0 L56.7 326.2 L61.3 335.3 L66.0 337.7 L70.6 336.7 L75.3 335.2 L80.0 335.9 L84.6 334.7 L89.3 330.6 L93.9 329.6 L98.6 348.7 L103.3 348.9 L107.9 348.2 L112.6 345.1 L117.2 345.2 L121.9 346.8 L126.6 346.3 L131.2 347.3 L135.9 345.0 L140.5 329.6 L145.2 323.1 L149.9 319.7 L154.5 322.4 L159.2 326.4 L163.8 318.0 L168.5 320.3 L173.2 324.1 L177.8 325.6 L182.5 307.1 L187.1 307.1 L191.8 306.5 L196.5 306.1 L201.1 300.9 L205.8 308.1 L210.4 303.6 L215.1 305.8 L219.8 310.0 L224.4 310.5 L229.1 306.8 L233.8 309.4 L238.4 312.9 L243.1 311.7 L247.7 300.4 L252.4 300.0 L257.1 301.2 L261.7 301.0 L266.4 301.4 L271.0 303.5 L275.7 304.0 L280.4 303.4 L285.0 312.1 L289.7 312.4 L294.3 312.8 L299.0 313.2 L303.7 311.1 L308.3 312.0 L313.0 307.0 L317.6 307.2 L322.3 309.3 L327.0 301.6 L331.6 290.7 L336.3 289.6 L340.9 285.2 L345.6 284.6 L350.3 284.5 L354.9 279.4 L359.6 272.3 L364.2 276.7 L368.9 273.7 L373.6 275.0 L378.2 272.1 L382.9 276.1 L387.5 276.3 L392.2 275.5 L396.9 274.5 L401.5 264.7 L406.2 258.8 L410.8 259.4 L415.5 244.0 L420.2 237.2 L424.8 237.8 L429.5 239.1 L434.1 234.6 L438.8 236.8 L443.5 241.0 L448.1 241.9 L452.8 244.1 L457.4 243.0 L462.1 246.1 L466.8 240.3 L471.4 237.7 L476.1 238.5 L480.7 236.4 L485.4 239.8 L490.1 244.0 L494.7 244.5 L499.4 253.5 L504.0 247.0 L508.7 238.1 L513.4 238.0 L518.0 250.4 L522.7 249.7 L527.3 250.1 L532.0 242.7 L536.7 251.6 L541.3 254.9 L546.0 249.1 L550.7 243.5 L555.3 241.1 L560.0 244.5 L564.6 244.4 L569.3 237.1 L574.0 238.3 L578.6 237.4 L583.3 225.3 L587.9 216.7 L592.6 210.0 L597.3 210.6 L601.9 207.5 L606.6 205.1 L611.2 212.3 L615.9 213.5 L620.6 209.7 L625.2 212.8 L629.9 207.4 L634.5 206.5 L639.2 210.3 L643.9 211.3 L648.5 211.6 L653.2 211.4 L657.8 213.1 L662.5 225.1 L667.2 223.3 L671.8 220.1 L676.5 223.5 L681.1 227.3 L685.8 222.2 L690.5 220.9 L695.1 213.5 L699.8 213.1 L704.4 205.4 L709.1 203.6 L713.8 201.8 L718.4 204.2 L723.1 204.2 L727.7 204.3 L732.4 207.8 L737.1 202.3 L741.7 201.7 L746.4 195.0 L751.0 196.2 L755.7 194.7 L760.4 198.2 L765.0 194.8 L769.7 196.1 L774.3 198.7 L779.0 202.3 L783.7 200.3 L788.3 197.5 L793.0 197.5 L797.6 199.6 L802.3 192.2 L807.0 197.7 L811.6 202.1 L816.3 198.0 L820.9 200.7 L825.6 204.9 L830.3 213.1 L834.9 219.4 L839.6 216.3 L844.2 216.3 L848.9 218.2 L853.6 217.8 L858.2 218.4 L862.9 215.3 L867.6 215.8 L872.2 213.6 L876.9 219.6 L881.5 228.7 L886.2 235.7 L890.9 237.4 L895.5 238.7 L900.2 240.9 L904.8 240.7 L909.5 233.0 L914.2 238.5 L918.8 240.6 L923.5 237.2 L928.1 235.3 L932.8 232.0 L937.5 227.1 L942.1 227.2 L946.8 223.6 L951.4 228.2 L956.1 228.6 L960.8 232.1 L965.4 243.8 L970.1 240.9 L974.7 243.8 L979.4 248.6 L984.1 243.4 L988.7 243.3 L993.4 242.1 L998.0 241.3 L1002.7 243.5 L1007.4 241.9 L1012.0 244.3 L1016.7 228.0 L1021.3 228.0 L1026.0 227.8" fill="none" stroke="var(--btc)" stroke-width="1.6" stroke-linejoin="round" stroke-dasharray="4 3"/>
+<path d="M52.0 333.1 L56.7 335.2 L61.3 339.2 L66.0 340.6 L70.6 340.6 L75.3 341.4 L80.0 342.3 L84.6 343.5 L89.3 342.5 L93.9 342.3 L98.6 340.0 L103.3 339.9 L107.9 338.9 L112.6 339.4 L117.2 340.7 L121.9 342.5 L126.6 342.6 L131.2 344.0 L135.9 346.0 L140.5 336.1 L145.2 336.2 L149.9 335.6 L154.5 335.7 L159.2 335.9 L163.8 337.0 L168.5 336.9 L173.2 335.7 L177.8 330.6 L182.5 324.3 L187.1 324.3 L191.8 325.1 L196.5 324.9 L201.1 321.9 L205.8 319.8 L210.4 320.1 L215.1 320.3 L219.8 318.6 L224.4 320.1 L229.1 318.4 L233.8 319.6 L238.4 320.4 L243.1 321.8 L247.7 312.9 L252.4 314.0 L257.1 315.3 L261.7 313.3 L266.4 313.5 L271.0 312.0 L275.7 314.0 L280.4 314.9 L285.0 304.0 L289.7 305.0 L294.3 301.1 L299.0 302.5 L303.7 304.3 L308.3 306.6 L313.0 299.9 L317.6 300.2 L322.3 301.6 L327.0 293.1 L331.6 284.4 L336.3 285.2 L340.9 283.1 L345.6 282.9 L350.3 284.1 L354.9 281.0 L359.6 271.5 L364.2 269.9 L368.9 270.5 L373.6 270.0 L378.2 268.3 L382.9 265.9 L387.5 265.8 L392.2 264.5 L396.9 265.0 L401.5 259.5 L406.2 254.7 L410.8 255.5 L415.5 248.7 L420.2 249.5 L424.8 249.1 L429.5 250.3 L434.1 249.8 L438.8 252.0 L443.5 254.5 L448.1 255.9 L452.8 255.1 L457.4 254.1 L462.1 256.6 L466.8 255.5 L471.4 251.7 L476.1 252.1 L480.7 252.5 L485.4 254.5 L490.1 251.4 L494.7 251.5 L499.4 255.3 L504.0 251.6 L508.7 245.9 L513.4 247.0 L518.0 239.0 L522.7 232.8 L527.3 234.3 L532.0 231.9 L536.7 231.6 L541.3 231.1 L546.0 230.9 L550.7 230.2 L555.3 229.0 L560.0 229.3 L564.6 230.0 L569.3 224.6 L574.0 230.3 L578.6 228.9 L583.3 229.3 L587.9 229.1 L592.6 226.7 L597.3 226.7 L601.9 227.6 L606.6 225.5 L611.2 225.0 L615.9 226.7 L620.6 229.8 L625.2 233.2 L629.9 235.0 L634.5 233.8 L639.2 234.4 L643.9 234.7 L648.5 234.7 L653.2 235.5 L657.8 226.8 L662.5 226.7 L667.2 228.4 L671.8 230.5 L676.5 229.7 L681.1 232.3 L685.8 233.7 L690.5 232.6 L695.1 226.2 L699.8 227.3 L704.4 225.8 L709.1 224.4 L713.8 225.5 L718.4 225.5 L723.1 225.0 L727.7 222.6 L732.4 221.6 L737.1 221.2 L741.7 225.0 L746.4 223.1 L751.0 223.7 L755.7 224.7 L760.4 221.8 L765.0 225.4 L769.7 223.3 L774.3 218.7 L779.0 213.9 L783.7 217.2 L788.3 219.4 L793.0 221.8 L797.6 221.7 L802.3 217.6 L807.0 217.4 L811.6 216.2 L816.3 218.0 L820.9 216.8 L825.6 215.4 L830.3 212.1 L834.9 210.9 L839.6 208.1 L844.2 206.8 L848.9 205.5 L853.6 204.2 L858.2 205.5 L862.9 206.9 L867.6 206.9 L872.2 204.9 L876.9 201.4 L881.5 195.5 L886.2 189.2 L890.9 191.5 L895.5 192.6 L900.2 196.8 L904.8 200.4 L909.5 198.5 L914.2 198.7 L918.8 197.9 L923.5 199.6 L928.1 199.0 L932.8 197.5 L937.5 194.6 L942.1 194.9 L946.8 194.0 L951.4 195.2 L956.1 195.1 L960.8 194.0 L965.4 184.4 L970.1 185.3 L974.7 184.9 L979.4 179.8 L984.1 183.7 L988.7 182.2 L993.4 184.7 L998.0 185.2 L1002.7 185.9 L1007.4 185.6 L1012.0 185.5 L1016.7 160.0 L1021.3 159.5 L1026.0 159.6" fill="none" stroke="var(--s3)" stroke-width="1.7" stroke-linejoin="round"/>
+<path d="M52.0 333.2 L56.7 335.1 L61.3 339.9 L66.0 341.6 L70.6 341.6 L75.3 342.1 L80.0 343.2 L84.6 344.7 L89.3 343.4 L93.9 343.3 L98.6 339.4 L103.3 339.2 L107.9 338.1 L112.6 338.4 L117.2 339.3 L121.9 341.2 L126.6 341.3 L131.2 342.5 L135.9 344.0 L140.5 336.7 L145.2 337.1 L149.9 336.7 L154.5 336.5 L159.2 336.6 L163.8 336.6 L168.5 336.9 L173.2 335.1 L177.8 329.2 L182.5 320.9 L187.1 320.9 L191.8 321.9 L196.5 321.6 L201.1 318.1 L205.8 315.5 L210.4 315.9 L215.1 316.1 L219.8 314.2 L224.4 315.9 L229.1 313.9 L233.8 316.8 L238.4 311.7 L243.1 313.4 L247.7 302.9 L252.4 304.3 L257.1 305.8 L261.7 303.4 L266.4 303.7 L271.0 301.8 L275.7 304.2 L280.4 305.3 L285.0 289.7 L289.7 290.9 L294.3 286.0 L299.0 287.7 L303.7 290.2 L308.3 292.9 L313.0 284.9 L317.6 285.3 L322.3 286.4 L327.0 275.1 L331.6 261.6 L336.3 262.6 L340.9 260.1 L345.6 259.9 L350.3 261.3 L354.9 256.1 L359.6 241.9 L364.2 240.1 L368.9 240.5 L373.6 240.4 L378.2 239.6 L382.9 238.5 L387.5 238.5 L392.2 237.5 L396.9 237.5 L401.5 234.2 L406.2 230.5 L410.8 230.8 L415.5 225.2 L420.2 226.2 L424.8 224.8 L429.5 225.1 L434.1 225.1 L438.8 225.7 L443.5 226.4 L448.1 227.6 L452.8 227.6 L457.4 226.2 L462.1 228.1 L466.8 227.9 L471.4 227.1 L476.1 227.3 L480.7 227.7 L485.4 229.3 L490.1 226.0 L494.7 225.5 L499.4 230.5 L504.0 225.0 L508.7 215.6 L513.4 217.0 L518.0 204.9 L522.7 191.2 L527.3 192.8 L532.0 190.3 L536.7 190.8 L541.3 190.4 L546.0 190.3 L550.7 189.5 L555.3 188.2 L560.0 188.8 L564.6 189.5 L569.3 182.1 L574.0 190.1 L578.6 189.1 L583.3 188.5 L587.9 188.1 L592.6 186.1 L597.3 186.1 L601.9 189.7 L606.6 187.6 L611.2 187.4 L615.9 188.4 L620.6 191.1 L625.2 195.6 L629.9 196.1 L634.5 196.2 L639.2 196.9 L643.9 197.1 L648.5 197.0 L653.2 197.9 L657.8 185.2 L662.5 184.0 L667.2 185.4 L671.8 187.2 L676.5 186.8 L681.1 188.5 L685.8 186.9 L690.5 184.4 L695.1 167.0 L699.8 164.9 L704.4 163.0 L709.1 162.4 L713.8 162.8 L718.4 163.1 L723.1 162.6 L727.7 160.6 L732.4 159.3 L737.1 158.0 L741.7 162.2 L746.4 160.7 L751.0 160.9 L755.7 161.9 L760.4 157.2 L765.0 161.4 L769.7 160.4 L774.3 159.8 L779.0 157.9 L783.7 158.5 L788.3 160.3 L793.0 161.6 L797.6 161.8 L802.3 157.2 L807.0 157.0 L811.6 154.9 L816.3 155.6 L820.9 154.4 L825.6 153.9 L830.3 153.4 L834.9 153.1 L839.6 150.6 L844.2 151.3 L848.9 150.4 L853.6 150.2 L858.2 150.6 L862.9 151.7 L867.6 151.7 L872.2 149.6 L876.9 148.2 L881.5 144.1 L886.2 138.6 L890.9 140.6 L895.5 141.1 L900.2 142.2 L904.8 145.9 L909.5 144.0 L914.2 144.2 L918.8 143.9 L923.5 144.6 L928.1 144.3 L932.8 143.5 L937.5 141.5 L942.1 142.5 L946.8 142.1 L951.4 142.3 L956.1 142.3 L960.8 142.0 L965.4 135.4 L970.1 136.6 L974.7 136.2 L979.4 132.8 L984.1 135.6 L988.7 134.4 L993.4 135.3 L998.0 135.5 L1002.7 135.8 L1007.4 135.8 L1012.0 135.9 L1016.7 90.4 L1021.3 89.1 L1026.0 89.1" fill="none" stroke="var(--s1)" stroke-width="2.4" stroke-linejoin="round"/>
 </svg>
       <div class="legend">
-<div class="lg"><span class="sw" style="background:var(--s1)"></span>S46 Net-signal book, 5 signals · 8% risk</div>
-<div class="lg"><span class="sw" style="background:var(--s2)"></span>S46 + implied volatility, 6 signals · 9% risk · from 2023-06</div>
-<div class="lg"><span class="sw" style="background:var(--s3)"></span>Order flow alone · 2% risk</div>
+<div class="lg"><span class="sw" style="background:var(--s1)"></span>S60 Adaptive conviction · 10% risk</div>
+<div class="lg"><span class="sw" style="background:var(--s3)"></span>S46 Fixed linear, same size · control</div>
+<div class="lg bench"><span class="sw" style="background:var(--btc)"></span>BTCUSDT perpetual, buy &amp; hold</div>
 <div class="lg bench"><span class="sw" style="background:var(--btc)"></span>BTCUSDT perpetual, buy &amp; hold</div>
 <div class="lg bench"><span class="sw" style="background:var(--btc)"></span>BTCUSDT perpetual, buy &amp; hold</div>
       </div>
     </div>
-    <p class="note">Over five and a half years the net-signal book turns 10,000 into
-    <strong>111,299</strong> against the perpetual's 16,985, at a 15% worst drawdown against the
-    perpetual's 77%. The six-signal line is spliced in from 2023-06, where the implied-volatility
-    index begins, and rebased onto the five-signal curve at that point so the two are comparable
-    from there on — it is not a 5.5-year track record and should not be read as one. The thin line
-    is the single best signal on its own under identical rules: <strong>18,834</strong>, barely
-    above buy and hold on a log scale. The distance between that line and the thick one is the
-    whole result of this study, and none of it came from improving that signal.</p>
+    <p class="note">Four years, one account, one position at a time. The thick line is the
+    adaptive-conviction book at 10% risk; the thin line is the identical five signals at the
+    identical size with a fixed linear conviction curve. <strong>Both make the same predictions</strong> —
+    the gap between them is entirely how hard each bets when the signals agree, and it is worth
+    roughly a third of the terminal equity. The dashed line is the perpetual itself, which ran a
+    77% drawdown over the same period.</p>
   </div>
 </section>
 <section>
@@ -348,6 +348,73 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
       paying a round turn. The three earlier blending failures all averaged <em>correlated</em>
       signals, where the average is just a noisier version of the same view. Averaging signals
       that correlate 0.10 is a different operation.</p>
+    </div>
+
+    <div class="why">
+      <h3>The second lever: the shape of the bet, not the size of it</h3>
+      <p class="prose">Once the signals were saturated, the arithmetic left exactly one term.
+      <em>CAGR at the drawdown limit = (Calmar/Sharpe) × Sharpe × 20%.</em> Sharpe is capped near 3
+      by the correlation ceiling. The bet count is closed — running the same signals at 6h, 4h, 2h
+      and 1h decisions gives up to eight times the trades and collapses profit factor from 1.81 to
+      <strong>0.99</strong>, monotonically, because sampling a twelve-hourly signal faster
+      manufactures threshold crossings out of noise. That leaves the <em>ratio</em>, which was
+      1.68 — and unlike the other two, it is not a property of the market. It is a property of how
+      the bet is shaped.</p>
+      <p class="prose">Sizing on <strong>|net|²</strong> instead of |net| — betting far harder when
+      all five signals agree, rescaled so the average position is unchanged, so this is shape and
+      not leverage — holds the drawdown flat and lifts everything else. Pushing the exponent
+      further keeps lifting the ratio:</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Conviction curve</th><th>CAGR</th><th>PF</th><th>Sharpe</th><th>Calmar</th>
+            <th>Calmar/Sharpe</th></tr></thead>
+          <tbody>
+            <tr><td>|net|¹ — linear</td><td class="n">54.9%</td><td class="n">2.03</td>
+              <td class="n"><strong>2.20</strong></td><td class="n">3.68</td><td class="n">1.68</td></tr>
+            <tr><td>|net|²</td><td class="n">62.2%</td><td class="n">2.70</td><td class="n">2.18</td>
+              <td class="n">3.99</td><td class="n">1.83</td></tr>
+            <tr><td>|net|<sup>2.5</sup></td><td class="n">67.1%</td><td class="n">3.30</td>
+              <td class="n">2.12</td><td class="n">4.29</td><td class="n">2.02</td></tr>
+            <tr><td>|net|³</td><td class="n">67.0%</td><td class="n">3.91</td><td class="n">2.01</td>
+              <td class="n">4.31</td><td class="n">2.15</td></tr>
+            <tr><td>|net|⁴</td><td class="n">61.7%</td><td class="n"><strong>5.01</strong></td>
+              <td class="n">1.86</td><td class="n">4.10</td><td class="n"><strong>2.20</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">The ratio rises monotonically, 1.68 → 2.20. But in-sample return falls down
+      that column while out-of-sample rises — a divergence that is a warning, not a bonus. At high
+      exponents the book bets almost only on rare unanimity, so few such events fall in any one
+      period and the variance between periods is large.</p>
+    </div>
+
+    <div class="why">
+      <h3>The right exponent is regime-dependent, so it is chosen quarterly</h3>
+      <p class="prose">Walk-forward resolved the divergence: the early folds want <strong>1.0</strong>,
+      the later ones <strong>2.5–3.0</strong>. Neither fixed choice is right for the whole sample,
+      and re-choosing every quarter from the trailing eighteen months uses no future information —
+      so it is implementable, not just a diagnostic.</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Book, same window and size</th><th>CAGR</th><th>Max DD</th><th>Sharpe</th>
+            <th>Calmar</th><th>P(DD&gt;20%)</th></tr></thead>
+          <tbody>
+            <tr class="best"><td>adaptive conviction, 10% risk</td><td class="n pos">111.4%</td>
+              <td class="n">−18.9%</td><td class="n">2.21</td><td class="n"><strong>5.89</strong></td>
+              <td class="n">46%</td></tr>
+            <tr><td>adaptive conviction, 8% risk</td><td class="n">84.6%</td><td class="n">−14.8%</td>
+              <td class="n">2.21</td><td class="n">5.71</td><td class="n">21%</td></tr>
+            <tr><td>adaptive conviction, 6% risk</td><td class="n">60.1%</td><td class="n">−11.2%</td>
+              <td class="n">2.20</td><td class="n">5.34</td><td class="n pos">4%</td></tr>
+            <tr><td>fixed linear, 10% risk (control)</td><td class="n">75.0%</td><td class="n">−16.0%</td>
+              <td class="n">2.20</td><td class="n">4.70</td><td class="n">44%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">Calmar 4.70 → 5.89 against its own control at matched size, and the Sharpe is
+      unchanged at 2.21 — which is the point. <strong>None of this gain came from predicting
+      better.</strong> It came from betting differently on predictions of the same quality, and it
+      is the only thing in this study that moved the Calmar/Sharpe ratio at all.</p>
     </div>
 
     <div class="why">
@@ -589,61 +656,67 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
           <th>Sharpe</th><th>Calmar</th><th>IS CAGR</th><th>OOS CAGR</th><th>Gate missed</th></tr></thead>
         <tbody>
           <tr class="best">
-            <td><span class="rk">1</span> <span class="name">S46 · Net-signal book</span><br>
-              <span class="sub">5 signals → one position · 8% risk · 2021-03→2026-08 incl. the 2022 bear</span></td>
+            <td><span class="rk">1</span> <span class="name">S60 · Adaptive conviction</span><br>
+              <span class="sub">5 signals → one position · conviction curve re-chosen quarterly · 10% risk · 2022-09→2026-08</span></td>
+            <td class="n pos">111.4%</td><td class="n">−18.9%</td><td class="n">2.80</td><td class="n">673</td>
+            <td class="n">2.21</td><td class="n"><strong>5.89</strong></td><td class="n">—</td><td class="n">—</td>
+            <td>profit only</td></tr>
+          <tr class="rank">
+            <td><span class="rk">2</span> <span class="name">S60 · Adaptive conviction, safe size</span><br>
+              <span class="sub">same book at 8% risk · 21% bootstrap chance of breaching 20%</span></td>
+            <td class="n pos">84.6%</td><td class="n">−14.8%</td><td class="n">2.78</td><td class="n">672</td>
+            <td class="n">2.21</td><td class="n">5.71</td><td class="n">—</td><td class="n">—</td>
+            <td>profit only</td></tr>
+          <tr class="rank">
+            <td><span class="rk">3</span> <span class="name">S46 · Net-signal book, fixed linear</span><br>
+              <span class="sub">5 signals · 8% risk · the full 5.5 years incl. the 2022 bear market</span></td>
             <td class="n pos">54.9%</td><td class="n">−14.9%</td><td class="n">2.03</td><td class="n">1,005</td>
             <td class="n"><strong>2.20</strong></td><td class="n">3.68</td><td class="n">54.1%</td><td class="n pos">55.7%</td>
             <td>profit only</td></tr>
           <tr class="rank">
-            <td><span class="rk">2</span> <span class="name">S51 · Walk-forward, 8 folds</span><br>
-              <span class="sub">parameters re-chosen on every training window, applied untouched to the next six months</span></td>
-            <td class="n pos">76.3%</td><td class="n">−13.8%</td><td class="n">—</td><td class="n">718</td>
-            <td class="n"><strong>2.28</strong></td><td class="n"><strong>5.53</strong></td><td class="n">—</td><td class="n">—</td>
-            <td>profit only</td></tr>
-          <tr class="rank">
-            <td><span class="rk">3</span> <span class="name">S46 · + implied volatility</span><br>
+            <td><span class="rk">4</span> <span class="name">S46 · + implied volatility</span><br>
               <span class="sub">6 signals · 9% risk · 2023-06→2026-08, no bear market in the window</span></td>
             <td class="n pos">56.2%</td><td class="n">−13.1%</td><td class="n">2.08</td><td class="n">580</td>
             <td class="n">2.05</td><td class="n">4.30</td><td class="n">64.6%</td><td class="n">52.2%</td>
             <td>profit only</td></tr>
           <tr class="rank">
-            <td><span class="rk">4</span> <span class="name">S46 · Net-signal book, safe size</span><br>
+            <td><span class="rk">5</span> <span class="name">S46 · Net-signal book, safe size</span><br>
               <span class="sub">5 signals · 6% risk · 3% bootstrap chance of a 20% drawdown</span></td>
             <td class="n pos">39.6%</td><td class="n">−11.4%</td><td class="n">2.02</td><td class="n">1,001</td>
             <td class="n"><strong>2.20</strong></td><td class="n">3.47</td><td class="n">39.2%</td><td class="n pos">40.3%</td>
             <td>profit only</td></tr>
           <tr class="rank">
-            <td><span class="rk">5</span> <span class="name">S36 · Implied-volatility momentum</span><br>
+            <td><span class="rk">6</span> <span class="name">S36 · Implied-volatility momentum</span><br>
               <span class="sub">single signal · 12h · short window only</span></td>
             <td class="n pos">29.8%</td><td class="n">−13.0%</td><td class="n">1.71</td><td class="n">201</td>
             <td class="n">1.58</td><td class="n">2.30</td><td class="n">47.7%</td><td class="n">22.0%</td>
             <td>profit only</td></tr>
           <tr class="rank">
-            <td><span class="rk">6</span> <span class="name">S31 · Short-window orthogonal flow</span><br>
+            <td><span class="rk">7</span> <span class="name">S31 · Short-window orthogonal flow</span><br>
               <span class="sub">single signal · 12h · found by the stability screen</span></td>
             <td class="n pos">18.7%</td><td class="n">−14.6%</td><td class="n">1.69</td><td class="n">229</td>
             <td class="n">1.26</td><td class="n">1.28</td><td class="n">16.6%</td><td class="n pos">22.7%</td>
             <td>profit only</td></tr>
           <tr class="rank">
-            <td><span class="rk">7</span> <span class="name">S38 · Stablecoin basis</span><br>
+            <td><span class="rk">8</span> <span class="name">S38 · Stablecoin basis</span><br>
               <span class="sub">single signal · the implied USDT/USD rate</span></td>
             <td class="n pos">21.0%</td><td class="n">−23.1%</td><td class="n">1.61</td><td class="n">369</td>
             <td class="n">1.21</td><td class="n">0.91</td><td class="n">13.4%</td><td class="n pos">33.6%</td>
             <td>profit + drawdown</td></tr>
           <tr class="rank">
-            <td><span class="rk">8</span> <span class="name">S40 · BTC dominance</span><br>
+            <td><span class="rk">9</span> <span class="name">S40 · BTC dominance</span><br>
               <span class="sub">single signal · share of turnover across 16 perps</span></td>
             <td class="n pos">20.6%</td><td class="n">−15.6%</td><td class="n">1.40</td><td class="n">536</td>
             <td class="n">1.13</td><td class="n">1.32</td><td class="n">24.9%</td><td class="n">13.8%</td>
             <td>profit only</td></tr>
           <tr class="rank">
-            <td><span class="rk">9</span> <span class="name">S7 · Smart-money vs retail</span><br>
+            <td><span class="rk">10</span> <span class="name">S7 · Smart-money vs retail</span><br>
               <span class="sub">single signal · positioning composite</span></td>
             <td class="n pos">12.8%</td><td class="n">−15.7%</td><td class="n">1.36</td><td class="n">232</td>
             <td class="n">0.82</td><td class="n">0.81</td><td class="n">13.0%</td><td class="n">12.0%</td>
             <td>profit only</td></tr>
           <tr class="rank">
-            <td><span class="rk">10</span> <span class="name">S15 · Convex trend</span><br>
+            <td><span class="rk">11</span> <span class="name">S15 · Convex trend</span><br>
               <span class="sub">4h · pyramid 3 · no target — highest profit factor of any single book</span></td>
             <td class="n pos">37.2%</td><td class="n">−36.0%</td><td class="n">1.91</td><td class="n">261</td>
             <td class="n">0.95</td><td class="n">1.03</td><td class="n">—</td><td class="n pos">56.4%</td>
@@ -683,8 +756,53 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
 
     <article class="spec">
       <div class="spec-head">
+        <h3>S60 · Adaptive conviction</h3>
+        <span class="id">RANK 1 · CAGR 111.4% · DD −18.9% · PF 2.80 · N 673</span>
+      </div>
+      <div class="spec-body">
+        <p>The S46 book below, with one addition: <strong>the conviction curve is re-chosen every
+        quarter</strong> from the trailing eighteen months. Same five signals, same execution, same
+        costs. Nothing else differs.</p>
+        <dl class="kv">
+          <dt>Position size</dt>
+          <dd>risk × |net|<sup>p</sup> ÷ stop distance, rescaled each time so the <em>average</em>
+            position is unchanged — so <em>p</em> changes the shape of the bet, never the leverage —
+            and capped at 3× the average.</dd>
+          <dt>Quarterly re-selection</dt>
+          <dd>Every three months, simulate the book over the trailing <strong>eighteen</strong> on
+            each of 40 configurations — exponent <em>p</em> ∈ {1.0, 1.5, 2.0, 2.5, 3.0} × stop
+            {2.5, 3.0} ATR × target {2R, 3R} × hold {14, 21} days — and adopt whichever had the
+            highest Sharpe over that window. Trade it until the next re-selection. The entire series
+            is generated forward: the configuration in force on any date was chosen only from data
+            strictly before it.</dd>
+          <dt>Result</dt>
+          <dd>111.4% / −18.9%, profit factor 2.80, win rate 46.1%, Sharpe 2.21, Calmar 5.89 over
+            673 trades. At 8% risk: 84.6% / −14.8%. At 6%: 60.1% / −11.2%.</dd>
+          <dt>Drawdown</dt>
+          <dd>Bootstrap median −19.6% and a <strong>46% chance of breaching 20%</strong> at 10%
+            risk; 21% at 8% risk; <strong>4%</strong> at 6% risk.</dd>
+          <dt>Window</dt>
+          <dd>2022-09 → 2026-08. The eighteen-month warm-up consumes 2021 and most of 2022.</dd>
+        </dl>
+        <p class="note">What the re-selection actually finds is that the right conviction curve is
+        <strong>regime-dependent</strong>: the early quarters choose <em>p</em> = 1.0 — spread the
+        bet over whatever agrees — and the later ones choose 2.5 to 3.0, betting almost only on
+        unanimity. Neither is right for the whole sample, which is why both fixed choices lose to
+        re-choosing. Against its own control at matched size, Calmar goes 4.70 → 5.89 <em>with the
+        Sharpe unchanged at 2.21</em>. None of that gain came from predicting better.</p>
+        <p class="note"><strong>Two things this does not do.</strong> Making the signal
+        <em>weights</em> adaptive on the same schedule makes it clearly worse (Sharpe 2.21 → 1.75,
+        breach probability 21% → 66%) because IC-proportional weighting zeroes out the veto signals
+        — the error section&nbsp;9 documents, committed once a quarter. And 2022 is negative in
+        every variant tested; the adaptive version is <em>worse</em> that year than the fixed
+        linear one. Its gains come from the trending years.</p>
+      </div>
+    </article>
+
+    <article class="spec">
+      <div class="spec-head">
         <h3>S46 · The net-signal book</h3>
-        <span class="id">RANK 1 · CAGR 54.9% · DD −14.9% · PF 2.03 · N 1,005</span>
+        <span class="id">RANK 3 · CAGR 54.9% · DD −14.9% · PF 2.03 · N 1,005</span>
       </div>
       <div class="spec-body">
         <p>Five signals, each reading a different market, are reduced to a single number every
@@ -1414,12 +1532,14 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
         <em>ρ̄</em>, and the combined Sharpe is bounded — not by how many you add, but by
         <em>ρ̄</em>:</p>
         <div class="eq">Sharpe(k)  =  s·√k ⁄ √(1 + (k−1)·ρ̄)   →   s ⁄ √ρ̄   as k → ∞</div>
-        <p style="color:var(--ash)">Measured on this instrument: <strong>s ≈ 0.8–1.3</strong>
-        per signal, <strong>ρ̄ ≈ 0.10</strong> across the set. That puts the ceiling at
-        <strong>Sharpe ≈ 3</strong>. Five signals already reach 2.13, and six reach 2.26 — between
-        70% and 75% of the way there. Signals seven through twenty are worth the remaining quarter
-        between them, and then nothing. <em>ρ̄ is a property of the market, not of the search</em>
-        — every signal available on one instrument is ultimately a view on the same price.</p>
+        <p style="color:var(--ash)">Measured on this instrument: <strong>s ≈ 0.8–1.3</strong> per
+        signal, <strong>ρ̄ ≈ 0.10</strong> across the set. That puts the ceiling at
+        <strong>Sharpe ≈ 3</strong>. Five signals reach 2.21 — about three quarters of the way — and
+        the in-book re-screen of all 116 candidates found that only 7% of them improve the book at
+        all, with the median candidate making it <em>worse</em> by 0.28 of Sharpe. Signals six
+        through twenty are worth the remaining quarter between them, and then nothing. <em>ρ̄ is a
+        property of the market, not of the search</em> — every signal available on one instrument is
+        ultimately a view on the same price.</p>
       </div>
 
       <div class="stack-sm">
@@ -1461,13 +1581,20 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
       <div class="stack-sm">
         <h3>What 300% at 20% drawdown would actually require</h3>
         <p style="color:var(--ash)">A Calmar ratio of 15. The best measured here is
-        <strong>6.40</strong> — and that on the friendliest window, with the bootstrap saying its
-        drawdown is really 22%. On the full 5.5 years including the 2022 bear market the same
-        strategy runs at <strong>3.01</strong>. Calmar tracked Sharpe at roughly 2.8× on the short
-        window and 1.4× on the long one, so 15 needs a Sharpe somewhere between 5 and 11 against a
-        measured ceiling near 3.</p>
-        <p style="color:var(--ash)">To reach it from ρ̄ ≈ 0.10 you would need per-signal Sharpe
-        near 3.5 — nothing in 116 screened features came within a factor of three of that — or
+        <strong>5.89</strong>, and it took both levers to get there — five near-independent signals
+        to reach Sharpe 2.21, then an adaptive conviction curve to push the Calmar/Sharpe ratio
+        from 1.68 to 2.67. On the full 5.5 years including the 2022 bear market, without the
+        adaptive curve, the same signals run at 3.68.</p>
+        <p style="color:var(--ash)">Decomposed, 15 needs <em>Sharpe × ratio = 15</em>. The ratio
+        reached 2.67 and the exponent sweep shows it flattening above 2.2 for any fixed curve. At
+        that ratio the required Sharpe is <strong>5.6</strong>, against a measured 2.21 and a
+        correlation ceiling near 3. Even granting the ceiling in full, the ratio would have to
+        reach <strong>5</strong> — roughly double anything this study could produce, and the
+        experiments that tried to push it further (pyramiding, trailing exits, continuous exposure)
+        all cost more Sharpe than they bought in shape.</p>
+        <p style="color:var(--ash)">To reach the required Sharpe from ρ̄ ≈ 0.10 you would need
+        per-signal Sharpe near 3.5 — nothing in 116 screened features came within a factor of three
+        of that — or
         ρ̄ near 0.01, which means signals that are genuinely independent of one another, which on
         a single instrument they cannot be. The gap is filled either by a wide cross-section of
         instruments, which is outside a BTCUSDT-only brief, or by sub-second market making, where
