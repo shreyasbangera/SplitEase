@@ -171,7 +171,10 @@ def _loop(o, h, l, c, entry, exitf, stopd, tpd, traild, fund,
                     rm = (dd_hard + dd_now) / (dd_hard - dd_soft)
                     if rm < dd_floor: rm = dd_floor
                     if rm > 1.0: rm = 1.0
-                q = (eq * risk * rm) / sd
+                # conviction sizing: |entry| scales the risk budget for this trade.
+                # Books that emit +/-1 are unaffected (|entry| == 1).
+                cv = entry[i] if entry[i] > 0.0 else -entry[i]
+                q = (eq * risk * rm * cv) / sd
                 if q * px > eq * maxlev:
                     q = eq * maxlev / px
                 if q * px >= min_notional:

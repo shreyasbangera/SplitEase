@@ -1207,3 +1207,115 @@ exactly as theory says it should**, which is a direct check on the machinery tha
 cross-sleeve gains. Second, the spread across phases — Sharpe 0.27 to 0.76 from *the same
 strategy on the same data* — is a blunt warning about how much of any single book's headline
 number is the accident of where the bars were cut.
+
+## Constraint change: single account, one position
+The brief was corrected mid-study — **no portfolios; one account, one position.** Everything from
+S32 to S44 ran the sleeves as separate sub-accounts rebalancing monthly, which is not tradable
+that way. So the same idea was rebuilt as a single strategy: every signal reduced to one number
+on one 12h grid, one net BTCUSDT position at a time, one stop, one target.
+
+**Netting turned out to be better than the sub-account structure, not a compromise.** Profit
+factor rose from **1.51 to 2.09**, because opposing signals cancel *before* anything is traded
+instead of both being opened and both paying a round turn. Sharpe rose from 1.84 to 2.13 on the
+same window. The three previous failures of signal blending (S2, the breadth blend, the S30
+composite) all averaged *correlated* signals; averaging near-orthogonal ones is a different
+operation and it works.
+
+## S43 — Lifting the other term: conviction sizing
+Portfolio Sharpe tends to s/√ρ̄ and ρ̄ will not move, so the remaining lever is s. The engine had
+been discarding information it already held: every book emitted a z-score and then collapsed it
+to ±1 at the entry, so a 3σ signal and a 1.01σ signal were the same bet. Letting |z| scale the
+risk budget — capped, so no single signal can take the account:
+
+| book | base Sharpe | conviction | IS | OOS |
+|---|---|---|---|---|
+| IVOL | 1.41 | **1.61** | 2.05 → 2.14 | 1.07 → **1.33** |
+| CMPX | 0.99 | **1.27** | 0.54 → 0.93 | 1.64 → **1.75** |
+| FLOW | 1.22 | 1.26 | 1.16 → 1.19 | 1.35 → **1.41** |
+| BTCDOM | 1.11 | 1.13 | 1.33 → 1.30 | 0.72 → **0.82** |
+
+Out-of-sample Sharpe improved on **all four**. Profit factor rose on all four too (IVOL
+1.61→1.73, CMPX 1.46→1.68). The engine change was regression-tested against S31's published
+numbers — CAGR 22.4%, DD −19.6%, PF 1.60, N 234, Sharpe 1.23 — reproduced exactly, since books
+emitting ±1 have |entry| = 1 and are unaffected.
+
+**The instructive contrast:** conviction *filtering* fails where conviction *sizing* works.
+Trading only |z| > 1.5× threshold roughly halves Sharpe on every book (IVOL 1.41→0.92, BTCDOM
+1.11→0.25). So the extremes do not carry the edge — the edge is monotone in |z| and the
+*ordering* is the information. That is what a real IC looks like, and it is a stronger check on
+the signals than any single backtest.
+
+Two other sizing ideas failed cleanly. A HAR-style volatility forecast (0.4·daily + 0.35·weekly
++ 0.25·monthly realised vol) replacing ATR for stop placement **lost on all four books** — Sharpe
+1.41→1.19, 0.99→0.62, 1.11→0.87, 1.22→0.88. ATR is already adequate at these horizons and the
+longer HAR components make the stop stale. A dead band on the net signal, so weak agreement goes
+untraded, also lost: 0.30 and 0.45 bands cut Sharpe from 1.74 to 1.42 and 1.13. Same lesson —
+do not filter a monotone edge.
+
+## S46 — FINAL: the net-signal book, one account, one position
+**Five signals, each reading a different market, averaged with equal weights** (in-sample-fitted
+inverse-volatility weights were tested and are worse — 2.13 → 1.65 Sharpe):
+
+| signal | source | what it reads |
+|---|---|---|
+| `s_flow` | 6-bar taker imbalance orthogonalised to past returns, z(480) | aggressive order flow |
+| `s_cmpx` | log(BTCUSD_PERP / BTCUSDT_PERP) diff 6, z(120) | the implied **USDT/USD rate** |
+| `s_btcdom` | BTC ÷ (BTC + 15 alts) quote volume, z(120) | rotation across the complex |
+| `s_fundz` | −z(funding rate) | fade crowded leverage |
+| `s_posn` | top-trader vs retail positioning composite, 4h → 12h | who is positioned how |
+| `s_ivol` | 3-day change in the BVOL implied-vol index, z(120) | *short window only* |
+
+Each contributes 0 inside its band and ±1 outside, scaled by |z|/threshold, capped at 2. Entry
+when the net is non-zero, sized by risk × |net| ÷ stop distance. Stop 3 × ATR(14), target 2R,
+21-day cap (which rarely binds — 21, 30 and 45 days give identical results). Signal from the
+closed 12h bar, filled on the next 15m bar.
+
+**Long window 2021-03 → 2026-08 (5.5 years, includes the 2022 bear market), risk 8%:**
+
+| | value |
+|---|---|
+| CAGR | **51.3%** |
+| Max drawdown | **−17.1%** |
+| Profit factor | **2.09** |
+| Trades | 787 |
+| Win rate | 48.7% |
+| Sharpe | **2.13** |
+| Calmar | 3.01 |
+| In-sample | 54.1% / PF 2.13 |
+| **Out-of-sample** | **57.8% / PF 2.27 / N 329** |
+| Bootstrap median DD | −15.4% (5th pct −23.6%) |
+| P(DD worse than 20%) | **15%** |
+
+Yearly: 2021 +65%, **2022 +6%**, 2023 +79%, 2024 +55%, 2025 +20%, 2026 +68% — **every calendar
+year positive, including the bear market**, and out-of-sample stronger than in-sample.
+
+At risk 6%: 37.2% CAGR, −13.4% DD, P(DD>20%) = **2%**.
+
+**Short window 2023-06 → 2026-08 with the implied-volatility signal added, risk 15%:** CAGR
+**123.2%**, DD −19.3%, PF 2.48, Sharpe 2.26, Calmar 6.40, OOS 122.5% / PF 2.63 — but the
+bootstrap puts P(DD>20%) at **64%**, so the 19.3% is a favourable draw and the honest point on
+that window is 66.0% at a 9% breach probability.
+
+### Robustness of the headline
+| test | result |
+|---|---|
+| look-ahead: as traded / peek 1 bar / delayed 1 bar | Sharpe 2.13 / **4.22** / 1.43 — textbook gradient |
+| oracle control on the same harness | Sharpe 20.3 — the harness can express a leak |
+| cost: zero / 16 / 32 / 48 / **64 bps** round turn | PF 2.32 / 2.09 / 1.88 / 1.72 / **1.57** |
+| leave-one-out | every signal contributes; dropping any one raises drawdown (−17.1% → −23.0% to −31.9%) |
+
+Surviving a **quadruple** cost assumption at PF 1.57 is the strongest cost result in the study.
+
+### Dropping the ETH-relative signal
+The leak audit had flagged `s_ethrel` as fragile — a flat peek/lag gradient, meaning no real
+timing content. Leave-one-out confirmed it: removing it *improved* the long window from 39.0% to
+51.3% CAGR while cutting drawdown from −20.8% to −17.1%, and improved Calmar on the short window
+too (4.84 → 6.40). It was carrying weight it had not earned, and the audit found it before the
+performance test did. Removed.
+
+### Where this leaves the target
+Gate by gate at the headline configuration: **trades 787 ✓, profit factor 2.09 ✓, drawdown
+−17.1% ✓, risk management ✓, no look-ahead ✓ — net yearly profit 51.3% ✗ against 300%.**
+The single failing gate is the return, and it is short by 5.8×. On the short window with implied
+volatility the same book reaches 123.2% at −19.3%, short by 2.4×, at a drawdown the bootstrap
+says is really 22%.
