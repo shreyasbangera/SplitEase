@@ -1821,3 +1821,53 @@ near-independent signals of similar strength — the 1/N result — because esti
 fitted combination exceeds the gain from fitting it. **Adding beats learning here, and the study
 now has three independent demonstrations of the same thing** (static fitted weights, adaptive
 IC weights, and a learned combiner).
+
+## S65 — The signal constructions were never swept either, and they do not matter
+Stops, targets, holds, thresholds, exponents and weights had all been swept; the *signal
+constructions* never had. The 480-bar z-window on flow, the 6-bar difference and 120-bar window on
+the stablecoin basis — all set once, early, and carried through every version of the book. Seven
+constructions were put into the walk-forward alongside the exponent, chosen each quarter on
+training data only.
+
+| variant | risk | CAGR | MaxDD | Sharpe | Calmar | P(DD>20%) |
+|---|---|---|---|---|---|---|
+| construction also searched | 10% | 107.0% | −16.4% | 2.24 | 6.51 | 37% |
+| published construction | 10% | 104.2% | −17.7% | 2.23 | 5.89 | 31% |
+
+At matched bootstrap risk the two are within three points of CAGR. The search picks the published
+480-bar window as often as any alternative (6 quarters each for 240 and 480). **That is the fifth
+parameter family where the answer is "it does not matter"** — after stops, targets, holds,
+thresholds and weights — and the accumulated insensitivity is better evidence that the edge is real
+than any single out-of-sample number.
+
+## S66–S67 — Short-side asymmetry: a clean example of a result that evaporates under discipline
+BTC trends up, and a short that goes wrong goes wrong fast, so the two sides plausibly want
+different risk settings. The book has always given them identical ones. First, do both sides earn
+their place?
+
+| side | CAGR | MaxDD | PF | Sharpe |
+|---|---|---|---|---|
+| both (reference) | 63.5% | −15.6% | 2.78 | **2.16** |
+| long only | 38.8% | −14.6% | **3.59** | 1.80 |
+| short only | 18.4% | −11.9% | 1.90 | 1.22 |
+
+They do — there is no long-only shortcut on an asset that tripled over the window.
+
+Direct testing then suggested a **tighter stop on shorts** was worth a great deal: Calmar 4.07 →
+4.40 with CAGR 63.5% → 77.2%. Economically motivated, too — what kills a short is a squeeze, not a
+drift.
+
+**It did not survive.** Put into the walk-forward grid and made to earn its place quarter by
+quarter on training data only:
+
+| variant | risk | CAGR | MaxDD | Sharpe | Calmar | P(DD>20%) |
+|---|---|---|---|---|---|---|
+| asymmetry searched | 10% | 91.6% | −17.1% | 2.07 | 5.35 | 37% |
+| **symmetric control** | 10% | **99.3%** | −17.7% | **2.19** | **5.62** | **30%** |
+
+The walk-forward *chooses* asymmetric settings in 11 of 16 quarters and is worse for it at every
+risk level. The direct 4.07 → 4.40 improvement was an artefact of picking after seeing the answer.
+Symmetric treatment stands.
+
+This is the cleanest example in the study of why the discipline matters: the idea was plausible,
+economically motivated, and produced a large improvement on a direct test. It was still noise.
