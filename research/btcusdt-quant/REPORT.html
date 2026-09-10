@@ -457,7 +457,14 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
           <span class="pill">PF 1.53 at double costs</span>
           <span class="pill">5 of 6 years positive, worst −1%</span>
           <span class="pill">Sharpe invariant to size: 1.23 at every risk level</span>
+          <span class="pill">1-minute execution: 15.5% vs 15.9%</span>
         </div>
+        <p class="note">A second, independent instance of the same caveat cuts the other way.
+        The 6h variant of this book has a <em>higher</em> out-of-sample IC (+0.036 at h=24
+        against +0.006 for the 12h book chosen here) and yet performs <em>worse</em> out of
+        sample — 17.0% against 18.6%, with a −21.0% drawdown and a bootstrap probability of
+        breaching 20% of 61% against 21%. IC stability neither guarantees nor is required for
+        strategy quality.</p>
         <p class="note">One honest caveat. The rank-IC of the traded signal itself degrades out
         of sample much as the earlier book's did — +0.112 in sample against +0.013 out, at a
         96-hour horizon. The strategy nevertheless performs <em>better</em> out of sample,

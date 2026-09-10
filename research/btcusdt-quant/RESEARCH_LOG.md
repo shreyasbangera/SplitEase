@@ -772,3 +772,24 @@ the payoff with a stop and a target, and full-distribution rank-IC says nothing 
 behaviour. So the stability screen earned its keep by **pointing at an under-explored feature
 family**, not by predicting strategy performance directly — the claim "stable IC implies stable
 strategy" is not supported by this study's own evidence, in either direction.
+
+### S31 — remaining validation
+**1-minute execution grid** (3,506,400 bars) against the 15-minute grid used throughout:
+| config | 15m CAGR / DD / PF | 1m CAGR / DD / PF |
+|---|---|---|
+| 12h thr1.0 3.0×2.0 7d | 15.9% / −14.3% / 1.61 | **15.5% / −14.8% / 1.59** |
+| 12h thr1.0 3.0×2.0 12d | 14.1% / −16.5% / 1.63 | 13.8% / −17.3% / 1.62 |
+| 6h thr1.3 3.5×2.5 7d | 20.0% / −21.0% / 1.45 | 18.8% / −21.0% / 1.41 |
+
+Differences of 0.3–1.2 pp of CAGR and under a point of drawdown. The book is not an artefact of
+coarse stop resolution.
+
+**Alternative configurations considered and rejected:**
+* `12h … 12d` — slightly higher PF (1.63) but drawdown −22.5% at the same risk, bootstrap
+  P(DD>20%) 30%, and a worse worst-year (−7% vs −1%).
+* `6h thr1.3` — **higher out-of-sample IC** (+0.036 at h=24 vs +0.006 for the 12h book) yet
+  *worse* strategy performance out of sample (17.0% vs 18.6%), a −21.0% drawdown and bootstrap
+  P(DD>20%) of **61%**. A second, independent instance of IC stability failing to predict
+  strategy quality — in the opposite direction this time.
+
+Chosen: **12h, thr 1.0, stop 3.0×ATR, target 2.0R, 7-day stop, risk 3.5%.**
