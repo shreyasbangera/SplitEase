@@ -1629,3 +1629,100 @@ There is a pleasing detail in which signal it is. The book is built entirely of 
 reads — aggressive flow, the stablecoin basis, turnover rotation, funding, positioning — and out
 of 116 candidates the single thing that adds to it is the simplest price signal there is: where
 price sits in its own recent range.
+
+## S55 — The bet-count lever, closed for good
+Sharpe = IC × √(bets/year). The book takes ~183 trades a year; reaching the target at constant IC
+needs ~16× more. Every earlier timeframe test in this study was run on *single* signals, never on
+the netted combination, so this was a real gap. The net book was rebuilt at 1h, 2h, 4h and 6h
+decisions with every rolling window rescaled to the same wall-clock span, so only the decision
+rate changes.
+
+| decisions | trades/yr | PF | Sharpe | Calmar |
+|---|---|---|---|---|
+| **12h** | 175 | **1.81** | **1.88** | **2.55** |
+| 6h | 308 | 1.40 | 1.40 | 2.04 |
+| 4h | 446 | 1.16 | 0.57 | 0.41 |
+| 2h | 817 | 1.05 | −0.12 | −0.11 |
+| 1h | 1,376 | 0.99 | −1.87 | −0.53 |
+
+**Eight times the bets and profit factor collapses to 1.00.** Perfectly monotone in the wrong
+direction. (This table's 12h row uses a rebuilt panel and so differs slightly from the book's own
+2.03/2.20 — the comparison across rows is like-for-like, the baseline is not the headline.)
+
+The identity has a catch that is easy to forget: **N must be *independent* bets.** These signals
+are genuinely 12-hourly. Sampling them faster manufactures threshold crossings out of noise, each
+of which pays 16 bps. IC falls faster than √N rises, and it is not close.
+
+## S56–S60 — Payoff shape: the one lever that was still open
+With Sharpe capped near 3 by the correlation ceiling and the bet count closed, the only remaining
+term is the **Calmar/Sharpe ratio**, which is 1.68 here. It is not a constant — it is a property
+of the shape of the return distribution.
+
+Four shapes and one sizing change, none previously tested on the net book:
+
+| shape | CAGR | DD | PF | Sharpe | Calmar | C/S |
+|---|---|---|---|---|---|---|
+| target 2R (baseline) | 54.9% | −14.9% | 2.03 | **2.20** | 3.68 | 1.68 |
+| trail 3 ATR, no target | 52.7% | −16.2% | 2.01 | 2.09 | 3.25 | 1.56 |
+| pyramid 3 + target | 89.8% | −27.7% | 2.19 | 2.11 | 3.24 | 1.53 |
+| convex (trail + pyramid) | 111.4% | −34.2% | **2.78** | 1.83 | 3.26 | 1.78 |
+| **quadratic conviction** | **59.1%** | **−14.9%** | **2.72** | 2.17 | **3.97** | **1.83** |
+
+Convexity raises profit factor to the highest in the study but wrecks the drawdown. **Quadratic
+conviction — sizing on |net|² rather than |net|, betting far harder when all five signals agree —
+is the one that works**: same realised drawdown, profit factor 2.03 → 2.72, Calmar 3.68 → 3.97,
+and the bootstrap risk of breaching 20% *falls* from 18% to 11%.
+
+Sweeping the exponent (rescaled each time so mean position size is unchanged, so this is shape and
+not leverage):
+
+| exponent | CAGR | PF | Sharpe | Calmar | **C/S** | IS | OOS |
+|---|---|---|---|---|---|---|---|
+| 1.0 | 54.9% | 2.03 | 2.20 | 3.68 | 1.68 | 54.1% | 55.7% |
+| 1.5 | 60.2% | 2.37 | 2.22 | 3.93 | 1.78 | 54.8% | 69.1% |
+| 2.0 | 62.2% | 2.70 | 2.18 | 3.99 | 1.83 | 52.7% | 79.8% |
+| 2.5 | 67.1% | 3.30 | 2.12 | 4.29 | 2.02 | 51.4% | 92.7% |
+| 3.0 | 67.0% | 3.91 | 2.01 | 4.31 | **2.15** | 47.1% | 102.8% |
+| 4.0 | 61.7% | **5.01** | 1.86 | 4.10 | **2.20** | 38.5% | 115.0% |
+
+**The Calmar/Sharpe ratio rises monotonically, 1.68 → 2.20.** Payoff shape is malleable, which is
+the first good news the ceiling arithmetic has had. But in-sample falls monotonically while
+out-of-sample rises — a divergence that is a warning, not a bonus: at high exponents the book bets
+almost only on rare unanimity, so each period contains few such events and the variance across
+periods is large.
+
+### The exponent is regime-dependent, so make it adaptive
+Walk-forward with the exponent in the search grid resolved the divergence. The early folds pick
+**1.0**; the later ones pick **2.5–3.0**. Neither fixed choice is right for the whole sample.
+
+| walk-forward variant | CAGR | DD | Sharpe | Calmar | P(DD>20%) |
+|---|---|---|---|---|---|
+| **exponent searched per fold** | **95.7%** | −13.8% | **2.31** | **6.92** | 22% |
+| fixed linear | 58.0% | −12.9% | 2.21 | 4.48 | 18% |
+| random config per fold | 95.1% | −21.9% | 2.11 | 4.34 | 60% |
+
+All eight folds positive. The random control reaches the same CAGR at *far* worse drawdown
+(−21.9% vs −13.8%, breach probability 60% vs 22%), so what the search is buying is risk control,
+not return.
+
+**That is implementable, not just a diagnostic.** Re-choosing the exponent every quarter from the
+trailing 18 months uses no future information. Run forward that way (S60), with the first 18
+months consumed as warm-up:
+
+| risk | CAGR | MaxDD | Sharpe | **Calmar** | boot median DD | P(DD>20%) |
+|---|---|---|---|---|---|---|
+| 6% | 64.9% | −11.2% | 2.27 | **5.78** | −12.3% | **4%** |
+| **8%** | **84.6%** | −14.8% | 2.21 | 5.71 | −16.0% | 21% |
+| **10%** | **119.9%** | **−18.9%** | 2.25 | **6.34** | −19.7% | 48% |
+| 12% | 154.6% | −21.4% | 2.28 | 7.23 | −22.9% | 71% |
+| fixed linear control, 10% | 75.0% | −16.0% | 2.20 | 4.70 | −19.2% | 44% |
+
+**Calmar 4.70 → 6.34 against its own control at matched size.** At 10% risk the book returns
+**119.9% at a −18.9% measured drawdown** — the first result in this study to pass the drawdown
+gate at a triple-digit return, though the bootstrap calls that a coin flip (48%) and the honest
+operating point is 84.6% at −14.8%.
+
+Caveats stated plainly: the 18-month warm-up costs the first stretch of history, so this is
+measured on 2022-09 → 2026-08 rather than the full 5.5 years, and **2022 is negative in every
+variant** (−6% to −17%) — the adaptive version is *worse* in that year than the fixed linear one.
+Its gains come from the trending years.
