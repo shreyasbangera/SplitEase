@@ -1973,3 +1973,90 @@ factor 3.26 over 546 trades, Sharpe 2.44. Short of the 300% target by **2.2×**.
 
 That is the honest ceiling on this window. Everything above it in the table buys return with
 drawdown that breaches the brief's own limit.
+
+## S71 — The three betting parameters nobody had looked at were already right
+The `|net|` cap (3.0), the flat-exit threshold (exactly 0) and the per-signal z-thresholds
+(1.0, and 0.7 for positioning) were all typed once, early, and never revisited.
+
+| parameter | values tested | best | verdict |
+|---|---|---|---|
+| `\|net\|` cap | 2 / 3 / 4 / 6 | 3 (=4=6) | **inert** — above 3 it never binds; 2 is slightly worse |
+| flat exit | 0 / 0.05 / 0.1 / 0.2 / 0.35 | **0** | Calmar 4.25 → 1.05 as the threshold rises |
+| threshold scale | 0.7 / 0.85 / 1.0 / 1.2 / 1.5 | **1.0** | Calmar 3.27 / 3.34 / **4.25** / 1.58 / 0.76 |
+
+Exiting on *decay* rather than *extinction* is much worse: the trade count goes 938 → 2,575 and
+profit factor 2.69 → 1.56. The book pays a round turn every time conviction wobbles near zero.
+
+Two things worth separating here. The cap is genuinely inert, and the exit rule is strongly
+confirmed. But **the threshold optimum is sharp** — Calmar falls by a fifth at ×0.85 and by two
+thirds at ×1.2 — and that sharpness is a fragility, not a vindication. It is mitigated only by the
+fact that 1.0 was chosen long before this test and on unrelated grounds.
+
+## S72 — The edge is not decaying. The market is.
+Every recent version of the book shows returns falling year on year (at 10% risk: 2023 +229%,
+2024 +133%, 2025 +44%, 2026 +44%). Two readings with opposite consequences: an unusually trending
+2023-24, or signals being arbitraged away. Measured on 54 rolling 12-month windows:
+
+| | first third | last third | slope/yr |
+|---|---|---|---|
+| mean signal rank-IC | 0.0347 | **0.0394** | — |
+| book Sharpe | 1.698 | 1.515 | −0.085 |
+| book CAGR | 35.2% | 32.7% | −1.8pp |
+
+**The raw predictive power of the signals is slightly HIGHER in the last third than the first.**
+Sharpe and CAGR drift down marginally, well inside the noise of 54 overlapping windows. This is
+not decay.
+
+What the returns actually track is how trending the market is:
+
+| relationship (54 windows) | Pearson | Spearman |
+|---|---|---|
+| **market trendiness vs book CAGR** | **+0.609** | +0.478 |
+| **mean signal IC vs book Sharpe** | **+0.662** | +0.523 |
+| market trendiness vs book Sharpe | +0.500 | +0.472 |
+| market **volatility** vs book CAGR | **−0.259** | −0.316 |
+
+The negative volatility relationship is the retrospective explanation for S34: portfolio
+volatility targeting was Calmar-neutral because it was scaling by a variable that is *negatively*
+related to the book's returns. The right variable was trendiness all along.
+
+**And the number that reframes the target.** The best 12-month window (ending 2024-03) returned
+**152% at 8% risk with a −7.5% drawdown**. Sized to the 20% drawdown limit that is **≈408% CAGR**.
+So 300% is not impossible for this strategy — it is what the strategy does in the right regime.
+Over the full period, sized to the same limit, it does 136%. The entire gap is regime.
+
+## S73 — Sizing to trendiness: the most promising lead in the study, and it fails
+If returns track trendiness at +0.61, and trendiness were persistent, then scaling risk by
+trailing trendiness would capture more of the 408% windows and less of the flat ones. It only
+needs persistence, not deep predictability.
+
+**Trendiness mean-reverts at exactly the horizons that matter:**
+
+| lookback → forward horizon | correlation |
+|---|---|
+| 180d → 30d | +0.620 |
+| 180d → 60d | +0.268 |
+| 180d → 90d | **+0.029** |
+| 60d → 60d | **−0.117** |
+| 90d → 90d | **−0.211** |
+
+At matched horizons it is *negatively* autocorrelated. A trending 90 days is followed by a less
+trending 90 days. The +0.62 at 180d→30d is the long window's own inertia, not forecasting power.
+
+Every scaled variant loses, on every lookback and every clip range:
+
+| variant (risk 8%) | CAGR | MaxDD | PF | Sharpe | Calmar |
+|---|---|---|---|---|---|
+| **flat risk (control)** | **67.1%** | −15.6% | **3.30** | **2.12** | **4.29** |
+| trend-scaled 60d [0.5, 2.0] | 61.2% | −16.7% | 2.66 | 2.04 | 3.67 |
+| trend-scaled 90d [0.5, 2.0] | 57.2% | −18.0% | 2.60 | 1.90 | 3.18 |
+| trend-scaled 180d [0.5, 2.0] | 61.0% | −19.4% | 2.53 | 2.01 | 3.14 |
+
+Scaling up after a trend buys a regime that is about to end. **This is the same lesson as the
+order book, in a different costume: a strong, real, measurable relationship that cannot be
+traded** — there the edge was smaller than the spread, here the driver is real but arrives only
+in hindsight.
+
+**Consequence for the target.** 300% at a 20% drawdown requires a permanently 2024-like market,
+and the one variable that would let you size into such a market is not forecastable at the
+horizon required. The 408% is available only to someone who already knows which year they are in.
