@@ -906,3 +906,161 @@ amount of predictive accuracy at a one-minute horizon recovers 16 bps from a 0.1
 With this, **every data source Binance publishes for BTCUSDT has been mined**: OHLCV, taker
 volume, trade count, funding, open interest, trader positioning, quarterly futures, the
 coin-margined contract, tick prints, and now the order book.
+
+## S34 — Attacking the drawdown instead of the return (portfolio risk overlays)
+Calmar = CAGR / MaxDD and leverage moves both together, so the only way leverage buys anything
+is if the *shape* of the equity curve can be changed. Two causal overlays were applied to the
+S32 portfolio's own daily returns, each computed from data through day t−1 and applied to day t:
+
+| overlay | knob | CAGR | MaxDD | PF | Sharpe | Calmar |
+|---|---|---|---|---|---|---|
+| none | 1.5 | 38.6% | −19.0% | 1.27 | 1.34 | **2.03** |
+| vol target 20% | 1.5 | 33.6% | −17.8% | 1.27 | **1.39** | 1.89 |
+| vol target 25% | 1.5 | 42.7% | −21.9% | 1.26 | **1.39** | 1.95 |
+| vol target 30% | 1.5 | 51.2% | −26.1% | 1.25 | **1.39** | 1.96 |
+| HWM drawdown throttle 8/22 | 1.5 | 30.4% | −16.6% | 1.23 | 1.20 | 1.83 |
+| HWM drawdown throttle 6/18 | 3.0 | 20.4% | −21.0% | 1.14 | 0.77 | 0.97 |
+
+**Volatility targeting is Calmar-neutral here.** It does exactly what it should — the three
+target levels trace a clean, near-linear risk dial (34%/18%, 43%/22%, 51%/26%) and the base
+leverage knob stops mattering entirely once the overlay is on, which is the correct signature of
+a working vol target. Sharpe improves 1.34 → 1.39 and out-of-sample drawdown tightens. But CAGR
+falls in step with drawdown, so Calmar does not move. **The reason is that the sleeves already
+size every trade by ATR**, so the equity curve is close to homoskedastic before the overlay ever
+sees it; portfolio-level vol targeting is largely redundant with trade-level vol sizing.
+
+**The high-water-mark throttle actively destroys the book.** Sharpe collapses from 1.34 to
+0.77–1.20 and at higher knobs the drawdown gets *worse*, not better. Cutting size in a drawdown
+means being small through the recovery, and for a book whose losses are not serially correlated
+that is a pure tax. Recorded as a clean negative: **do not de-risk into drawdowns on a
+mean-reverting-equity strategy.**
+
+## S35 — Maker execution: does a resting limit order unlock the fast end?
+Every book so far crossed the spread twice (≈4.5 bps fee + ≈3.5 bps slippage per side = 16 bps
+round turn). A resting limit order pays ≈1.8 bps a side — 3.6 bps round turn, **4.4× cheaper**.
+Since Sharpe ≈ IC × √(bets/year) and the sleeves take only ~85 bets a year, cheap execution is
+the one thing that could open up the thousands-of-bets regime.
+
+A new engine (`engine/maker.py`) was built on 1-minute bars: an order is posted at the first
+minute after the decision bar closes, fills only when a later minute trades **strictly through**
+the limit, is cancelled after a TTL, exits at a resting limit (maker fee) or a market stop
+(taker fee + slippage), and takes the stop when a minute's range covers both.
+
+Full grids of a 5-minute short-term-reversal book across thresholds, offsets, R:R and both
+polarities returned **profit factor 0.36–0.81 — every single configuration lost**, most blowing
+the account. Rather than tune, the raw edge was isolated directly: for every fill, the mean
+forward return from the fill price, before any stop or target.
+
+| limit offset | fill rate | +5m | +15m | +30m | +60m | +120m |
+|---|---|---|---|---|---|---|
+| 0.25 σ (fade) | 85% | −0.39 | −0.37 | −0.41 | −0.69 | −0.72 |
+| 0.50 σ (fade) | 75% | +0.10 | +0.15 | +0.22 | −0.14 | −0.30 |
+| **1.00 σ (fade)** | **57%** | **+0.84** | **+1.06** | **+1.18** | +0.63 | +0.48 |
+| 1.00 σ (fade, 2σ trigger) | 69% | +1.15 | +1.19 | **+1.57** | +1.06 | +0.52 |
+
+(bps; against a **3.6 bps** maker round turn.)
+
+The trade-off is textbook and perfectly monotone: the deeper the order rests, the better the
+fill-conditional edge and the lower the fill rate. **And the best point on that curve is
++1.57 bps against a 3.6 bps cost — less than half of what is needed.** Fading beats joining at
+every offset, so short-term reversal is the right sign; there is just almost nothing there.
+
+Note on the fill rule: modelling "fill on touch" instead of "fill on penetration" changes
+nothing, because a limit placed at a continuous price (close − 0.5σ) is essentially never
+exactly equal to a bar's low. The conservative and optimistic bounds coincide.
+
+**Taken with the order-book result, this closes the fast end from two independent directions.**
+The order book says the *information* at a 1-minute horizon is worth 0.16 bps; the maker engine
+says the *execution* saving is worth 12.4 bps but the fill-conditional edge only 1.6 bps. Retail
+high-frequency trading on BTCUSDT is not blocked by one of cost or signal — it fails on both.
+
+## S36 — Implied volatility: the one input class the study had never touched
+Correcting the previous entry: Binance publishes one more BTCUSDT-relevant series, and it is
+not a price series at all. **BVOL** is a 30-day forward-looking implied volatility index for BTC,
+a VIX analogue, published as 1-second ticks. 1,152 daily files were streamed and reduced to
+**1,656,492 minute bars covering 2023-06-20 → 2026-09-09**. Everything else in this study is
+*realised* — prices, taker flow, open interest, positioning, funding. This is the market's
+*price* of future risk.
+
+Measured directly over the window: **mean IV 51.4%, mean realised vol 42.7%, mean variance risk
+premium +8.7 percentage points.** The VRP is real and positive in BTC, exactly as in equities —
+but it is a premium for *selling options*, and this study trades futures, so it is not directly
+harvestable here.
+
+As directional signals for the perp, most IV features are unstable — the level, the premium and
+the IV/RV ratio all flip sign between in- and out-of-sample. One does not:
+
+| signal (12h bars, h = 1 day) | IS IC | OOS IC |
+|---|---|---|
+| iv (level, z-scored) | +0.062 | +0.039 |
+| vrp (IV − realised) | −0.031 | +0.013 |
+| iv_rv (ratio) | −0.036 | +0.008 |
+| **iv_mom** (3-day IV change) | **+0.046** | **+0.091** |
+| **iv_mom_res** (orthogonalised to price momentum) | **+0.083** | **+0.090** |
+| price momentum (same lookback) | −0.016 | −0.028 |
+
+**iv_mom is not a price-momentum proxy.** The two correlate −0.10, price momentum's own IC is
+*negative* over this window, and projecting price momentum out (expanding-window fit, refit
+monthly on strictly past data — the S31 construction) *raises* the IC from +0.046 to +0.083
+rather than lowering it. What is left is the options market repricing risk before the perp moves.
+
+Decile economics at a 1-day horizon: **D1 −22 bps, D10 +22 bps, spread +44 bps against a 16 bps
+round turn.** Nearly 3× cost — the first feature in the study to clear its hurdle by that margin.
+
+Backtested as a book (12h decision, 15m execution, 3 ATR stop, 2R target, risk 2%):
+
+| variant | ALL CAGR | DD | PF | N | Sharpe | IS CAGR / PF | OOS CAGR / PF / N |
+|---|---|---|---|---|---|---|---|
+| **raw, thr 0.7** | **15.6%** | **−8.0%** | **1.61** | 201 | **1.41** | 26.0% / 2.10 | **11.0% / 1.45 / 142** |
+| raw, thr 1.0 | 10.0% | −9.9% | 1.42 | 166 | 0.98 | 15.2% / 1.58 | 7.6% / 1.34 |
+| residual, thr 0.7 | 10.5% | −9.5% | 1.45 | 187 | 1.06 | 13.1% / 1.90 | 9.3% / 1.35 |
+
+An honest wrinkle: **the residual has the better IC but the raw signal makes the better book.**
+The monthly refit adds estimation noise that a 3.2-year sample cannot absorb, and the raw series
+is what gets traded. Sample caveat stated up front: BVOL begins 2023-06-20, so this book has
+3.2 years where the others have 5.7 — but 2.17 of those years are out-of-sample, so most of its
+life is out of sample, which is the opposite of the usual problem.
+
+## S37 — The IV sleeve in the portfolio: the best result in the study
+Standalone the IV book is modest (15.6% CAGR). What matters is that it reads something nothing
+else reads. Daily-return correlations over the common window 2023-06-21 → 2026-08-31:
+
+| | FLOW | POSN | CONVEX | IVOL |
+|---|---|---|---|---|
+| FLOW | 1.000 | 0.436 | 0.455 | **0.087** |
+| POSN | 0.436 | 1.000 | 0.722 | **0.172** |
+| CONVEX | 0.455 | 0.722 | 1.000 | **0.231** |
+
+Inverse-volatility weights fixed in-sample give IVOL 40.9% of the book (it has the lowest
+volatility). Like-for-like on the *same* window, so the shorter sample cannot flatter the
+comparison:
+
+| sleeves | knob | CAGR | MaxDD | PF | Sharpe | Calmar | N |
+|---|---|---|---|---|---|---|---|
+| FLOW+POSN+CONVEX | 1.5 | 49.2% | −18.1% | 1.29 | 1.49 | 2.72 | 517 |
+| FLOW+POSN+CONVEX | 2.5 | 84.4% | −28.2% | 1.27 | 1.49 | 2.99 | 519 |
+| **+IVOL** | 1.5 | 39.9% | −11.4% | 1.37 | **1.78** | 3.51 | 718 |
+| **+IVOL** | 2.0 | 54.9% | −14.9% | 1.36 | **1.78** | 3.68 | 718 |
+| **+IVOL** | 2.6 | **73.7%** | **−19.0%** | 1.35 | **1.78** | **3.87** | 720 |
+
+**At matched drawdown the IV sleeve is worth roughly +40% of return**: ≈51% CAGR without it at
+−19% drawdown versus ≈74% with it. Sharpe 1.49 → 1.78, Calmar 2.99 → 3.87. Yearly, at knob 2.6:
+2023 +34%, 2024 +75%, 2025 +56%, 2026 +59% — no losing year, though the window excludes 2022.
+
+**The drawdown must be read from the bootstrap, not the sample.** A stationary block bootstrap
+(2,000 paths, 5-day blocks) says the −19.0% realised figure badly understates the risk:
+
+| knob | CAGR | realised DD | bootstrap median DD | 5th pct | P(DD worse than 20%) |
+|---|---|---|---|---|---|
+| **1.5** | **39.9%** | −11.4% | **−15.6%** | −26.2% | **19%** |
+| 2.0 | 54.9% | −14.9% | −20.3% | −33.4% | 52% |
+| 2.6 | 73.7% | −19.0% | −25.7% | −41.4% | 84% |
+
+So the honest headline is **≈40% a year at a genuine sub-20% drawdown**, not 74%. Taking the
+74% means accepting an 84% chance of breaching the 20% limit — which fails the brief's risk
+criterion even though the backtest's realised number passes it.
+
+**Still nowhere near 300%.** But it is the first structural improvement in a long while, and it
+confirms the study's central lesson for the third time: *a sleeve's correlation to what you
+already hold matters more than its standalone quality.* IVOL is the weakest book here on
+standalone CAGR and the most valuable one in the portfolio.
