@@ -1726,3 +1726,32 @@ Caveats stated plainly: the 18-month warm-up costs the first stretch of history,
 measured on 2022-09 → 2026-08 rather than the full 5.5 years, and **2022 is negative in every
 variant** (−6% to −17%) — the adaptive version is *worse* in that year than the fixed linear one.
 Its gains come from the trending years.
+
+## S61 — Adaptive weights fail, and rediscover the invalid screen while doing it
+Re-choosing the conviction exponent quarterly took Calmar 4.70 → 6.34, so the obvious next step was
+to make the *weights* adaptive too. They have always been equal and fixed. Four weightings were
+searched jointly with the exponent every quarter on the trailing 18 months: EQUAL, IC-proportional
+(each signal's trailing rank-IC against forward one-day returns, floored at zero), IC-squared, and
+DROP1 (equal minus the worst signal by trailing IC).
+
+| variant (risk 8%) | CAGR | MaxDD | Sharpe | Calmar | boot med DD | P(DD>20%) |
+|---|---|---|---|---|---|---|
+| **adaptive exponent only (S60)** | **84.6%** | **−14.8%** | **2.21** | **5.71** | −16.0% | **21%** |
+| adaptive weights + exponent | 80.0% | −18.3% | 1.75 | 4.38 | −22.1% | **66%** |
+| fixed equal, linear | 59.8% | −14.8% | 2.23 | 4.03 | −15.6% | 19% |
+
+**Adding adaptive weights makes it clearly worse**: Sharpe 2.21 → 1.75, Calmar 5.71 → 4.38, and the
+chance of breaching 20% triples to 66%.
+
+The reason is the interesting part, and it arrives independently of S53. Look at the chosen
+weights: in nine of the sixteen quarters the fourth signal is set to **0.00**. That signal is
+`fundz` — and S53 measured its standalone Sharpe at **−0.04** while removing it costs the book
+0.24 of Sharpe, because its value is in *vetoing* other signals rather than in making money.
+
+**IC-proportional weighting is a standalone screen applied dynamically, so it makes exactly the
+error S53 documented — it throws away the veto signals.** DROP1 does the same thing more bluntly.
+The adaptive weighting rediscovers the invalid criterion on its own and pays for it every quarter.
+
+Equal weights stand. The adaptive exponent is kept; adaptive weighting is rejected. Two independent
+routes now say the same thing: **in a netted book you cannot judge a signal by what it does alone,
+at any point in time, statically or dynamically.**
