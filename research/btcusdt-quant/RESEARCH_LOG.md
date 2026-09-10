@@ -793,3 +793,37 @@ coarse stop resolution.
   strategy quality — in the opposite direction this time.
 
 Chosen: **12h, thr 1.0, stop 3.0×ATR, target 2.0R, 7-day stop, risk 3.5%.**
+
+## S32 — Flow + Positioning pair — **the best futures-only result in the study**
+The two best books read different things and share no input series: S31 reads aggressive flow
+(taker imbalance orthogonalised to returns, 12h), S7 reads positioning (how crowded retail and
+top-trader accounts are, 4h). In-sample daily-return correlations:
+
+| | FLOW | POSN | CONVEX |
+|---|---|---|---|
+| FLOW | 1.00 | **0.30** | **0.30** |
+| POSN | 0.30 | 1.00 | 0.71 |
+
+FLOW is genuinely diversifying against both positioning books, which correlate 0.71 with each
+other. Two sub-accounts, monthly rebalance, inverse-vol weights fixed in-sample (FLOW 52%,
+POSN 48%):
+
+| knob | IS CAGR / DD | OOS CAGR / DD | ALL CAGR / DD | PF | Sharpe | Calmar | N |
+|---|---|---|---|---|---|---|---|
+| 1 | 22.2% / −13.5% | 26.0% / −11.4% | 23.4% / −13.5% | 1.26 | 1.42 | 1.73 | 463 |
+| **1.5** | 34.1% / −19.7% | **39.8% / −16.6%** | **35.8% / −19.7%** | 1.25 | **1.43** | **1.82** | 463 |
+| 2 | 46.3% / −25.5% | 54.0% / −21.6% | 48.7% / −25.5% | 1.24 | 1.43 | 1.91 | 463 |
+| 3 | 71.8% / −36.0% | 83.0% / −30.8% | 75.1% / −36.0% | 1.23 | 1.44 | 2.09 | 463 |
+
+Yearly at knob 2: 2021 +90%, 2022 **−5%**, 2023 +76%, 2024 +39%, 2025 +45%, 2026 +46%.
+
+**Sharpe 1.43 and Calmar 1.82 are the highest futures-only figures in this study** — against
+1.23 / 1.14 for the best single book and 1.12 / 1.17 for the earlier four-sleeve portfolio,
+which was dragged down by having three correlated directional books in it. Pairing two
+genuinely different reads beats stacking four similar ones.
+
+At knob 1.5 the portfolio clears three of the five numeric gates — 463 trades, PF 1.25,
+drawdown −19.7% — and misses net yearly profit at **35.8% against 300%**. That is a 60%
+improvement on the previous futures-only best (22.4%) at the same drawdown, and still 8.4×
+short of the target. Bootstrap P(DD>20%) is 98% at knob 2, so knob 1.5 is the practical ceiling
+and even there the drawdown margin is thin.
