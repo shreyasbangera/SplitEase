@@ -153,7 +153,7 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
     <span class="eyebrow">2021-01 → 2026-08</span>
   </div>
   <h1>The 300% Problem</h1>
-  <p class="lede">Twenty-eight strategies on the BTCUSDT perpetual, against a target of 300% net
+  <p class="lede">Twenty-nine strategies on the BTCUSDT perpetual, against a target of 300% net
   annual profit at under 20% drawdown. This is the record of what was tested, what survived
   out of sample, and the measured reason the target is unreachable — which turns out not to be
   a matter of finding a better signal.</p>
@@ -169,7 +169,7 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
       <div class="gap-item"><div class="k">Required net / year</div><div class="v">300%</div></div>
       <div class="gap-item"><div class="k">Best under 20% DD</div><div class="v" style="color:var(--fail)">22.9%</div></div>
       <div class="gap-item"><div class="k">Best at any drawdown</div><div class="v">59.6%</div></div>
-      <div class="gap-item"><div class="k">Strategies tested</div><div class="v">28</div></div>
+      <div class="gap-item"><div class="k">Strategies tested</div><div class="v">29</div></div>
       <div class="gap-item"><div class="k">Parameter sets run</div><div class="v">3,100+</div></div>
     </div>
   </div>
@@ -669,7 +669,7 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
   <div class="stack-lg">
     <div class="stack-sm">
       <span class="eyebrow">7b — Closing the remaining avenues</span>
-      <h2>Six more things that were not the problem</h2>
+      <h2>Seven more things that were not the problem</h2>
       <p class="prose" style="color:var(--ash)">Once the growth-optimal curve showed leverage
       could not close the gap, the remaining hypothesis was that the <em>signal</em> was
       leaving something on the table — a data source not yet mined, or a construction not yet
@@ -700,6 +700,10 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
             <td style="text-align:left">Monthly re-weighting of sleeves by trailing Sharpe / mean, 3–12 month lookbacks</td>
             <td class="n">Sharpe 0.97–1.10 vs <strong>1.10</strong> fixed</td>
             <td>No scheme beats fixed equal weight</td></tr>
+          <tr><td class="name">Conditional gating</td>
+            <td style="text-align:left">Requiring breadth to confirm the positioning signal instead of averaging with it</td>
+            <td class="n">Sharpe <strong>0.55–1.16</strong> vs 1.14 ungated</td>
+            <td>Every gate that filters makes it worse</td></tr>
           <tr><td class="name">Market-wide breadth</td>
             <td style="text-align:left">15 alt perps as sensors (BTCUSDT still the only traded instrument): breadth, flow breadth, alt-vs-BTC, volume dominance</td>
             <td class="n">IS +10 to +13%, <strong>OOS −3 to −17%</strong></td>
@@ -742,6 +746,16 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
       <strong>0.80</strong> out of sample. Single configurations ranged from −0.6% to +36.0%
       CAGR out of sample; that spread is precisely the selection risk the grid search exposed.
       This is the right default. It does not move the ceiling.</p>
+
+      <h3>Averaging dilutes, and gating cannot rescue</h3>
+      <p style="color:var(--ash)">Equal-weight averaging dragged the strongest signal toward the
+      weakest twice — S2 took profit factor from 1.30 to 1.19, and blending breadth into the
+      positioning composite took IC from 0.108 to 0.070. Conditional gating is the usual answer,
+      and it worked in S1 (profit factor 1.04 to 1.30). Here it did not: every gate that
+      actually removed trades hurt, and the one variant matching the baseline vetoed just 12 of
+      229 trades — it converges to doing nothing. Gating works when the confirmer is genuinely
+      predictive. Breadth was not, and no combination rule rescues a signal with no
+      out-of-sample edge.</p>
 
       <h3>The sharpest methodological lesson</h3>
       <p style="color:var(--ash)">The breadth signal's in-sample decile economics were the most

@@ -599,3 +599,23 @@ in-sample decile economics were genuinely strong (top decile +131.9 bps over 96h
 +115.9 bps net of cost) and they did not survive. This is the sharpest reminder in the study
 that **in-sample decile economics are not evidence of out-of-sample tradability** — a t-stat of
 10.9 on overlapping 96-hour windows is far weaker evidence than it looks.
+
+## S29 — Conditional Gating instead of averaging — REJECTED
+Two results pointed the same way: equal-weight *averaging* diluted the strongest signal twice
+(S2 PF 1.30→1.19; S28 blend IC 0.108→0.070), while conditional *gating* worked in S1
+(PF 1.04→1.30). Gating leaves the primary untouched and only removes trades the confirmer
+disputes. Applied to the S7 positioning book with market-wide flow breadth as confirmer
+(correlation 0.22).
+
+| variant | CAGR | DD | PF | N | Sharpe | Calmar | IS | OOS |
+|---|---|---|---|---|---|---|---|---|
+| **ungated baseline** | **22.9%** | −18.7% | 1.49 | 229 | 1.14 | **1.23** | 22.3% | 24.1% |
+| gate "agree" 0.0 | 13.7% | −16.0% | 1.40 | 168 | 0.84 | 0.85 | 16.7% | 9.0% |
+| gate "strict" 0.3 | 8.0% | −26.4% | 1.23 | 159 | 0.55 | 0.30 | 15.5% | −3.1% |
+| gate "veto" 1.0 | 23.3% | −20.1% | 1.51 | 217 | 1.16 | 1.16 | 24.1% | 22.4% |
+
+**Verdict: FAILS.** Every gate that actually filters makes things worse, and the only variant
+that matches the baseline is the weakest possible veto — which removes just 12 of 229 trades,
+i.e. converges to doing nothing. The contrast with S1 is the point: gating works when the
+confirmer is genuinely predictive, and breadth is not (S28 lost money in every out-of-sample
+variant). Gating cannot rescue a signal that has no out-of-sample edge.
