@@ -1530,3 +1530,61 @@ Kept the published configuration: switching on a gap that small, after the fact,
 overfitting this study keeps documenting. The right conclusion is not that one config beats the
 other — it is that **the strategy is insensitive to these parameters**, which the random control
 had already said.
+
+## S53 — Alt-complex positioning, and why portfolio theory stops describing this book
+The book reads BTC's own positioning but had never read whether the *rest* of the perp market is
+crowded the same way. Eight majors (ETH, SOL, XRP, BNB, DOGE, ADA, LINK, AVAX) publish identical
+metrics; 13,879 daily files were pulled into **333,019 hourly rows, 2021-12-01 → 2026-08-31**
+(Binance publishes no alt metrics before Dec 2021, so this is 4.7 years rather than 5.5).
+
+| alt signal | sign | corr to book | CAGR | PF | Sharpe | IS PF | OOS PF |
+|---|---|---|---|---|---|---|---|
+| alt_tt (top-trader position ratio) | +1 | 0.17 | 11.1% | 1.49 | 0.57 | 1.22 | **1.67** |
+| alt_retail (retail account ratio) | −1 | 0.36 | 14.3% | 1.29 | 0.70 | 1.26 | 1.31 |
+| alt_oi (45-bar OI change) | −1 | −0.24 | −11.5% | 0.84 | −0.40 | 0.95 | 0.73 |
+| alt_taker (taker buy/sell ratio) | −1 | −0.01 | −15.5% | 0.87 | −0.93 | 1.00 | 0.74 |
+| alt_vs_btc (alt minus BTC crowding) | +1 | 0.17 | −9.4% | 0.93 | −0.35 | 1.17 | 0.73 |
+
+Two pass a standalone screen. **Both make the book worse:**
+
+| book | CAGR | MaxDD | PF | Sharpe | Calmar |
+|---|---|---|---|---|---|
+| **five signals (control)** | **55.5%** | −14.9% | **2.03** | **2.19** | **3.72** |
+| + alt_tt | 36.2% | −17.1% | 1.87 | 1.75 | 2.12 |
+| + alt_retail | 46.9% | −16.8% | 2.07 | 2.04 | 2.80 |
+| + both | 32.4% | −16.6% | 1.88 | 1.67 | 1.95 |
+
+### The criterion that should have predicted this, and does not
+Standard portfolio theory says a signal earns a place iff **sᵢ > ρᵢ × S_book**. Tested against
+every signal the study has, in-book and rejected alike:
+
+| signal | status | sᵢ | ρᵢ | ρᵢ·S | margin | predicts | **actual ΔSharpe** |
+|---|---|---|---|---|---|---|---|
+| flow | in book | 1.12 | 0.57 | 1.26 | −0.14 | SKIP | **+0.15** |
+| cmpx | in book | 0.86 | 0.43 | 0.94 | −0.08 | SKIP | **+0.83** |
+| btcdom | in book | **0.01** | 0.28 | 0.61 | −0.60 | SKIP | **+0.17** |
+| fundz | in book | **−0.04** | 0.17 | 0.38 | −0.41 | SKIP | **+0.24** |
+| posn | in book | 0.98 | 0.61 | 1.33 | −0.35 | SKIP | **+0.61** |
+| alt_tt | rejected | 0.57 | 0.17 | 0.37 | **+0.20** | **ADD** | **−0.44** |
+| alt_oi | rejected | −0.40 | −0.24 | −0.53 | +0.13 | ADD | −0.02 |
+
+**Correlation between predicted margin and actual Sharpe change: +0.05.** The criterion is
+worthless here, and it is wrong on every single row that matters — it says skip all five signals
+that are carrying the book, and add the one that costs the most.
+
+The reason is structural and it invalidates a chunk of this study's earlier reasoning. **A netted
+single-position book is not a portfolio in the mean-variance sense.** The signals combine *before*
+a position exists: two agreeing produce a bigger position, two disagreeing produce *no position at
+all*. That is a nonlinear interaction through the entry, sizing and exit logic, and covariance
+algebra does not describe it. The correlation arithmetic used from S37 to S41 was valid *there*,
+because those sub-accounts really were separate return streams — and I kept applying it after
+switching to netting, where it does not hold.
+
+The most striking rows are `btcdom` and `fundz`: **standalone Sharpe 0.01 and −0.04, and removing
+either costs the book 0.17 and 0.24 of Sharpe.** Signals with no standalone edge whatsoever are
+contributing real value. That only makes sense under netting — their worth is in *vetoing*,
+cancelling other signals' positions at the right moments, not in making money on their own. No
+screen of standalone performance would ever have found them.
+
+**Practical consequence: candidates cannot be screened by standalone statistics or by correlation.
+They have to be run inside the book.** That is more expensive and it is the only thing that works.
