@@ -742,3 +742,33 @@ Three results worth separating:
    with the *highest* retention in the panel (1.13–1.47, stronger out of sample than in) and
    still loses money out of sample (−8.6%, PF 0.92). Its IC is real but too small (|0.05|) to
    survive a 16 bps round turn. Stability is necessary, not sufficient — magnitude matters too.
+
+## S31 — Short-Window Orthogonal Flow — **the best book in the study**
+Full parameter map over 3 timeframes × 3 thresholds × 3 stop/target pairs × 2 holding caps
+(54 configurations). Best by drawdown-penalised Sharpe: **12h, thr 1.0, stop 3.0×ATR, target
+2.0R, 7-day time stop.**
+
+| risk | CAGR | MaxDD | PF | N | WR | Sharpe | Calmar | IS | OOS (PF) |
+|---|---|---|---|---|---|---|---|---|---|
+| 2.5% | 15.9% | −14.3% | 1.61 | 234 | 53.0% | **1.23** | 1.11 | 14.7% | **18.6%** (1.60) |
+| **3.5%** | **22.4%** | **−19.6%** | 1.60 | 234 | 53.0% | 1.23 | 1.14 | 20.7% | **26.2%** (1.59) |
+| 4.5% | 28.8% | −24.6% | 1.59 | 234 | 53.0% | 1.23 | 1.17 | 26.7% | 33.8% (1.58) |
+
+**Robustness:**
+* Cost stress: 15.9% → 14.7% → 13.3% at 1×/1.5×/2× costs; **PF 1.61 → 1.57 → 1.53**.
+* Yearly: 2021 +13%, 2022 **−1%**, 2023 +32%, 2024 +6%, 2025 +34%, 2026 +10% — positive in
+  five of six years, worst year −1%.
+* Bootstrap (risk 2.5%): median DD −15.8%, 5th pct −26.3%, P(DD>20%) 21%.
+* The whole 12h/thr-1.0 neighbourhood holds PF 1.55–1.63 with positive OOS in every cell — a
+  robust region, not one lucky configuration.
+
+**Against the previous best (S7):** PF 1.60 vs 1.49, Sharpe 1.23 vs 1.14, OOS CAGR 26.2% vs
+24.1%, PF at double costs 1.53 vs 1.43, at comparable CAGR and drawdown.
+
+**One honest caveat.** The traded signal's own rank-IC degrades out of sample much as
+`tt_vs_retail`'s did: +0.112 in-sample vs +0.013 out, at h=96. The *strategy* nevertheless
+does better out of sample. The reason is that it trades only the tails beyond |z|>1 and shapes
+the payoff with a stop and a target, and full-distribution rank-IC says nothing about tail
+behaviour. So the stability screen earned its keep by **pointing at an under-explored feature
+family**, not by predicting strategy performance directly — the claim "stable IC implies stable
+strategy" is not supported by this study's own evidence, in either direction.

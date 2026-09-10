@@ -153,7 +153,7 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
     <span class="eyebrow">2021-01 → 2026-08</span>
   </div>
   <h1>The 300% Problem</h1>
-  <p class="lede">Twenty-nine strategies on the BTCUSDT perpetual, against a target of 300% net
+  <p class="lede">Thirty-one strategies on the BTCUSDT perpetual, against a target of 300% net
   annual profit at under 20% drawdown. This is the record of what was tested, what survived
   out of sample, and the measured reason the target is unreachable — which turns out not to be
   a matter of finding a better signal.</p>
@@ -169,8 +169,8 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
       <div class="gap-item"><div class="k">Required net / year</div><div class="v">300%</div></div>
       <div class="gap-item"><div class="k">Best under 20% DD</div><div class="v" style="color:var(--fail)">22.9%</div></div>
       <div class="gap-item"><div class="k">Best at any drawdown</div><div class="v">59.6%</div></div>
-      <div class="gap-item"><div class="k">Strategies tested</div><div class="v">29</div></div>
-      <div class="gap-item"><div class="k">Parameter sets run</div><div class="v">3,100+</div></div>
+      <div class="gap-item"><div class="k">Strategies tested</div><div class="v">31</div></div>
+      <div class="gap-item"><div class="k">Parameter sets run</div><div class="v">3,700+</div></div>
     </div>
   </div>
 </header>
@@ -180,29 +180,29 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
     <div class="stack-sm">
       <span class="eyebrow">1 — Qualification gates</span>
       <h2>The best qualifying-shaped strategy, gate by gate</h2>
-      <p class="prose" style="color:var(--ash)">Measured on S7, the smart-money-vs-retail
-      positioning book, at the largest risk setting that still respects the drawdown limit.
-      Perpetual futures only — no spot leg anywhere. Net of fees, slippage and real funding.</p>
+      <p class="prose" style="color:var(--ash)">Measured on S31, the short-window orthogonal
+      flow book, at the largest risk setting that still respects the drawdown limit. Perpetual
+      futures only — no spot leg anywhere. Net of fees, slippage and real funding.</p>
     </div>
     <div class="gates">
       <div class="gate">
         <div class="req">Net yearly profit &gt; 300%</div>
-        <div class="got" style="color:var(--fail)">22.9%</div>
+        <div class="got" style="color:var(--fail)">22.4%</div>
         <span class="tag f">Fail</span>
       </div>
       <div class="gate">
         <div class="req">At least 100 completed trades</div>
-        <div class="got">229</div>
+        <div class="got">234</div>
         <span class="tag p">Pass</span>
       </div>
       <div class="gate">
         <div class="req">Profit factor &gt; 1.10</div>
-        <div class="got">1.49</div>
+        <div class="got">1.60</div>
         <span class="tag p">Pass</span>
       </div>
       <div class="gate">
         <div class="req">Maximum drawdown &lt; 20%</div>
-        <div class="got">18.7%</div>
+        <div class="got">19.6%</div>
         <span class="tag p">Pass</span>
       </div>
       <div class="gate">
@@ -216,10 +216,12 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
         <span class="tag p">Pass</span>
       </div>
     </div>
-    <p class="note">This book is the most stable thing in the study: in-sample CAGR 22.3%
-    against out-of-sample 24.1%, profit factor 1.52 against 1.47, and it still returns 19.4%
-    with profit factor 1.43 when every cost assumption is doubled. What it will not do is
-    return 300%.</p>
+    <p class="note">This book is the most stable thing in the study: in-sample CAGR 20.7%
+    against out-of-sample <strong>26.2%</strong>, profit factor 1.60 against 1.59, positive in
+    five of six calendar years with a worst year of −1%, and still profit factor <strong>1.53
+    when every cost assumption is doubled</strong>. What it will not do is return 300%. Sized
+    down to 2.5% risk its drawdown is −14.3% and the bootstrap probability of breaching 20%
+    falls to 21%; at the 3.5% shown here that margin is much thinner.</p>
   </div>
 </section>
 <section>
@@ -401,7 +403,7 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
         </tbody>
       </table>
     </div>
-    <p class="note">Rank 3 is the interesting one. Removing the take-profit and pyramiding into
+    <p class="note">Rank 4 is the interesting one. Removing the take-profit and pyramiding into
     winners lifted profit factor from 1.46 to <strong>1.91</strong> and dropped the win rate to
     22% — a genuinely convex payoff, which is exactly the shape you want when a drawdown limit
     is binding. It still failed, because the drawdown grew with the return.</p>
@@ -412,15 +414,64 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
     <div class="stack-sm">
       <span class="eyebrow">5 — Reproduction</span>
       <h2>Complete specifications</h2>
-      <p class="prose" style="color:var(--ash)">Everything needed to rebuild the top three.
+      <p class="prose" style="color:var(--ash)">Everything needed to rebuild the top books.
       Rolling windows are counted in decision bars. Costs and execution rules are identical
-      across every strategy and listed once in section&nbsp;8.</p>
+      across every strategy and listed once in section&nbsp;9.</p>
     </div>
 
     <article class="spec">
       <div class="spec-head">
+        <h3>S31 · Short-window orthogonal flow</h3>
+        <span class="id">RANK 1 · CAGR 22.4% · DD −19.6% · PF 1.60 · N 234</span>
+      </div>
+      <div class="spec-body">
+        <p>Raw taker imbalance is contaminated by short-horizon price reversal. Projecting it
+        off recent returns isolates the part of aggressive flow that recent price action does
+        <em>not</em> already explain. A six-bar window is short enough to react and long enough
+        to average out single-print noise. This book was not found by searching harder — it was
+        found by changing the selection rule (section&nbsp;7c).</p>
+        <dl class="kv">
+          <dt>Instrument</dt><dd>Binance USDⓈ-M perpetual <code>BTCUSDT</code></dd>
+          <dt>Timeframes</dt><dd>12h decision bars · 15m execution bars</dd>
+          <dt>Imbalance</dt><dd class="mono">imb = 2 × (taker_buy_base ÷ volume − 0.5)</dd>
+          <dt>Flow</dt><dd class="mono">ofi6 = mean(imb, 6 bars)</dd>
+          <dt>Orthogonalisation</dt>
+          <dd>Residual of <code>ofi6</code> regressed on past returns over 1, 2, 4, 6, 12 and 24
+            bars. Coefficients come from an <strong>expanding window refit monthly on strictly
+            past data</strong> — a full-sample fit would leak.</dd>
+          <dt>Signal</dt><dd class="mono">s = z(ofi6_res, 480 bars)</dd>
+          <dt>Entry</dt>
+          <dd>Long when <code>s &gt; +1.0</code>, short when <code>s &lt; −1.0</code>. Fills at
+            the open of the first 15m bar after the 12h bar closes.</dd>
+          <dt>Stop</dt><dd><code>3.0 × ATR(14)</code> of the 12h bar, fixed at entry</dd>
+          <dt>Target</dt><dd><code>2.0R</code> (= 6.0 × ATR)</dd>
+          <dt>Time stop</dt><dd>7 days</dd>
+          <dt>Sizing</dt>
+          <dd><code>qty = 0.035 × equity ÷ stop_distance</code>, notional capped at 10× equity.
+            At 2.5% risk the drawdown is −14.3% with the same Sharpe.</dd>
+          <dt>Period</dt><dd>2021-01-03 onward</dd>
+        </dl>
+        <div class="pill-row">
+          <span class="pill">IS 20.7% · PF 1.60</span>
+          <span class="pill">OOS 26.2% · PF 1.59</span>
+          <span class="pill">PF 1.53 at double costs</span>
+          <span class="pill">5 of 6 years positive, worst −1%</span>
+          <span class="pill">Sharpe invariant to size: 1.23 at every risk level</span>
+        </div>
+        <p class="note">One honest caveat. The rank-IC of the traded signal itself degrades out
+        of sample much as the earlier book's did — +0.112 in sample against +0.013 out, at a
+        96-hour horizon. The strategy nevertheless performs <em>better</em> out of sample,
+        because it trades only the tails beyond |z| &gt; 1 and shapes the payoff with a stop and
+        a target; full-distribution rank-IC does not describe tail behaviour. The stability
+        screen earned its keep by pointing at an under-explored feature family, not by
+        predicting strategy performance directly.</p>
+      </div>
+    </article>
+
+    <article class="spec">
+      <div class="spec-head">
         <h3>S7 · Smart-money vs retail positioning</h3>
-        <span class="id">RANK 1 · CAGR 22.9% · DD −18.7% · PF 1.49 · N 229</span>
+        <span class="id">RANK 2 · CAGR 22.9% · DD −18.7% · PF 1.49 · N 229</span>
       </div>
       <div class="spec-body">
         <p>Binance publishes, every five minutes, the long/short <em>account</em> ratio of its
@@ -463,7 +514,7 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
     <article class="spec">
       <div class="spec-head">
         <h3>S19 · Futures-only portfolio</h3>
-        <span class="id">RANK 2 · CAGR 22.6% · DD −19.3% · PF 1.24 · N 811</span>
+        <span class="id">RANK 3 · CAGR 22.6% · DD −19.3% · PF 1.24 · N 811</span>
       </div>
       <div class="spec-body">
         <p>Four directional books on the same perpetual, run as separate sub-accounts and
@@ -487,7 +538,7 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
     <article class="spec">
       <div class="spec-head">
         <h3>S15 · Convex trend</h3>
-        <span class="id">RANK 3 · CAGR 37.2% · DD −36.0% · PF 1.91 · N 261</span>
+        <span class="id">RANK 4 · CAGR 37.2% · DD −36.0% · PF 1.91 · N 261</span>
       </div>
       <div class="spec-body">
         <p>Same entry as S7, but restructured to break the symmetric return distribution that
@@ -764,6 +815,74 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
       lost money in every out-of-sample variant. A t-statistic of 10.9 computed on overlapping
       96-hour windows is far weaker evidence than it appears, and in-sample decile economics are
       not evidence of out-of-sample tradability.</p>
+    </div>
+  </div>
+</section>
+<section>
+  <div class="stack-lg">
+    <div class="stack-sm">
+      <span class="eyebrow">7c — The selection rule was the problem</span>
+      <h2>What a stability screen does to 91 features</h2>
+      <p class="prose" style="color:var(--ash)">Every screen up to this point ranked features by
+      in-sample rank-IC and built on the winner. The breadth signal exposed that as unsafe: top
+      decile +131.9 bps over 96 hours at t = 10.9, and it lost money in every out-of-sample
+      variant. So the screen was rebuilt — measure the <em>same</em> IC separately in each
+      window, and keep only what holds its sign and most of its strength in both.</p>
+    </div>
+
+    <div class="why stack-sm">
+      <p style="color:var(--ash)">Applied to all 91 features on 4h bars, at 24-hour and 96-hour
+      horizons:</p>
+      <ul class="prose" style="color:var(--ash);padding-left:1.1em;margin:0;display:flex;flex-direction:column;gap:6px">
+        <li><strong>41 of 91 (45%)</strong> keep their sign in both windows at both horizons — barely better than a coin flip.</li>
+        <li>Of the 33 with |IS IC| &gt; 0.04, only 18 are sign-stable, and the <strong>median out-of-sample retention is 0.27</strong>: a strong-looking feature keeps about a quarter of its apparent power.</li>
+      </ul>
+    </div>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th>feature</th><th>IS h=24</th><th>OOS h=24</th><th>IS h=96</th><th>OOS h=96</th><th>retention</th></tr></thead>
+        <tbody>
+          <tr class="best"><td class="name">`oi_rank` — open-interest crowding, faded</td>
+            <td class="n">−0.071</td><td class="n">−0.033</td><td class="n"><strong>−0.137</strong></td><td class="n"><strong>−0.073</strong></td><td class="n">0.53</td></tr>
+          <tr class="best"><td class="name">`ofi6_res` — 6-bar flow ⟂ past returns</td>
+            <td class="n">+0.039</td><td class="n pos"><strong>+0.058</strong></td><td class="n">+0.085</td><td class="n">+0.044</td><td class="n">0.68</td></tr>
+          <tr><td class="name">`fund` — funding, faded</td>
+            <td class="n">−0.030</td><td class="n">−0.022</td><td class="n">−0.053</td><td class="n">−0.060</td><td class="n pos">1.13</td></tr>
+          <tr><td class="name">`ofi96_res`</td>
+            <td class="n">+0.008</td><td class="n">+0.010</td><td class="n">+0.040</td><td class="n">+0.034</td><td class="n">0.85</td></tr>
+          <tr style="border-top:2px solid var(--line)"><td class="name" style="color:var(--fail)">`tt_vs_retail` — <em>what the previous best book was built on</em></td>
+            <td class="n">+0.053</td><td class="n">+0.015</td><td class="n"><strong>+0.104</strong></td><td class="n" style="color:var(--fail)"><strong>−0.003</strong></td><td class="n">mirage</td></tr>
+          <tr><td class="name" style="color:var(--fail)">`ofi96_resz`</td>
+            <td class="n">+0.029</td><td class="n">−0.012</td><td class="n">+0.080</td><td class="n">−0.009</td><td class="n">mirage</td></tr>
+          <tr><td class="name" style="color:var(--fail)">`mom168`</td>
+            <td class="n">+0.031</td><td class="n">−0.001</td><td class="n">+0.068</td><td class="n">−0.014</td><td class="n">mirage</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="why stack-sm">
+      <h3>An audit of this report's own headline</h3>
+      <p style="color:var(--ash)">The screen flags <code>tt_vs_retail</code> — the feature S7 is
+      named after — as the single biggest mirage in the panel. Yet S7 reported in-sample 22.3%
+      against out-of-sample 24.1%. Both cannot be innocent, so I checked directly, and the
+      answer is in three parts.</p>
+      <p style="color:var(--ash)"><strong>The composite the strategy actually trades degrades
+      but does not collapse</strong> — on 4h bars, IC at h=96 goes +0.082 → +0.014, and at h=168
+      +0.072 → +0.034. <strong>But the component carrying it out of sample is not the one in the
+      name.</strong> At h=96: <code>tt_vs_retail</code> +0.104 → −0.003, while
+      <code>−retail_acct_z</code> holds +0.083 → +0.017 and <code>−tt_acct_z</code> holds +0.126
+      → +0.023. What survives is fading a crowded retail book and a crowded count of top-trader
+      accounts — not following sophisticated positioning.</p>
+      <p style="color:var(--ash)"><strong>It is not disguised long-bias beta</strong>, the other
+      suspicion. Net exposure is −0.07 in sample and +0.02 out of sample, and the short book is
+      profitable in <em>both</em> windows — including out of sample, where the perpetual rose
+      25%. Shorts earning into a rising market is alpha, not beta. Longs do supply 85–91% of
+      gross P&amp;L, so the book is long-driven, but it is not long-only in disguise.</p>
+      <p style="color:var(--ash)">Net effect on this report's conclusion: none — S7 still clears
+      four of five gates. But the honest characterisation is weaker than the earlier framing:
+      the edge loses roughly three-quarters of its strength out of sample, and it rests on
+      crowd-fading rather than on smart-money following.</p>
     </div>
   </div>
 </section>

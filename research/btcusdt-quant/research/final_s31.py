@@ -13,7 +13,7 @@ from research.runner import zs
 import strategies.s31_ofi6 as s31
 
 START = "2021-01-03"
-CFGS = [("6h", 1.3, 3.5, 2.5, 7), ("6h", 1.3, 3.5, 2.5, 12), ("12h", 0.7, 3.5, 2.5, 10)]
+CFGS = [("12h", 1.0, 3.0, 2.0, 7), ("12h", 1.0, 3.0, 2.0, 12), ("6h", 1.3, 3.5, 2.5, 7)]
 
 for tf, thr, stp, rr, hold in CFGS:
     fut, f = panel(tf); f = f[f.dt >= START].reset_index(drop=True)
@@ -31,7 +31,7 @@ for tf, thr, stp, rr, hold in CFGS:
     print(row)
     a = s31.arrays(f, s, thr=thr, atr_stop=stp, rr=rr)
     # risk calibrated so the full-period drawdown sits just inside 20%
-    for risk in (0.02, 0.025, 0.03):
+    for risk in (0.025, 0.035, 0.045):
         o = {lab: backtest(f, a, tf, start=ss, end=ee, risk=risk, max_lev=10.0,
                            max_bars_h=hold*24)
              for lab, ss, ee in (("IS",START,IS_END),("OOS",IS_END,OOS_END),("ALL",START,OOS_END))}
