@@ -2756,3 +2756,56 @@ expected to flatter itself. It also explains why per-signal gating differs from 
 zeroing each signal's negative contribution lets a bar that netted short flip to a small *long*,
 which the net gate would have left flat — 651 trades under the net gate against 762 here. S91 puts
 it in the quarterly grid and makes the selection choose it causally.
+
+## S91 — The funding gate, chosen causally: real, validated, and not an improvement
+S90's overlay found that gating only `fundz`'s short side beats gating the whole composite. Here
+the choice is an axis of the quarterly grid — 120 configurations, gates {none, whole short side
+above EMA200, funding's short side above EMA200} — with the selection choosing each quarter from
+the preceding twelve months and nothing else. Grid size deliberately matches S85's, since S88
+showed what widening it to 360 costs.
+
+**The selection reaches for it.** Given a free choice among the three:
+
+| gate chosen | top-1 (of 18) | top-3 (of 54) |
+|---|---|---|
+| **fundz** | **10** | **32** |
+| net | 5 | 13 |
+| none | 3 | 9 |
+
+So the finding is not an artefact of having looked at the whole sample: the causal rule prefers
+funding-only gating to the net gate already adopted, in most quarters.
+
+**And it shrinks, as it should:**
+
+| | CAGR | MaxDD | PF | Sharpe | Calmar | P(DD>20%) |
+|---|---|---|---|---|---|---|
+| S90 overlay (full-sample read) | **84.1%** | −11.3% | 2.92 | 2.24 | **7.43** | 19% |
+| S91 causal, top-1 | 77.0% | −11.3% | 2.81 | 2.11 | 6.79 | 24% |
+| S91 causal, top-3 (**V8**) | 81.5% | −12.3% | 2.90 | **2.18** | 6.63 | **18%** |
+| S87 incumbent, top-3 (**V7**) | 86.2% | −12.3% | **3.17** | 2.15 | **7.01** | 34% |
+
+Calmar 7.43 → 6.63 once the selection has to choose causally. That gap is the selection illusion
+being removed, the same shrinkage that caught S66 and S76.
+
+**At the 20% gate the two books are a dead heat, and V7 keeps the headline:**
+
+| | risk | CAGR | MaxDD | PF | N | Sharpe | Calmar | P(DD>20%) |
+|---|---|---|---|---|---|---|---|---|
+| **V7** wide gate menu, top-3 | 14.4% | **179.0%** | −19.99% | **3.18** | 1,769 | 2.13 | 8.95 | 98% |
+| **V8** funding gate, top-3 | 14.0% | 172.0% | −19.18% | 2.97 | 2,133 | **2.21** | **8.96** | **86%** |
+
+Calmar 8.96 against 8.95 — indistinguishable. V7 wins return and profit factor; V8 wins Sharpe and
+bootstrap risk. **The decider is 2022: V7 returns +3% through the bear market where V8 returns
+−10%**, because the net gate suppresses the whole short side while the funding-only gate leaves
+four signals free to keep selling a falling market. The bear year is the sample's hardest test and
+the one there is least of, so the book that survives it stays the headline.
+
+Note also that V8's bootstrap advantage at 8% risk (18% against 34%) **largely evaporates at the
+gate** (86% against 98%). Sized so that realised drawdown lands on 20%, almost any version of this
+book is likely to breach it. That is a statement about the size, not about the gate.
+
+**The gate lever is now closed.** Four experiments — S84 overlay, S85 causal, S88 what it measures,
+S89 what shape, S90/S91 which signal — established that a trend gate is real, that it reads price
+against a smoothed reference rather than direction or trend strength, that its shape is a step the
+sample cannot resolve further, and that funding is the signal it is mostly correcting. None of the
+refinements beat the plain net gate at the 20% drawdown limit.

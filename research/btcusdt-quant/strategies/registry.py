@@ -77,6 +77,12 @@ def v7(risk):
     from strategies.s87_combined import rankings, blend
     return blend(rankings(), 3, risk)
 
+def v8(risk):
+    """S91 - gate FUNDING's short side rather than the whole composite, chosen
+    causally against both alternatives each quarter.  Top 3."""
+    from strategies.s91_fundgate import rankings, blend
+    return blend(rankings(), 3, risk)
+
 VERSIONS = [
     ("V1  S46  fixed config, 5 signals",        v1, "2021-03 -> 2026-08 (5.5y, incl. bear)"),
     ("V2  S69  quarterly Calmar, 24m lookback", v2, "2023-03 -> 2026-08 (3.5y, NO bear)"),
@@ -85,6 +91,7 @@ VERSIONS = [
     ("V5  S86  + top-5 blend",                  v5, "2022-03 -> 2026-08 (4.5y, incl. bear)"),
     ("V6  S87  + wide gate menu, top-5",        v6, "2022-03 -> 2026-08 (4.5y, incl. bear)"),
     ("V7  S87  + wide gate menu, top-3",        v7, "2022-03 -> 2026-08 (4.5y, incl. bear)"),
+    ("V8  S91  gate funding only, top-3",       v8, "2022-03 -> 2026-08 (4.5y, incl. bear)"),
 ]
 
 # ----------------------------------------------------------------- measuring
