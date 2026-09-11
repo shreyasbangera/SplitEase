@@ -32,7 +32,7 @@ FUND_HOURS = (0, 8, 16)
 @njit(cache=True)
 def _loop(o, h, l, c, entry, exitf, stopd, tpd, traild, fund,
           fee, slip, eq0, risk, maxlev, be_r, trail_after_r, maxbars, min_notional,
-          dd_soft, dd_hard, dd_floor, pyr_max, pyr_step):
+          dd_soft, dd_hard, dd_floor, pyr_max, pyr_step, addf, add_mult, add_max):
     n = o.shape[0]
     eq = eq0
     eqc = np.empty(n)
@@ -41,6 +41,7 @@ def _loop(o, h, l, c, entry, exitf, stopd, tpd, traild, fund,
     npyr = 0
     blown = False
     qty = 0.0; epx = 0.0; spx = 0.0; tpx = 0.0; runit = 0.0; ei = 0
+    cvcur = 0.0; nadd = 0
     # trade records
     t_ei = np.empty(n, np.int64); t_xi = np.empty(n, np.int64)
     t_side = np.empty(n, np.int64); t_epx = np.empty(n); t_xpx = np.empty(n)
@@ -133,6 +134,37 @@ def _loop(o, h, l, c, entry, exitf, stopd, tpd, traild, fund,
                 t_rsn[nt] = 3; t_qty[nt] = qty; nt += 1
                 pos = 0; qty = 0.0; tpx = 0.0
 
+        # ---- conviction top-up: the signal now wants a bigger position ----
+        # The composite enters at whatever conviction it had on the entry bar and
+        # is then frozen for the life of the trade, even though 37% of trades see
+        # their own signal at least double while they are held.  When it does,
+        # resize the WHOLE package so that its loss down to the existing stop is
+        # exactly the risk budget the new conviction earns - never more.
+        if pos != 0 and add_max > 0 and nadd < add_max and runit > 0.0:
+            ac = addf[i]
+            acv = ac if ac > 0.0 else -ac
+            if ac != 0.0 and ac * pos > 0.0 and acv >= add_mult * cvcur:
+                dd_now = eqc[i] / hwm - 1.0
+                rm = 1.0
+                if dd_now < -dd_soft:
+                    rm = (dd_hard + dd_now) / (dd_hard - dd_soft)
+                    if rm < dd_floor: rm = dd_floor
+                    if rm > 1.0: rm = 1.0
+                addpx = nxt * (1.0 + pos * slip)
+                de = pos * (epx - spx)
+                da = pos * (addpx - spx)
+                if da > 0.25 * runit:
+                    budget = eqc[i] * risk * rm * acv
+                    aq = (budget - qty * de) / da
+                    if (qty + aq) * addpx > eqc[i] * maxlev:
+                        aq = eqc[i] * maxlev / addpx - qty
+                    if aq > 0.0 and aq * addpx >= min_notional:
+                        eq -= fee * addpx * aq
+                        epx = (epx * qty + addpx * aq) / (qty + aq)
+                        qty += aq
+                        cvcur = acv
+                        nadd += 1
+
         # ---- pyramid: add to a winner that has advanced pyr_step R ----
         if pos != 0 and pyr_max > 0 and npyr < pyr_max and runit > 0.0:
             lvl = epx + pos * (npyr + 1) * pyr_step * runit
@@ -180,6 +212,7 @@ def _loop(o, h, l, c, entry, exitf, stopd, tpd, traild, fund,
                 if q * px >= min_notional:
                     eq -= fee * px * q
                     pos = side; qty = q; epx = px; ei = i + 1; npyr = 0
+                    cvcur = cv; nadd = 0
                     runit = sd
                     spx = px - side * sd
                     td = tpd[i]
@@ -233,7 +266,8 @@ class Engine:
 
     def run(self, entry, exit_flag=None, stop_dist=None, tp_dist=None,
             trail_dist=None, risk=0.01, be_r=0.0, trail_after_r=0.0, max_bars=0,
-            dd_soft=1.0, dd_hard=1.0, dd_floor=0.0, pyramid=0, pyramid_step=1.0):
+            dd_soft=1.0, dd_hard=1.0, dd_floor=0.0, pyramid=0, pyramid_step=1.0,
+            add_signal=None, add_mult=0.0, add_max=0):
         """dd_soft / dd_hard / dd_floor implement a high-water-mark throttle:
         full nominal risk while the drawdown is shallower than `dd_soft`, tapering
         linearly to `dd_floor` x nominal at `dd_hard`. Defaults disable it.
@@ -252,7 +286,8 @@ class Engine:
         res = _loop(o, h, l, c, z(entry), z(exit_flag), stopd, tpd, traild, self.fund,
                     self.fee, self.slip, self.eq0, risk, self.maxlev,
                     be_r, trail_after_r, int(max_bars), self.min_notional,
-                    dd_soft, dd_hard, dd_floor, int(pyramid), pyramid_step)
+                    dd_soft, dd_hard, dd_floor, int(pyramid), pyramid_step,
+                    z(add_signal), add_mult, int(add_max))
         return self._metrics(*res)
 
     def _metrics(self, eqc, ei, xi, side, epx, xpx, pnl, rsn, qty, expo, fpaid):

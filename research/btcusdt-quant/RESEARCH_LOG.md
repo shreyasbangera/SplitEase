@@ -2221,3 +2221,96 @@ stale view.
 Across seven frequencies from 1 hour to 2 days, **12h is a verified interior optimum**, not the
 arbitrary default it started as. Faster manufactures threshold crossings out of noise; slower
 averages the flow signal into uselessness and leaves too few bets.
+
+## S81 — Orthogonalising the other four signals: a clean negative
+Only `s_flow` is orthogonalised to past returns (S36 established that this was what made the
+implied-volatility signal usable). The other four go into the composite as raw z-scores, so any of
+them could be smuggling in plain price momentum and double-counting it. Each was projected off six
+past-return horizons (1, 2, 4, 6, 12 and 24 bars of 12h), with the projection coefficients refit
+monthly on strictly past data and a six-month warm-up.
+
+Two of the four are visibly contaminated:
+
+| signal | corr to past return | raw IC | residual IC |
+|---|---|---|---|
+| cmpx | +0.187 | 0.0380 | 0.0408 |
+| btcdom | −0.010 | 0.0481 | 0.0518 |
+| fundz | −0.172 | 0.0030 | 0.0033 |
+| posn | **+0.443** | 0.0290 | 0.0281 |
+
+Residual IC is *higher* than raw IC for three of the four, which is exactly the pattern that made
+the flow signal work. It does not survive contact with the book:
+
+| variant | CAGR | MaxDD | PF | N | Sharpe | Calmar | OOS | P(DD>20%) |
+|---|---|---|---|---|---|---|---|---|
+| **all raw (control)** | **77.8%** | −18.3% | 2.69 | 938 | **2.16** | **4.25** | 85.2% | 35% |
+| orthogonalised: cmpx | 60.4% | −18.2% | 2.45 | 927 | 1.94 | 3.32 | 74.9% | 36% |
+| orthogonalised: btcdom | 70.2% | −19.1% | 2.91 | 912 | 1.99 | 3.67 | 91.5% | 43% |
+| orthogonalised: fundz | 69.3% | −18.1% | 2.38 | 943 | 1.94 | 3.84 | 74.8% | 46% |
+| orthogonalised: posn | 69.1% | −31.9% | 3.53 | 919 | 1.84 | 2.17 | 136.6% | 87% |
+| orthogonalised: all four | 25.1% | −30.7% | 1.69 | 727 | 0.87 | 0.82 | 34.9% | 94% |
+
+Every variant loses, and doing all four at once is catastrophic. The lesson is specific and worth
+keeping: **a higher rank-IC on the residual does not mean a better bet.** Orthogonalising removes
+the part of each signal that agrees with recent price, and that agreement is what makes the five
+signals line up on the trades that matter. Stripping the shared component raises each signal's
+standalone information and destroys the composite's. `posn` shows it most starkly — residualising
+a signal that is 44% past-return by construction leaves something that still makes money (OOS
+136.6%) but at −31.9% drawdown, because the trades it now takes are no longer the ones the other
+four confirm.
+
+The flow signal is the exception because order-flow imbalance is contaminated by *short-horizon
+reversal* (IC −0.04 at h=1, recorded at the top of this log), so the thing being removed there is
+noise with the wrong sign, not shared conviction.
+
+**Closed.** Signal construction via orthogonalisation is exhausted.
+
+## S82 — Conviction predicts the size of the move, and it still cannot be traded
+Conviction |net| has done exactly one job in this study: it scales the SIZE of the bet. The
+geometry of the trade — where the stop sits, where the target sits — is uniform across every trade
+in a quarter, applied identically to a 0.3-sigma reading and a 3.0-sigma one. That is an
+assumption, and it had never been tested.
+
+**The premise checks out, cleanly.** Bucketing every signal bar by conviction and measuring the
+forward close excursions over the 21-bar holding horizon, in ATR units:
+
+| conviction quintile | n | mean cv | MFE | MAE | MFE/\|MAE\| | mean fwd |
+|---|---|---|---|---|---|---|
+| Q1 | 675 | 0.01 | 2.05 | −1.82 | 1.130 | +0.118 |
+| Q2 | 674 | 0.06 | 1.92 | −2.11 | 0.906 | −0.099 |
+| Q3 | 761 | 0.17 | 2.08 | −2.01 | 1.036 | +0.037 |
+| Q4 | 588 | 0.44 | 2.30 | −1.96 | 1.171 | +0.168 |
+| Q5 | 675 | 1.40 | **2.30** | **−1.63** | **1.410** | **+0.334** |
+
+Favourable excursion rises with conviction and adverse excursion *shrinks*: the strongest readings
+both go further and hurt less. So the geometry should be conviction-dependent — a farther target,
+and (given the smaller MAE) if anything a tighter stop.
+
+**Every exploitation of it loses.** On the bear-inclusive 12-month plan at 8% risk, with the
+quarterly selection held at the control geometry so no variant gets a second layer of search:
+
+| variant | CAGR | MaxDD | PF | N | Sharpe | Calmar | P(DD>20%) |
+|---|---|---|---|---|---|---|---|
+| **control (uniform)** | 73.2% | **−14.8%** | 2.64 | 771 | **2.12** | **4.94** | **22%** |
+| stop × cv^0.3 | 60.3% | −18.0% | 2.29 | 825 | 2.07 | 3.34 | 19% |
+| stop × cv^0.5 | 49.0% | −22.3% | 1.91 | 902 | 1.90 | 2.20 | 28% |
+| stop × cv^−0.3 (tighter when strong) | 74.2% | −24.0% | 2.41 | 733 | 1.81 | 3.10 | 79% |
+| target × cv^0.3 | **82.3%** | −19.9% | **2.81** | 774 | 2.15 | 4.13 | 27% |
+| target × cv^0.5 | 73.9% | −42.2% | 2.47 | 789 | 1.84 | 1.75 | 75% |
+| stop+target × cv^0.3 | 59.9% | −23.6% | 2.11 | 876 | 1.99 | 2.53 | 29% |
+| breakeven stop after 1R | 71.7% | −14.6% | 2.62 | 775 | 2.09 | 4.90 | 24% |
+| breakeven stop after 1.5R | 73.1% | −15.0% | 2.64 | 771 | 2.12 | 4.88 | 22% |
+| ATR trail (2 ATR after 1R) | 71.5% | −15.1% | 2.55 | 786 | 2.04 | 4.72 | 27% |
+| ATR trail (3 ATR after 2R) | 71.7% | −14.8% | 2.61 | 772 | 2.10 | 4.84 | 23% |
+
+The farther target on strong signals is the only variant that raises return — 73.2% to 82.3% with
+profit factor up to 2.81 — and it buys that with five points of drawdown, so Calmar falls. Every
+stop variant is worse in both directions. Breakeven stops and ATR trails are *neutral*: they move
+nothing, which is itself informative — the exits are not where the money is being lost.
+
+**Why a true premise yields nothing.** The conviction exponent has already concentrated the risk
+budget into exactly the Q5 bars whose excursions are favourable. Widening the target on those same
+bars does not find new profit, it converts a booked profit into a give-back: the 2.30 ATR mean MFE
+is a *mean*, and the trades that reach 3 R were already reaching the 2 R target. The uniform box
+chosen by the quarterly grid is not laziness; it is the optimum given the sizing rule in front of
+it. **Trade geometry is closed.**
