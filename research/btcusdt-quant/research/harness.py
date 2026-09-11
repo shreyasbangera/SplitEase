@@ -95,7 +95,7 @@ def backtest(sig_df, arrays, tf, period=("all"), risk=0.01, max_lev=5.0,
              fee=5.0, slip=3.0, be_r=0.0, trail_after_r=0.0, max_bars_h=0,
              start=None, end=None, eq0=10_000.0,
              dd_soft=1.0, dd_hard=1.0, dd_floor=0.0, pyramid=0, pyramid_step=1.0,
-             exec_df=None, exec_key=None, funding_df=None, add_mult=0.0, add_max=0):
+             exec_df=None, exec_key=None, funding_df=None, add_mult=0.0, add_max=0, add_mode=0):
     """
     arrays: dict with keys 'entry','exit','stop','tp','trail' on the DECISION grid.
     Values from decision bar t become active at the open of decision bar t+1.
@@ -115,7 +115,7 @@ def backtest(sig_df, arrays, tf, period=("all"), risk=0.01, max_lev=5.0,
                    pyramid=pyramid, pyramid_step=pyramid_step,
                    add_signal=(np.nan_to_num(al["add"]) * first
                                if "add" in al else None),
-                   add_mult=add_mult, add_max=add_max)
+                   add_mult=add_mult, add_max=add_max, add_mode=add_mode)
 
 def report(name, sig_df, arrays, tf, **kw):
     out = {}

@@ -32,7 +32,8 @@ FUND_HOURS = (0, 8, 16)
 @njit(cache=True)
 def _loop(o, h, l, c, entry, exitf, stopd, tpd, traild, fund,
           fee, slip, eq0, risk, maxlev, be_r, trail_after_r, maxbars, min_notional,
-          dd_soft, dd_hard, dd_floor, pyr_max, pyr_step, addf, add_mult, add_max):
+          dd_soft, dd_hard, dd_floor, pyr_max, pyr_step, addf, add_mult, add_max,
+          add_mode):
     n = o.shape[0]
     eq = eq0
     eqc = np.empty(n)
@@ -41,7 +42,7 @@ def _loop(o, h, l, c, entry, exitf, stopd, tpd, traild, fund,
     npyr = 0
     blown = False
     qty = 0.0; epx = 0.0; spx = 0.0; tpx = 0.0; runit = 0.0; ei = 0
-    cvcur = 0.0; nadd = 0
+    cvcur = 0.0; nadd = 0; tunit = 0.0
     # trade records
     t_ei = np.empty(n, np.int64); t_xi = np.empty(n, np.int64)
     t_side = np.empty(n, np.int64); t_epx = np.empty(n); t_xpx = np.empty(n)
@@ -143,7 +144,8 @@ def _loop(o, h, l, c, entry, exitf, stopd, tpd, traild, fund,
         if pos != 0 and add_max > 0 and nadd < add_max and runit > 0.0:
             ac = addf[i]
             acv = ac if ac > 0.0 else -ac
-            if ac != 0.0 and ac * pos > 0.0 and acv >= add_mult * cvcur:
+            ok_pnl = (add_mode != 2) or (pos * (c[i] - epx) >= 0.0)
+            if ac != 0.0 and ac * pos > 0.0 and acv >= add_mult * cvcur and ok_pnl:
                 dd_now = eqc[i] / hwm - 1.0
                 rm = 1.0
                 if dd_now < -dd_soft:
@@ -151,19 +153,37 @@ def _loop(o, h, l, c, entry, exitf, stopd, tpd, traild, fund,
                     if rm < dd_floor: rm = dd_floor
                     if rm > 1.0: rm = 1.0
                 addpx = nxt * (1.0 + pos * slip)
-                de = pos * (epx - spx)
-                da = pos * (addpx - spx)
-                if da > 0.25 * runit:
-                    budget = eqc[i] * risk * rm * acv
-                    aq = (budget - qty * de) / da
+                budget = eqc[i] * risk * rm * acv
+                aq = -1.0
+                if add_mode == 1 or add_mode == 2:
+                    # conviction-driven only: the package carries the SAME risk
+                    # unit a fresh entry at this conviction would, and the stop is
+                    # reset to one unit from the new average entry so total risk
+                    # is exactly the budget.  No price feedback, so a losing trade
+                    # can never manufacture a bigger add.
+                    aq = budget / runit - qty
+                else:
+                    # mode 0: hold the stop and solve for the quantity that brings
+                    # the package back to budget.  Kept for the record - the
+                    # distance to the stop shrinks as a trade loses, so this adds
+                    # hardest into losers.  See S83.
+                    de = pos * (epx - spx)
+                    da = pos * (addpx - spx)
+                    if da > 0.25 * runit:
+                        aq = (budget - qty * de) / da
+                if aq > 0.0:
                     if (qty + aq) * addpx > eqc[i] * maxlev:
                         aq = eqc[i] * maxlev / addpx - qty
-                    if aq > 0.0 and aq * addpx >= min_notional:
-                        eq -= fee * addpx * aq
-                        epx = (epx * qty + addpx * aq) / (qty + aq)
-                        qty += aq
-                        cvcur = acv
-                        nadd += 1
+                if aq > 0.0 and aq * addpx >= min_notional:
+                    eq -= fee * addpx * aq
+                    epx = (epx * qty + addpx * aq) / (qty + aq)
+                    qty += aq
+                    if add_mode == 1 or add_mode == 2:
+                        spx = epx - pos * runit
+                        if tpx > 0.0 and tunit > 0.0:
+                            tpx = epx + pos * tunit
+                    cvcur = acv
+                    nadd += 1
 
         # ---- pyramid: add to a winner that has advanced pyr_step R ----
         if pos != 0 and pyr_max > 0 and npyr < pyr_max and runit > 0.0:
@@ -216,7 +236,8 @@ def _loop(o, h, l, c, entry, exitf, stopd, tpd, traild, fund,
                     runit = sd
                     spx = px - side * sd
                     td = tpd[i]
-                    tpx = px + side * td if (td == td and td > 0.0) else 0.0
+                    tunit = td if (td == td and td > 0.0) else 0.0
+                    tpx = px + side * tunit if tunit > 0.0 else 0.0
 
     if pos != 0 and not blown:
         xpx = c[n - 1] * (1.0 - pos * slip)
@@ -267,7 +288,7 @@ class Engine:
     def run(self, entry, exit_flag=None, stop_dist=None, tp_dist=None,
             trail_dist=None, risk=0.01, be_r=0.0, trail_after_r=0.0, max_bars=0,
             dd_soft=1.0, dd_hard=1.0, dd_floor=0.0, pyramid=0, pyramid_step=1.0,
-            add_signal=None, add_mult=0.0, add_max=0):
+            add_signal=None, add_mult=0.0, add_max=0, add_mode=0):
         """dd_soft / dd_hard / dd_floor implement a high-water-mark throttle:
         full nominal risk while the drawdown is shallower than `dd_soft`, tapering
         linearly to `dd_floor` x nominal at `dd_hard`. Defaults disable it.
@@ -287,7 +308,7 @@ class Engine:
                     self.fee, self.slip, self.eq0, risk, self.maxlev,
                     be_r, trail_after_r, int(max_bars), self.min_notional,
                     dd_soft, dd_hard, dd_floor, int(pyramid), pyramid_step,
-                    z(add_signal), add_mult, int(add_max))
+                    z(add_signal), add_mult, int(add_max), int(add_mode))
         return self._metrics(*res)
 
     def _metrics(self, eqc, ei, xi, side, epx, xpx, pnl, rsn, qty, expo, fpaid):

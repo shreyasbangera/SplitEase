@@ -2314,3 +2314,142 @@ bars does not find new profit, it converts a booked profit into a give-back: the
 is a *mean*, and the trades that reach 3 R were already reaching the 2 R target. The uniform box
 chosen by the quarterly grid is not laziness; it is the optimum given the sizing rule in front of
 it. **Trade geometry is closed.**
+
+## S83 — The position is sized once and frozen, and the first repair was worse than the disease
+The engine opens a position only when flat and never resizes it. A marginal signal that opens a
+5%-size long owns the slot for up to the timeout, so a full-conviction signal arriving two bars
+later trades at the marginal signal's size. That is not a forecasting problem — the information is
+on a closed bar, in the same composite the book already trusts for direction. Measured
+(`research/blocked.py`, 643 trades on the bear-inclusive book):
+
+| | mean | median |
+|---|---|---|
+| conviction at entry | 0.226 | 0.091 |
+| peak same-sign conviction while held | **0.497** | 0.160 |
+
+| trades whose conviction later rose ≥ | count | share | mean P&L | mean P&L, rest |
+|---|---|---|---|---|
+| 1.5× | 253 | 39.3% | **+413** | −4 |
+| 2× | 238 | 37.0% | **+437** | −3 |
+| 3× | 208 | 32.3% | +471 | +11 |
+
+**The book enters at roughly half the conviction it goes on to see, and the trades whose conviction
+rises carry the entire P&L.** By entry-conviction quintile the money is all in Q2, Q4 and Q5
+(+39.6k, +24.9k, +40.5k) with Q1 and Q3 contributing −0.3k and −1.8k.
+
+The first mechanism held the stop fixed and solved for the quantity that brought the package back
+to budget, `aq = (budget − qty·|entry−stop|) / |add_price−stop|`. **The denominator is the distance
+from the current price to the stop, and it shrinks as a trade loses** — so the rule added hardest
+into losers, and refused to add once a trade was far enough in front that `qty·|entry−stop|` already
+exceeded budget. An averaging-down machine wearing a risk budget as a disguise:
+
+| variant | CAGR | MaxDD | PF | Sharpe | Calmar | P(DD>20%) |
+|---|---|---|---|---|---|---|
+| **no top-up (control)** | 73.2% | **−14.8%** | **2.64** | **2.12** | **4.94** | **22%** |
+| top-up 2×, max 1 | 83.1% | −30.1% | 2.14 | 1.81 | 2.76 | 93% |
+| top-up 2×, max 2 | 77.4% | −41.0% | 1.94 | 1.58 | 1.89 | 99% |
+| top-up 2×, max 4 | 73.3% | −44.5% | 1.89 | 1.51 | 1.65 | 100% |
+| top-up 1.5×, max 4 | **86.4%** | −45.5% | 1.98 | 1.57 | 1.90 | 100% |
+| top-up 3×, max 4 | 74.0% | −47.3% | 1.96 | 1.56 | 1.56 | 98% |
+| top-up 5×, max 4 | 71.9% | −44.1% | 2.01 | 1.63 | 1.63 | 94% |
+| **SHUFFLED 2×, max 4** | 60.8% | −35.4% | 1.64 | 1.29 | 1.71 | 100% |
+
+**The shuffled control is the reason this is not yet a closed door.** Topping up on the same
+schedule with a random other bar's conviction returns 60.8%; topping up on the real conviction
+returns 73.3% at essentially the same drawdown. The 12.5 points between them is signal content that
+the mechanism failed to convert. The risk handling was wrong, not the premise. Repaired in S83b.
+
+## Anatomy of the drawdowns — 66 episodes, not one accident
+Before attacking the drawdown it is worth knowing whether there is a shape to attack. On the
+bear-inclusive book at 8% risk over 4.5 years there are **66 distinct drawdown episodes**, 13 of
+them deeper than 5% and 3 deeper than 10%:
+
+| rank | peak | trough | recovered | depth | days down | days back |
+|---|---|---|---|---|---|---|
+| 1 | 2024-10-17 | 2025-02-23 | 2025-04-21 | **−14.8%** | 129 | 57 |
+| 2 | 2026-07-01 | 2026-08-18 | 2026-08-20 | −11.3% | 48 | 2 |
+| 3 | 2022-09-02 | 2023-01-09 | 2023-03-13 | −10.8% | 129 | 63 |
+| 4 | 2024-03-03 | 2024-04-12 | 2024-07-04 | −9.4% | 40 | 83 |
+| 5 | 2026-02-06 | 2026-03-19 | 2026-06-03 | −8.6% | 41 | 76 |
+
+The max drawdown is therefore a *measurable* property rather than a single accident — good news for
+every Calmar comparison in this log, which would otherwise be an argument about one observation.
+
+Two numbers reframe the problem:
+
+* **Daily skew +5.87, kurtosis 61.1**, on 1.44% daily vol, with the worst ten days only −5.5% to
+  −3.3%. The return stream is lottery-shaped: the money arrives in a handful of enormous days and
+  there is no crash risk to speak of on the losing side.
+* **72% of days are spent in drawdown**, and the deepest episode is 129 days of grind — not a shock.
+
+So the binding constraint is not a tail event that could be hedged or stopped out of. It is the
+slow bleed between the big days. And the worst of those bleeds, 2024-10 to 2025-02, sits inside the
+strongest trend of the whole sample — which for a book whose returns track trendiness at +0.61 is
+the most surprising fact in this study and the obvious next thing to explain.
+
+## S83b — The top-up with the sizing bug removed, and it is still a losing trade
+Two repaired modes, neither with any price feedback in the sizing. Mode 1 sets the target quantity
+to `budget / original_risk_unit` — exactly the size a fresh entry at this conviction would take —
+and resets the stop to one risk unit from the new average entry so the package risk is the budget
+by construction. Mode 2 adds the condition that the trade must not be in loss: a top-up may
+reinforce a position the market is already agreeing with, never rescue one it is not.
+
+| variant | CAGR | MaxDD | PF | Sharpe | Calmar | P(DD>20%) |
+|---|---|---|---|---|---|---|
+| **no top-up (control)** | 73.2% | **−14.8%** | **2.64** | **2.12** | **4.94** | **22%** |
+| m1 conviction-unit 2×, max 1 | **92.3%** | −31.9% | 2.15 | 1.75 | 2.89 | 98% |
+| m1 conviction-unit 2×, max 4 | 74.0% | −55.6% | 1.81 | 1.32 | 1.33 | 100% |
+| m1 conviction-unit 3×, max 4 | 76.5% | −59.1% | 1.91 | 1.38 | 1.29 | 100% |
+| m2 winners only 1.5×, max 4 | 73.7% | −61.2% | 1.82 | 1.23 | 1.20 | 100% |
+| m2 winners only 2×, max 1 | 77.7% | −31.1% | 2.03 | 1.57 | 2.50 | 99% |
+| m2 winners only 2×, max 4 | 56.2% | −59.2% | 1.67 | 1.11 | 0.95 | 100% |
+| m2 SHUFFLED 2×, max 4 | 61.1% | −36.6% | 1.69 | 1.23 | 1.67 | 100% |
+
+**Restricting top-ups to winners makes it worse, and that is the tell.** Adding to a long that is in
+profit raises the average entry, so resetting the stop one unit below it *tightens* the stop
+underneath a position that is now several times larger. A routine retracement then stops out the
+big package instead of the small one. The mechanism converts a won trade into a large loss at
+exactly the moment it looks safest.
+
+The shuffled control still shows real signal content — 61.1% against 74.0% at comparable drawdown —
+so conviction genuinely does keep rising on the trades that matter. It simply cannot be harvested
+by adding to an open position, because the stop that made the original bet survivable is sized for
+the original quantity and nothing you do to it afterwards is free.
+
+## Attribution of the worst drawdown — it is 29 shorts into a melt-up
+Splitting every trade in the deepest episode (2024-10-17 → 2025-02-23) by side and by which
+signals were on when it opened:
+
+| | n | P&L |
+|---|---|---|
+| long | 21 | −165 |
+| **short** | **29** | **−1,351** |
+| total | 50 | −1,516 (win rate 48%) |
+
+**The hit rate does not collapse** — 48% inside the window against 47% everywhere else. The book
+simply keeps selling a market that keeps going up, and the losing shorts are bigger than the
+winning ones. By signal, inside the window against everywhere else:
+
+| signal | agree n | agree P&L (in DD) | agree P&L (elsewhere) |
+|---|---|---|---|
+| flow | 9 | **−805** | +14,443 |
+| ivol | 11 | −415 | +8,869 |
+| cmpx | 13 | +271 | +15,430 |
+| btcdom | 11 | −396 | +5,408 |
+| fundz | 7 | −291 | +4,568 |
+| posn | 23 | −209 | **+29,441** |
+
+`posn` *opposing* the trade loses a further 596 inside the window while costing only 965 across the
+other 721 trades — so positioning is not merely quiet in a melt-up, it is actively on the wrong
+side and dragging the composite short.
+
+This is the textbook failure mode of crowding data: positioning and funding turn contrarian early
+in a melt-up and stay wrong for months. It also explains the paradox in the drawdown anatomy — a
+book whose returns track trendiness at +0.61 losing its worst money inside the strongest trend.
+The +0.61 is the *long* side working; the short side is what fails, and it fails exactly when the
+trend is strongest.
+
+**Caveat that governs everything downstream:** this rule was found by looking at the worst window,
+which is how overfitting starts. S84 measures a trend gate as an overlay only. Nothing is adopted
+from it — if it looks real it goes into the quarterly grid and must be chosen causally, quarter by
+quarter, on trailing Calmar alone.
