@@ -23,7 +23,7 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel
 import pandas as pd
 
-from webapp import config, engine
+from webapp import config, engine, scheduler, keys
 from webapp.strategies.registry import discover, get
 from webapp.broker.paper import PaperBroker
 
@@ -36,6 +36,12 @@ STATE = {"armed": False, "strategy": "v7", "equity": 10_000.0, "risk": 0.08,
 def make_broker():
     if config.MODE in ("test", "live"):
         from webapp.broker.binance import BinanceFutures
+        b = BinanceFutures.__new__(BinanceFutures)
+        k, sec = keys.get() if config.MODE == "test" else (None, None)
+        if k and sec:                      # keys entered in this session
+            b.mode, b.symbol, b.recv = config.MODE, "BTCUSDT", 5000
+            b.key, b.secret, b.base = k, sec, config.FAPI_TEST
+            return b
         return BinanceFutures(config.MODE)
     df = pd.read_parquet(config.STORE / "panel_12h.parquet")
     return PaperBroker(lambda: float(df.close.iloc[-1]), STATE["equity"])
@@ -49,9 +55,53 @@ def index():
 @app.get("/api/status")
 def status():
     return dict(mode=config.MODE, allow_live=config.ALLOW_LIVE,
-                key=config.key_fingerprint(), armed=STATE["armed"],
+                key=keys.fingerprint() or config.key_fingerprint(),
+                can_enter_keys=(config.MODE == "test"),
+                armed=STATE["armed"], scheduler=scheduler.running(),
+                next_decision=scheduler.next_decision().isoformat(timespec="minutes"),
                 strategy=STATE["strategy"], equity=STATE["equity"], risk=STATE["risk"],
                 strategies={n: c.description for n, c in discover().items()})
+
+
+class Keys(BaseModel):
+    key: str
+    secret: str
+
+
+@app.post("/api/keys")
+def set_keys(k: Keys):
+    """TESTNET ONLY. Verified against testnet before it is accepted, held in
+    memory, never written to disk."""
+    try:
+        detail = keys.set_testnet(k.key.strip(), k.secret.strip())
+    except PermissionError as e:
+        raise HTTPException(403, str(e))
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    return dict(ok=True, detail=detail, key=keys.fingerprint())
+
+
+@app.delete("/api/keys")
+def clear_keys():
+    keys.clear()
+    STATE["armed"] = False
+    return status()
+
+
+@app.post("/api/scheduler/{action}")
+async def sched(action: str):     # async so it runs ON the loop, not in a worker thread
+    if action == "start":
+        ok = scheduler.start(STATE, make_broker, get, engine, lambda: config.MODE)
+    elif action == "stop":
+        ok = scheduler.stop()
+    else:
+        raise HTTPException(400, "action must be start or stop")
+    return dict(ok=ok, running=scheduler.running())
+
+
+@app.get("/api/log")
+def runtime_log():
+    return list(scheduler.LOG)[-120:]
 
 
 class Settings(BaseModel):

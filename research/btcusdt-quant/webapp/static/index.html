@@ -112,6 +112,35 @@ pre{font-family:var(--mono);font-size:.76rem;background:var(--sunk);padding:11px
   <pre id="diag">—</pre>
 </div>
 
+<div class="card" id="keycard" hidden>
+  <h2>Testnet credentials</h2>
+  <div class="row">
+    <input id="apikey" placeholder="testnet API key" style="flex:1 1 260px">
+    <input id="apisec" type="password" placeholder="testnet API secret" style="flex:1 1 260px">
+    <button onclick="saveKeys()">Verify &amp; use</button>
+    <button onclick="clearKeys()">Forget</button>
+  </div>
+  <p class="muted" style="margin:10px 0 0">Accepted only while <b>BOT_MODE=test</b>, verified
+    against testnet before it is used, and held in memory — nothing is written to disk and a
+    restart forgets it. A production key fails that verification and is rejected rather than used.
+    <b>Live credentials are never entered here</b>; they come from the environment.</p>
+  <p id="keymsg" class="muted" style="margin:6px 0 0"></p>
+</div>
+
+<div class="card">
+  <h2>Autopilot</h2>
+  <div class="row">
+    <button id="schedbtn" onclick="toggleSched()">Start</button>
+    <span class="muted">Next decision <span id="nextdec" class="mono">—</span></span>
+    <span class="grow"></span>
+    <span id="schedpill" class="pill safe">stopped</span>
+  </div>
+  <p class="muted" style="margin:10px 0 0">Decides at each 12h close (00:05 / 12:05 UTC). While
+    <b>disarmed it still computes and logs but sends nothing</b>, so you can watch a full week of
+    decisions before letting it touch anything.</p>
+  <pre id="runlog" style="margin-top:12px;max-height:220px;overflow:auto">—</pre>
+</div>
+
 <div class="card">
   <h2>Actions</h2>
   <div class="row">
@@ -159,6 +188,11 @@ async function loadStatus(){
   }
   sel.value = ST.strategy;
   $("stratdesc").textContent = ST.strategies[ST.strategy] || "";
+  $("keycard").hidden = !ST.can_enter_keys;
+  $("nextdec").textContent = (ST.next_decision||"").replace("T"," ").replace("+00:00","Z");
+  $("schedpill").textContent = ST.scheduler ? "running" : "stopped";
+  $("schedpill").className = "pill " + (ST.scheduler ? "test" : "safe");
+  $("schedbtn").textContent = ST.scheduler ? "Stop" : "Start";
   $("armpill").textContent = ST.armed ? "ARMED" : "disarmed";
   $("armpill").className = "pill " + (ST.armed ? "armed" : "safe");
   $("armbtn").textContent = ST.armed ? "Disarm" : "Arm";
@@ -222,6 +256,29 @@ async function flatten(){
   loadStatus(); refresh();
 }
 
+async function saveKeys(){
+  try{
+    const r = await api("/api/keys", {method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({key:$("apikey").value, secret:$("apisec").value})});
+    $("keymsg").textContent = r.detail;
+    $("apikey").value = ""; $("apisec").value = "";
+  }catch(e){ $("keymsg").textContent = "rejected"; }
+  loadStatus();
+}
+async function clearKeys(){
+  await fetch("/api/keys", {method:"DELETE"});
+  $("keymsg").textContent = "forgotten"; loadStatus();
+}
+async function toggleSched(){
+  await api("/api/scheduler/" + (ST.scheduler ? "stop" : "start"), {method:"POST"});
+  loadStatus(); loadLog();
+}
+async function loadLog(){
+  const l = await api("/api/log");
+  $("runlog").textContent = l.slice().reverse().map(x =>
+    `${x.t.replace("T"," ").replace("+00:00","")}  ${x.kind.padEnd(9)} ${x.msg}`).join("\n") || "—";
+}
+
 async function loadLedger(){
   const l = await api("/api/ledger");
   $("ledger").innerHTML = l.slice().reverse().map(x => `<tr>
@@ -234,5 +291,6 @@ async function loadLedger(){
 }
 
 loadStatus().then(refresh).catch(e => console.error(e));
-setInterval(() => loadStatus().catch(()=>{}), 15000);
+setInterval(() => { loadStatus().catch(()=>{}); loadLog().catch(()=>{}); }, 15000);
+loadLog().catch(()=>{});
 </script>
