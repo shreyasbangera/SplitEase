@@ -2876,3 +2876,48 @@ result becomes readable again.
 Keep the miss rate under about 10% and the cost is a handful of CAGR points on a book that is
 already 1.7× short of the 300% gate — tolerable. Past 20% in blocks the drawdown alone disqualifies
 the run.
+
+---
+
+## V7 across the whole risk dial
+
+Two points of this were on record (8% and the 20%-gate size); here is the curve, because
+"what risk gives the highest return" is a question the two points invite and answer badly.
+
+| risk | CAGR | MaxDD | PF | Sharpe | Calmar | P(DD>20%) |
+|---|---|---|---|---|---|---|
+| 4% | 41.1% | −6.7% | 3.18 | 2.19 | 6.18 | **0%** |
+| 6% | 60.5% | −9.6% | 3.06 | 2.12 | 6.31 | **8%** |
+| **8%** (deployed) | **86.2%** | **−12.3%** | 3.17 | 2.15 | 7.01 | **34%** |
+| 10% | 114.3% | −14.8% | 3.19 | 2.16 | 7.72 | 67% |
+| 12% | 142.9% | −17.1% | 3.18 | 2.15 | 8.34 | 87% |
+| **14.4%** (on the gate) | **179.0%** | **−20.0%** | 3.18 | 2.13 | 8.95 | **98%** |
+| 16% | 208.1% | −22.0% | 3.20 | 2.14 | 9.45 | 99% |
+| 20% | 287.6% | −26.9% | 3.22 | 2.15 | 10.68 | 100% |
+| 25% | **396.6%** | −32.8% | 3.23 | 2.14 | 12.11 | 100% |
+
+**Risk is a pure leverage dial and nothing else.** Profit factor sits at 3.18 ± 0.05 and Sharpe at
+2.15 ± 0.03 across a six-fold range of position size. Not one property of the book improves or
+degrades with sizing; only the scale does. Anyone reading the 396.6% row as a better strategy than
+the 41.1% row is reading the same strategy twice.
+
+**Calmar rising from 6.18 to 12.11 is an artefact, not an edge.** CAGR compounds while drawdown is a
+single worst path, so the ratio flatters larger sizes mechanically. It is the reason Calmar is used
+here only to rank configurations *at a fixed risk*, never to choose the risk.
+
+**The 300% gate is reachable by leverage alone, and that settles nothing.** 25% risk returns 396.6%,
+clearing the brief's return bar outright — at −32.8% realised drawdown and a 100% bootstrap
+probability of breaching 20%. The brief asks for >300% **and** <20%, and no point on this curve does
+both: the 20% drawdown limit is hit at 14.4% risk and 179.0%. **The book is 1.7× short of the target
+at the only size the target can honestly be judged at**, which is exactly where it was before this
+measurement. Sizing up is not progress on the brief; it is a different answer to a different
+question.
+
+**2022 is flat at every size** (+1% to +3%). The bear year neither contributes nor costs, so the
+entire record is a bull-market record scaled up and down. That is the sample's most important
+limitation and no risk setting changes it.
+
+**For the laptop deployment specifically:** S93 measured that missed bars add roughly 7 points of
+drawdown at a realistic 20% block miss rate. Read against this table, 8% risk (−12.3%, 34%) becomes
+roughly what 10-12% would otherwise be. 6% (−9.6%, 8%) is the size that keeps its margin once the
+schedule is accounted for, and is the honest recommendation for a machine that sleeps.
