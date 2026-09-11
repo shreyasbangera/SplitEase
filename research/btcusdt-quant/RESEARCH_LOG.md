@@ -2921,3 +2921,84 @@ limitation and no risk setting changes it.
 drawdown at a realistic 20% block miss rate. Read against this table, 8% risk (−12.3%, 34%) becomes
 roughly what 10-12% would otherwise be. 6% (−9.6%, 8%) is the size that keeps its margin once the
 schedule is accounted for, and is the honest recommendation for a machine that sleeps.
+
+---
+
+## S94 — Can the SHAPE be changed? The last structural lever, closed
+
+The risk dial settled that leverage is a pure scale knob: PF 3.18 ± 0.05 and Sharpe 2.15 ± 0.03
+across a six-fold range of size. So the 20% gate binds at 14.4% risk and 179.0% CAGR, and the only
+route past it is to change the **shape** of the equity curve — cut the deep part of the drawdown
+without giving up the same fraction of return, so the gate binds at a larger base size.
+
+S34 tested this and recorded a clean negative, but on the S32 multi-instrument portfolio (PF 1.27,
+Sharpe 1.34), which is not this book. Re-tested on V7.
+
+**Method.** Every overlay applied causally to V7's own daily returns — the multiplier for day *t*
+from data through *t−1* only — then compared **at the gate**: the global scale bisected so realised
+max drawdown lands on −20%, so the only thing differing between rows is shape, not size.
+
+**The scaling assumption, checked rather than assumed.** 8% × 1.5 gives 145.9%/−18.1% against the
+engine's actual 12% at 142.8%/−17.1%; daily correlation **0.9962**, mean absolute difference
+0.000275 on a daily sd of 0.0240. Valid for ranking, ~2% optimistic in level. **The baseline within
+this method is therefore 168.8%, not 179.0%**, and every row is judged against 168.8%. Comparing an
+overlay measured one way against a baseline measured another is how a methodology gap becomes a
+discovery.
+
+| overlay | CAGR at −20% | Sharpe | Calmar |
+|---|---|---|---|
+| **no overlay** | **168.8%** | 2.15 | 8.44 |
+| vol target 20% | 64.1% | 1.94 | 3.21 |
+| vol target 50% | 125.2% | 2.11 | 6.26 |
+| vol target 70% | 150.5% | 2.16 | 7.53 |
+| throttle 5/20 floor 0 | **57.0%** | **1.40** | 2.85 |
+| throttle 8/22 floor 0 | 114.8% | 1.80 | 5.74 |
+| throttle 15/30 floor 0.25 | 168.0% | 2.13 | 8.40 |
+
+**Both families are monotone toward doing nothing.** The best vol target is the loosest; the best
+throttle the gentlest. Each converges on the baseline from below and never crosses it — the
+signature of an overlay that is pure cost. The aggressive throttle is actively destructive: Sharpe
+2.15 → 1.40. S34's verdict confirmed on a book with 2.5× the profit factor, and for the reason the
+drawdown anatomy already gave: **72% of days are spent in drawdown**, so a high-water-mark throttle
+throttles nearly always, and the top decile of trades that carries 130% of net profit arrives while
+it is asleep. Episode 2 in the anatomy recovered 11.3% in two days.
+
+### S94b — the inverse worked on the full sample, and the split killed it
+
+S34's own explanation for the failure — "cutting size in a drawdown means being small through the
+recovery" — implies the opposite may pay. Sizing **up** into drawdowns beat the baseline on every
+measure: 176.4% at 1.5× peak, Sharpe 2.22, Calmar 8.82. Pushed until it broke:
+
+| peak multiplier | full sample | first half | second half |
+|---|---|---|---|
+| 1.0× (none) | 168.8% | 166.6% | 218.9% |
+| 1.5× | **176.4%** (+7.6) | 154.3% (**−12.3**) | 239.5% (**+20.6**) |
+| 2.0× | **180.5%** (+11.7) | 144.4% (**−22.1**) | 252.7% (**+33.8**) |
+| 3.0× | **182.1%** (+13.2) | 129.0% (**−37.6**) | 263.9% (**+45.1**) |
+| 4.0× | 180.0% (+11.2) | | |
+| 6.0× | 163.7% (−5.1) | | |
+| 10.0× | 136.8% (−32.0) | | |
+
+**It turns over at 3×**, so it is not the unbounded martingale the boundary optimum suggested — one
+concern retired. But **the sign of the effect flips between sample halves, monotonically in both
+directions.** The full-sample +7.6 points is the net of −12.3 and +20.6. It is not a property of the
+book; it is a property of which half you measure, and it pays in the half with the higher baseline
+(218.9% vs 166.6%) — leverage applied at the worst moment being rewarded by a period in which every
+drawdown happened to recover.
+
+Two further practical objections, either of which would be sufficient alone. At the settings that
+look best the overlay **demands 2–3× the nominal position at the bottom of the worst drawdown**,
+which is a margin call rather than a strategy and is not modelled by scaling daily returns past the
+engine's 10× leverage cap. And at 6× and above the bisection produced a **negative terminal
+equity** — the account is gone, and only the CAGR formula complained.
+
+**Recorded as a clean negative. The shape lever is closed.** Nothing available at the portfolio
+level moves Calmar on this book: de-risking is monotone cost, and re-risking is regime-dependent
+noise that would have lost money over the first half of the sample while demanding triple size to
+do it.
+
+**Where that leaves the brief.** Every structural lever is now closed — signals, weights,
+combination, payoff shape, bet count, multi-instrument, conviction, top-up, selection, the trend
+gate, leverage, and now curve shape. V7 stands at **179.0% CAGR at −19.99%**, which is **1.7× short
+of the 300% target** at the only size the 20% drawdown limit permits. No result in this log reaches
+the brief's gate, and nothing in S94 changes that.

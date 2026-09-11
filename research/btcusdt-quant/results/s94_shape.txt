@@ -1,0 +1,35 @@
+loading V7 daily returns (cached after the first run)
+  1645 days, 2022-03-01 -> 2026-08-31
+
+LINEARITY CHECK - is scaling the daily return the same as sizing up?
+  8% x 1.5   CAGR   145.9%  DD  -18.1%
+  12% actual CAGR   142.8%  DD  -17.1%
+  correlation of daily returns 0.9962
+  mean abs difference 0.000275 on a daily sd of 0.0240
+
+AT THE -20% GATE - scale bisected so realised drawdown matches
+
+       no overlay (V7 as deployed) | CAGR   168.8%  DD  -20.0%  Shp  2.15  Clm  8.44  scale 1.67
+
+                    vol target 20% | CAGR    64.1%  DD  -20.0%  Shp  1.94  Clm  3.21  scale 0.55
+                    vol target 30% | CAGR    86.6%  DD  -20.0%  Shp  1.99  Clm  4.33  scale 0.59
+                    vol target 40% | CAGR   106.7%  DD  -20.0%  Shp  2.04  Clm  5.34  scale 0.60
+                    vol target 50% | CAGR   125.2%  DD  -20.0%  Shp  2.11  Clm  6.26  scale 0.59
+                    vol target 70% | CAGR   150.5%  DD  -20.0%  Shp  2.16  Clm  7.53  scale 0.59
+
+          throttle 5/20 floor 0.00 | CAGR    57.0%  DD  -20.0%  Shp  1.40  Clm  2.85  scale 2.24
+          throttle 5/15 floor 0.25 | CAGR    86.2%  DD  -20.0%  Shp  1.63  Clm  4.31  scale 2.06
+          throttle 8/22 floor 0.00 | CAGR   114.8%  DD  -20.0%  Shp  1.80  Clm  5.74  scale 1.94
+          throttle 8/20 floor 0.25 | CAGR   130.0%  DD  -20.0%  Shp  1.90  Clm  6.50  scale 1.89
+         throttle 10/25 floor 0.00 | CAGR   140.5%  DD  -20.0%  Shp  1.99  Clm  7.03  scale 1.77
+         throttle 10/20 floor 0.50 | CAGR   156.2%  DD  -20.0%  Shp  2.03  Clm  7.81  scale 1.80
+         throttle 12/30 floor 0.00 | CAGR   163.8%  DD  -20.0%  Shp  2.07  Clm  8.19  scale 1.77
+         throttle 15/30 floor 0.25 | CAGR   168.0%  DD  -20.0%  Shp  2.13  Clm  8.40  scale 1.69
+
+           INVERSE 5/20 floor 0.50 | CAGR   176.4%  DD  -20.0%  Shp  2.22  Clm  8.82  scale 1.56
+           INVERSE 8/22 floor 0.50 | CAGR   171.4%  DD  -20.0%  Shp  2.20  Clm  8.57  scale 1.58
+          INVERSE 10/25 floor 0.50 | CAGR   169.6%  DD  -20.0%  Shp  2.19  Clm  8.48  scale 1.61
+          INVERSE 10/25 floor 0.00 | CAGR   168.8%  DD  -20.0%  Shp  2.21  Clm  8.44  scale 1.56
+
+baseline to beat: 179.0% at -20.0%
+done: shape overlays

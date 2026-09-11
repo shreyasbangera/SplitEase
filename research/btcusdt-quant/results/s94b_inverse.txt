@@ -1,0 +1,41 @@
+V7 daily returns, 1645 days, 2022-03-01 -> 2026-08-31
+same-method baseline at the -20% gate: 168.8%
+
+1. HOW FAR DOES IT GO BEFORE IT TURNS OVER?
+   soft/hard fixed at 5/20; the peak multiplier is the lever.
+
+                    no overlay | CAGR   168.8%  DD  -20.0%  Shp  2.15  Clm  8.44  peak size 1.00x    +0.0pt
+       inverse 5/20 peak 1.25x | CAGR   173.3%  DD  -20.0%  Shp  2.19  Clm  8.66  peak size 1.25x    +4.5pt
+       inverse 5/20 peak 1.50x | CAGR   176.4%  DD  -20.0%  Shp  2.22  Clm  8.82  peak size 1.50x    +7.6pt
+       inverse 5/20 peak 2.00x | CAGR   180.5%  DD  -20.0%  Shp  2.25  Clm  9.02  peak size 2.00x   +11.7pt
+       inverse 5/20 peak 3.00x | CAGR   182.1%  DD  -20.0%  Shp  2.26  Clm  9.10  peak size 3.00x   +13.2pt
+       inverse 5/20 peak 4.00x | CAGR   180.0%  DD  -20.0%  Shp  2.24  Clm  9.00  peak size 4.00x   +11.2pt
+/home/user/quant/strategies/s94_shape.py:99: RuntimeWarning: invalid value encountered in scalar power
+  cagr = float(e[-1] ** (1 / yrs) - 1)
+       inverse 5/20 peak 6.00x | CAGR   163.7%  DD  -20.0%  Shp  2.18  Clm  8.18  peak size 6.00x    -5.1pt
+      inverse 5/20 peak 10.00x | CAGR   136.8%  DD  -20.0%  Shp  2.02  Clm  6.84  peak size 10.00x   -32.0pt
+
+   and with the ramp starting immediately (soft=0):
+
+       inverse 0/20 peak 1.50x | CAGR   169.5%  DD  -20.0%  Shp  2.22  Clm  8.47  peak size 1.50x    +0.7pt
+       inverse 0/20 peak 2.00x | CAGR   169.0%  DD  -20.0%  Shp  2.24  Clm  8.45  peak size 2.00x    +0.2pt
+       inverse 0/20 peak 3.00x | CAGR   161.9%  DD  -20.0%  Shp  2.23  Clm  8.09  peak size 3.00x    -6.9pt
+       inverse 0/20 peak 6.00x | CAGR   138.9%  DD  -20.0%  Shp  2.12  Clm  6.95  peak size 6.00x   -29.9pt
+
+2. DOES IT SURVIVE A SPLIT?
+
+   first half: 2022-03-01 -> 2024-05-30, baseline 166.6%
+
+                    no overlay | CAGR   166.6%  DD  -20.0%  Shp  2.25  Clm  8.33  peak size 1.00x    +0.0pt
+       inverse 5/20 peak 1.50x | CAGR   154.3%  DD  -20.0%  Shp  2.26  Clm  7.72  peak size 1.50x   -12.3pt
+       inverse 5/20 peak 2.00x | CAGR   144.4%  DD  -20.0%  Shp  2.26  Clm  7.22  peak size 2.00x   -22.1pt
+       inverse 5/20 peak 3.00x | CAGR   129.0%  DD  -20.0%  Shp  2.25  Clm  6.45  peak size 3.00x   -37.6pt
+
+   second half: 2024-05-31 -> 2026-08-31, baseline 218.9%
+
+                    no overlay | CAGR   218.9%  DD  -20.0%  Shp  2.17  Clm 10.94  peak size 1.00x    +0.0pt
+       inverse 5/20 peak 1.50x | CAGR   239.5%  DD  -20.0%  Shp  2.28  Clm 11.97  peak size 1.50x   +20.6pt
+       inverse 5/20 peak 2.00x | CAGR   252.7%  DD  -20.0%  Shp  2.33  Clm 12.63  peak size 2.00x   +33.8pt
+       inverse 5/20 peak 3.00x | CAGR   263.9%  DD  -20.0%  Shp  2.37  Clm 13.20  peak size 3.00x   +45.1pt
+
+done: inverse
