@@ -23,11 +23,12 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel
 import pandas as pd
 
-from webapp import config, engine, scheduler, keys
+from webapp import config, engine, scheduler, keys, auth
 from webapp.strategies.registry import discover, get
 from webapp.broker.paper import PaperBroker
 
 app = FastAPI(title="BTCUSDT book")
+app.middleware("http")(auth.middleware)
 STATIC = pathlib.Path(__file__).parent / "static"
 STATE = {"armed": False, "strategy": "v7", "equity": 10_000.0, "risk": 0.08,
          "last_plan": None}
@@ -177,6 +178,10 @@ def ledger():
 
 if __name__ == "__main__":
     import uvicorn
+    host = os.environ.get("HOST", "127.0.0.1")
+    port = int(os.environ.get("PORT", 8000))
+    auth.check_startup(host)
     print(f"mode={config.MODE}  key={config.key_fingerprint()}  "
-          f"allow_live={config.ALLOW_LIVE}")
-    uvicorn.run(app, host="127.0.0.1", port=8000, log_level="info")
+          f"allow_live={config.ALLOW_LIVE}  "
+          f"auth={'on' if auth.required() else 'OFF (localhost only)'}")
+    uvicorn.run(app, host=host, port=port, log_level="info")

@@ -1,0 +1,28 @@
+# One-click deploy on Render.  The dashboard only - trading runs in GitHub
+# Actions, which is deliberate: Render's free web services sleep when idle, and
+# a sleeping dashboard costs nothing because it is not the thing placing orders.
+services:
+  - type: web
+    name: btcusdt-book
+    runtime: docker
+    dockerfilePath: ./research/btcusdt-quant/webapp/Dockerfile
+    dockerContext: ./research/btcusdt-quant
+    plan: free
+    healthCheckPath: /api/status
+    envVars:
+      - key: BOT_MODE
+        value: test
+      - key: BOOK_STORE
+        value: /data
+      - key: APP_USER
+        value: trader
+      - key: APP_PASSWORD
+        generateValue: true      # Render generates one; read it in the dashboard
+      - key: BINANCE_TEST_KEY
+        sync: false              # paste in the Render UI
+      - key: BINANCE_TEST_SECRET
+        sync: false
+    disk:
+      name: data
+      mountPath: /data
+      sizeGB: 1
