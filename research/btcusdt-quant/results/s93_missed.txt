@@ -1,0 +1,76 @@
+CONTROL - must reproduce 73.2% / -14.8% / PF 2.64 / N 771
+
+   control, nothing missed             | CAGR    73.2%  DD  -14.8%  PF  2.64  N  771  Shp  2.12  Clm  4.94
+
+
+PART A - the average cost of a miss rate
+8 seeds per cell; the figure is the MEAN, the bracket the range.
+
+  --- outages as scattered single bars (block=1) ---
+    miss  4.9%  CAGR   69.7% [ 52.7 ..  77.1]  PF 2.61 [2.25 .. 2.89]  DD  -15.6%  N   740
+    miss  9.8%  CAGR   66.6% [ 53.4 ..  82.1]  PF 2.63 [2.30 .. 2.91]  DD  -17.0%  N   711
+    miss 20.0%  CAGR   61.5% [ 44.3 ..  75.8]  PF 2.60 [2.15 .. 2.84]  DD  -18.5%  N   650
+    miss 33.0%  CAGR   53.8% [ 37.2 ..  72.7]  PF 2.55 [2.20 .. 3.42]  DD  -21.4%  N   570
+    miss 50.0%  CAGR   40.5% [ 15.1 ..  78.0]  PF 2.20 [1.50 .. 3.69]  DD  -30.0%  N   454
+  --- outages as three-day outages (block=6) ---
+    miss  6.5%  CAGR   68.8% [ 56.0 ..  78.3]  PF 2.61 [2.15 .. 2.90]  DD  -15.3%  N   730
+    miss 10.2%  CAGR   64.3% [ 50.1 ..  75.5]  PF 2.50 [2.13 .. 2.84]  DD  -17.1%  N   705
+    miss 21.2%  CAGR   55.3% [ 41.5 ..  70.3]  PF 2.36 [1.89 .. 2.95]  DD  -21.5%  N   627
+    miss 34.2%  CAGR   44.9% [ 22.3 ..  70.7]  PF 2.19 [1.57 .. 2.80]  DD  -23.7%  N   540
+    miss 51.0%  CAGR   29.3% [ 19.1 ..  53.1]  PF 1.88 [1.59 .. 2.60]  DD  -26.5%  N   431
+
+
+PART B - the dispersion at one realistic setting
+20% of bars missed in three-day blocks - a laptop shut most weekends
+and away one week in five. 40 seeds. SAME strategy, SAME period, SAME
+data: the only thing that differs is WHICH bars were missed.
+
+    seed 101  CAGR    61.4%  PF  2.60  DD  -15.2%  N  634
+    seed 102  CAGR    58.6%  PF  2.54  DD  -23.7%  N  638
+    seed 103  CAGR    63.0%  PF  2.52  DD  -19.2%  N  607
+    seed 104  CAGR    66.2%  PF  2.70  DD  -15.9%  N  618
+    seed 105  CAGR    52.1%  PF  2.34  DD  -19.7%  N  639
+    seed 106  CAGR    45.0%  PF  2.14  DD  -16.4%  N  629
+    seed 107  CAGR    58.7%  PF  2.48  DD  -16.0%  N  622
+    seed 108  CAGR    49.9%  PF  2.14  DD  -25.2%  N  626
+    seed 109  CAGR    66.9%  PF  2.63  DD  -17.2%  N  624
+    seed 110  CAGR    56.9%  PF  2.39  DD  -23.6%  N  639
+    seed 111  CAGR    63.4%  PF  2.68  DD  -29.1%  N  642
+    seed 112  CAGR    72.7%  PF  2.91  DD  -21.5%  N  628
+    seed 113  CAGR    77.6%  PF  3.00  DD  -13.4%  N  619
+    seed 114  CAGR    77.3%  PF  2.98  DD  -15.1%  N  613
+    seed 115  CAGR    67.6%  PF  2.72  DD  -15.6%  N  633
+    seed 116  CAGR    54.1%  PF  2.41  DD  -13.6%  N  631
+    seed 117  CAGR    66.6%  PF  2.72  DD  -18.6%  N  628
+    seed 118  CAGR    70.0%  PF  2.64  DD  -17.0%  N  640
+    seed 119  CAGR    53.9%  PF  2.28  DD  -17.7%  N  628
+    seed 120  CAGR    49.4%  PF  2.26  DD  -20.7%  N  606
+    seed 121  CAGR    58.4%  PF  2.55  DD  -12.0%  N  630
+    seed 122  CAGR    68.6%  PF  2.69  DD  -17.5%  N  643
+    seed 123  CAGR    48.4%  PF  2.09  DD  -23.6%  N  618
+    seed 124  CAGR    54.9%  PF  2.32  DD  -25.5%  N  646
+    seed 125  CAGR    48.4%  PF  2.24  DD  -16.0%  N  649
+    seed 126  CAGR    72.5%  PF  2.94  DD  -14.3%  N  622
+    seed 127  CAGR    58.3%  PF  2.55  DD  -26.7%  N  622
+    seed 128  CAGR    54.3%  PF  2.36  DD  -20.4%  N  624
+    seed 129  CAGR    68.0%  PF  2.63  DD  -14.3%  N  644
+    seed 130  CAGR    70.4%  PF  2.76  DD  -12.8%  N  650
+    seed 131  CAGR    61.6%  PF  2.53  DD  -19.8%  N  612
+    seed 132  CAGR    46.5%  PF  2.15  DD  -27.6%  N  623
+    seed 133  CAGR    40.6%  PF  2.25  DD  -15.2%  N  611
+    seed 134  CAGR    49.2%  PF  2.38  DD  -21.4%  N  639
+    seed 135  CAGR    49.4%  PF  2.28  DD  -26.8%  N  628
+    seed 136  CAGR    56.4%  PF  2.45  DD  -23.9%  N  616
+    seed 137  CAGR    62.7%  PF  2.61  DD  -13.6%  N  627
+    seed 138  CAGR    55.2%  PF  2.47  DD  -20.8%  N  625
+    seed 139  CAGR    37.7%  PF  1.95  DD  -34.9%  N  620
+    seed 140  CAGR    53.2%  PF  2.28  DD  -35.5%  N  630
+
+    control CAGR 73.2%   PF 2.64
+    missed  CAGR  min   37.7%  p10   48.2%  median   58.4%  p90   70.6%  max   77.6%
+            PF   min  1.95   p10  2.15   median  2.50   p90  2.78   max  3.00
+
+    spread in CAGR: 40 points, on one strategy over one period.
+    Anything you conclude from a single run has to clear that.
+
+done: missed bars

@@ -95,7 +95,8 @@ def backtest(sig_df, arrays, tf, period=("all"), risk=0.01, max_lev=5.0,
              fee=5.0, slip=3.0, be_r=0.0, trail_after_r=0.0, max_bars_h=0,
              start=None, end=None, eq0=10_000.0,
              dd_soft=1.0, dd_hard=1.0, dd_floor=0.0, pyramid=0, pyramid_step=1.0,
-             exec_df=None, exec_key=None, funding_df=None, add_mult=0.0, add_max=0, add_mode=0):
+             exec_df=None, exec_key=None, funding_df=None, add_mult=0.0, add_max=0,
+             add_mode=0, delay_bars=0, miss_prob=0.0, miss_seed=0, miss_block=1):
     """
     arrays: dict with keys 'entry','exit','stop','tp','trail' on the DECISION grid.
     Values from decision bar t become active at the open of decision bar t+1.
@@ -104,9 +105,50 @@ def backtest(sig_df, arrays, tf, period=("all"), risk=0.01, max_lev=5.0,
                             exec_df=exec_df, exec_key=exec_key, funding_df=funding_df)
     al = align_to_exec(sig_df, ex_s, arrays, lag=1)
     entry = np.nan_to_num(al["entry"]) * first
+    exit_flag = np.nan_to_num(al.get("exit", np.zeros(len(ex_s))))
+    miss_rate = 0.0
+    if miss_prob > 0:
+        # Decision bars nobody was there for. Zeroing `entry` at a decision
+        # bar's first execution bar is exactly "no one acted": the engine
+        # carries the existing position forward rather than closing it.
+        #
+        # `exit` is masked across that whole decision bar for the same reason -
+        # a signal exit needs a machine running to send it. Stops and
+        # take-profits are deliberately NOT masked, because they are reduce-only
+        # orders already resting on the exchange and fire whether or not
+        # anything of yours is up.
+        #
+        # That asymmetry IS the experiment. A missed bar does not delete a
+        # trade; it substitutes one. You keep the old position, protected by the
+        # old stop, and lose only the signal-based exits and reversals - which
+        # is a different strategy from the one that was backtested.
+        starts = np.flatnonzero(first)
+        nd = len(starts)
+        rng = np.random.default_rng(miss_seed)
+        miss = np.zeros(nd, bool)
+        target = int(round(miss_prob * nd))
+        guard = 0
+        # Outages come in BLOCKS. A laptop is not off for independent bars, it
+        # is off for a night, a weekend, a trip - and a contiguous block is one
+        # market regime rather than k independent draws, which matters far more
+        # than the same number of scattered bars would.
+        while miss.sum() < target and guard < 20 * nd + 50:
+            s0 = int(rng.integers(0, nd))
+            miss[s0:s0 + miss_block] = True
+            guard += 1
+        miss_rate = miss.mean()
+        entry[starts[miss]] = 0.0
+        bounds = np.r_[starts, len(entry)]
+        for j in np.flatnonzero(miss):
+            exit_flag[bounds[j]:bounds[j + 1]] = 0.0
+    if delay_bars:
+        # Act `delay_bars` execution bars after the decision bar opens, instead
+        # of at its first bar. Models an operator (or a sleeping machine) that
+        # reaches the decision late.
+        entry = np.r_[np.zeros(delay_bars), entry[:-delay_bars]]
     bar_h = pd.Series(ex_s.dt).diff().median().total_seconds() / 3600.0
-    return eng.run(entry,
-                   exit_flag=np.nan_to_num(al.get("exit", np.zeros(len(ex_s)))),
+    out = eng.run(entry,
+                   exit_flag=exit_flag,
                    stop_dist=al.get("stop"), tp_dist=al.get("tp"),
                    trail_dist=al.get("trail"),
                    risk=risk, be_r=be_r, trail_after_r=trail_after_r,
@@ -116,6 +158,9 @@ def backtest(sig_df, arrays, tf, period=("all"), risk=0.01, max_lev=5.0,
                    add_signal=(np.nan_to_num(al["add"]) * first
                                if "add" in al else None),
                    add_mult=add_mult, add_max=add_max, add_mode=add_mode)
+    if miss_prob > 0:
+        out["miss_rate"] = miss_rate
+    return out
 
 def report(name, sig_df, arrays, tf, **kw):
     out = {}

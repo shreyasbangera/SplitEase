@@ -2809,3 +2809,70 @@ S89 what shape, S90/S91 which signal — established that a trend gate is real, 
 against a smoothed reference rather than direction or trend strength, that its shape is a step the
 sample cannot resolve further, and that funding is the signal it is mostly correcting. None of the
 refinements beat the plain net gate at the 20% drawdown limit.
+
+---
+
+## S93 — what missed bars cost, and what not knowing which ones costs
+
+S92 asked what acting LATE costs. This asks what not acting at all costs, because the only machine
+now available is a laptop and a laptop sleeps.
+
+**A missed bar is a substitution, not a deletion.** The position is carried forward and only the
+signal-driven actions are lost — the reversal, the flat-signal exit, the rebalance. The stop and the
+take-profit are reduce-only orders already resting on the exchange and fire whether or not anything
+of yours is running. So a missed bar quietly converts the book from *exit when the edge decays* into
+*exit only on a stop, a target, or the holding cap*. Modelled exactly that way: `entry` zeroed at the
+missed decision bar, `exit` masked across it, stop and tp untouched. Control reproduces
+73.2% / −14.8% / PF 2.64 / N 771 with `miss_prob=0`, so the harness change is inert.
+
+Outages are drawn in BLOCKS as well as scattered, because a laptop is not off for independent bars —
+it is off for a night, a weekend, a trip, and six consecutive bars are three days of one market
+regime rather than six independent draws.
+
+**Mean of 8 seeds per cell, 8% risk, 12-month plan. Bracket is the range across seeds.**
+
+| missed | scattered (block=1) | three-day blocks (block=6) |
+|---|---|---|
+| 0% | 73.2%, PF 2.64, DD −14.8% | — |
+| ~5% | 69.7% [52.7 .. 77.1], PF 2.61, DD −15.6% | 68.8% [56.0 .. 78.3], PF 2.61, DD −15.3% |
+| ~10% | 66.6% [53.4 .. 82.1], PF 2.63, DD −17.0% | 64.3% [50.1 .. 75.5], PF 2.50, DD −17.1% |
+| ~20% | 61.5% [44.3 .. 75.8], PF 2.60, DD −18.5% | 55.3% [41.5 .. 70.3], PF 2.36, DD −21.5% |
+| ~33% | 53.8% [37.2 .. 72.7], PF 2.55, DD −21.4% | 44.9% [22.3 .. 70.7], PF 2.19, DD −23.7% |
+| ~50% | 40.5% [15.1 .. 78.0], PF 2.20, DD −30.0% | 29.3% [19.1 .. 53.1], PF 1.88, DD −26.5% |
+
+**Three findings, in order of how much they matter.**
+
+**1. Clustering costs about six points of CAGR at the same miss rate.** 21% in blocks returns 55.3%
+where 20% scattered returns 61.5%, and profit factor falls further (2.36 against 2.60). The realistic
+pattern is the more damaging one.
+
+**2. Missed bars raise risk, they do not merely lower return.** Drawdown degrades monotonically:
+−14.8% → −18.5% → −21.5% → −26.5%. At a 21% block miss rate the book is already through the brief's
+20% gate *at 8% risk*, a size chosen because it sits well inside it. This is the mechanism above
+made visible — holding through signal decay until a stop fires is a worse trade than exiting on the
+signal, and the stop is the only thing left.
+
+**3. The dispersion swamps the mean, and that is the real problem.** 40 seeds at 20% missed in
+three-day blocks. Same strategy, same period, same data; the only difference is *which* bars were
+missed:
+
+| | min | p10 | median | p90 | max | control |
+|---|---|---|---|---|---|---|
+| CAGR | 37.7% | 48.2% | 58.4% | 70.6% | **77.6%** | 73.2% |
+| PF | 1.95 | 2.15 | 2.50 | 2.78 | 3.00 | 2.64 |
+
+A **40-point spread in CAGR** on one strategy over one period. And the best missed run (77.6%) beats
+the control (73.2%) — so a *good* live result does not even license the conclusion that the schedule
+was adequate. Individual seeds separate further still: seed 137 returns 62.7% at −13.6% drawdown,
+seed 140 returns 53.2% at −35.5%.
+
+**The conclusion for a laptop deployment.** A single live result at an unknown miss rate is
+uninterpretable: most of its variance is scheduling, not strategy. The remedy is not to miss fewer
+bars — it is to *record which ones*, which is what `webapp/journal.py` in the deployment repo now
+does. Without that record, three months of live P&L cannot distinguish a working book from a broken
+one in either direction. With it, the coverage figure is quotable alongside the return and the
+result becomes readable again.
+
+Keep the miss rate under about 10% and the cost is a handful of CAGR points on a book that is
+already 1.7× short of the 300% gate — tolerable. Past 20% in blocks the drawdown alone disqualifies
+the run.
