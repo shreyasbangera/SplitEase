@@ -9,7 +9,7 @@ services:
     dockerfilePath: ./research/btcusdt-quant/webapp/Dockerfile
     dockerContext: ./research/btcusdt-quant
     plan: free
-    healthCheckPath: /api/status
+    healthCheckPath: /healthz     # unauthenticated; a health check cannot log in
     envVars:
       - key: BOT_MODE
         value: paper           # the viewer never places orders

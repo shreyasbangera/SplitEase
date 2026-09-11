@@ -16,7 +16,6 @@ Keys come from the environment only.  This app never accepts a key through the
 browser, never writes one to disk and never logs one.
 """
 import os, sys, json, pathlib
-sys.path.insert(0, "/home/user/quant")
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -29,6 +28,14 @@ from webapp.broker.paper import PaperBroker
 
 app = FastAPI(title="BTCUSDT book")
 app.middleware("http")(auth.middleware)
+
+
+@app.get("/healthz")
+def healthz():
+    """Unauthenticated on purpose: a platform health check cannot present a
+    password, so pointing one at an authenticated route fails every deploy.
+    Returns liveness only - no account data, no configuration."""
+    return dict(ok=True)
 STATIC = pathlib.Path(__file__).parent / "static"
 STATE = {"armed": False, "strategy": "v7", "equity": 10_000.0, "risk": 0.08,
          "last_plan": None}

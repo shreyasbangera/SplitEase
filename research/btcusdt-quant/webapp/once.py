@@ -26,7 +26,7 @@ backtest in a way a laptop that sleeps at 3am is not.
 mis-fired cron job cannot trade.
 """
 import argparse, json, os, sys
-sys.path.insert(0, "/home/user/quant")
+import webapp  # noqa: F401  - puts the project root on sys.path
 
 from webapp import config, engine
 from webapp.strategies.registry import get

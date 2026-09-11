@@ -10,9 +10,9 @@ sleeves are always on the same side or flat, and each sleeve's stop can be a
 separate reduce-only order against one netted position.
 """
 import os, sys, json
+import webapp  # noqa: F401  - puts the project root on sys.path
 import numpy as np, pandas as pd
 
-sys.path.insert(0, "/home/user/quant")
 from webapp.strategies.base import Strategy, Sleeve, Decision
 from webapp.config import STORE
 from live.runner import build_signals, unit, THR

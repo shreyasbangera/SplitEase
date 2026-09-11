@@ -46,8 +46,11 @@ def _unauthorized():
                     headers={"WWW-Authenticate": 'Basic realm="BTCUSDT book"'})
 
 
+OPEN_PATHS = {"/healthz"}      # platform health checks cannot authenticate
+
+
 async def middleware(request: Request, call_next):
-    if not required():
+    if request.url.path in OPEN_PATHS or not required():
         return await call_next(request)
     header = request.headers.get("authorization", "")
     if header.startswith("Basic "):

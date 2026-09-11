@@ -5,9 +5,9 @@ the sleeves, and moves the difference.  That keeps strategies stateless and make
 adding one a matter of answering a single question.
 """
 import os, sys, json, datetime as dt
+import webapp  # noqa: F401  - puts the project root on sys.path
 import pandas as pd
 
-sys.path.insert(0, "/home/user/quant")
 from .config import STORE, MODE
 from .strategies.registry import get, discover
 
