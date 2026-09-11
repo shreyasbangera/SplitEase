@@ -1,0 +1,112 @@
+# Twice-daily decision for the BTCUSDT book, on GitHub's runners.
+#
+# SCHEDULES ONLY FIRE FROM THE DEFAULT BRANCH. GitHub ignores `schedule:` on any
+# other branch, so this file has to be on `main` before it runs on its own. Until
+# then use the "Run workflow" button, which works from any branch.
+#
+# BEST-EFFORT TIMING. Scheduled workflows are commonly delayed 10-30 minutes
+# under load and are sometimes skipped entirely. The backtest assumes a fill at
+# the next bar's open, so a late run is a worse fill and a skipped run is a
+# decision the backtest never missed. Survivable for a 12h book; still the reason
+# a $4 VPS is better for anything you mind losing.
+name: BTCUSDT book
+
+on:
+  schedule:
+    - cron: "5 0 * * *"      # 00:05 UTC, just after the 12h bar closes
+    - cron: "5 12 * * *"     # 12:05 UTC
+  workflow_dispatch:
+    inputs:
+      arm:
+        description: "Place orders (otherwise this is a dry run)"
+        type: boolean
+        default: false
+      risk:
+        description: "Total risk budget per decision"
+        default: "0.08"
+
+concurrency:
+  group: btcusdt-book        # never let two decisions overlap
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  decide:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: research/btcusdt-quant
+    env:
+      BOOK_STORE: ${{ github.workspace }}/research/btcusdt-quant/data/live
+      PYTHONPATH: ${{ github.workspace }}/research/btcusdt-quant
+      BOT_MODE: test                      # testnet. Never 'live' from CI.
+      BOT_STRATEGY: v7
+      BOT_EQUITY: "10000"
+      BOT_RISK: ${{ github.event.inputs.risk || '0.08' }}
+      BINANCE_TEST_KEY: ${{ secrets.BINANCE_TEST_KEY }}
+      BINANCE_TEST_SECRET: ${{ secrets.BINANCE_TEST_SECRET }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: research/btcusdt-quant/webapp/requirements.txt
+
+      - run: pip install -r webapp/requirements.txt
+
+      # The panels are under a megabyte and change every run, so the cache key is
+      # unique (always a miss, always a save) and restore-keys picks up the most
+      # recent. A cold cache falls back to a full seed, which is slow but works.
+      - name: Restore market-data panels
+        uses: actions/cache@v4
+        with:
+          path: research/btcusdt-quant/data/live
+          key: panels-${{ github.run_id }}
+          restore-keys: panels-
+
+      - name: Top up market data
+        run: python live/fetch.py update || python live/fetch.py seed --months 36
+
+      - name: Refresh the quarterly selection
+        # The plan is re-chosen on the 1st of Jan/Apr/Jul/Oct and left alone
+        # otherwise - re-choosing whenever convenient turns a walk-forward rule
+        # into hindsight.
+        run: |
+          if [ "$(date -u +%d)" = "01" ] && echo "01 04 07 10" | grep -qw "$(date -u +%m)"; then
+            python live/v7_select.py
+          else
+            echo "not a selection date; keeping the current plan"
+          fi
+
+      - name: Decide
+        run: |
+          ARM=""
+          if [ "${{ github.event_name }}" = "schedule" ] || \
+             [ "${{ github.event.inputs.arm }}" = "true" ]; then ARM="--arm"; fi
+          echo "running with ARM='${ARM:-dry run}'"
+          python -m webapp.once --strategy "$BOT_STRATEGY" \
+            --equity "$BOT_EQUITY" --risk "$BOT_RISK" $ARM | tee run.txt
+
+      - name: Keep the plan as a record
+        if: always()
+        run: python -m webapp.once --strategy "$BOT_STRATEGY" --json > plan.json || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: decision-${{ github.run_number }}
+          path: |
+            research/btcusdt-quant/run.txt
+            research/btcusdt-quant/plan.json
+          retention-days: 90
+
+      - name: Fail loudly if nothing was decided
+        # Silence and success look identical in a cron job. This makes a run that
+        # produced no decision show up red rather than green.
+        run: grep -qE "SENT|not sent" run.txt
