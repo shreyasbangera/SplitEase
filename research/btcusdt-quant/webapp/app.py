@@ -23,7 +23,7 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel
 import pandas as pd
 
-from webapp import config, engine, scheduler, keys, auth
+from webapp import config, engine, scheduler, keys, auth, status as pubstatus
 from webapp.strategies.registry import discover, get
 from webapp.broker.paper import PaperBroker
 
@@ -141,13 +141,23 @@ def arm(a: Arm):
 
 @app.get("/api/plan")
 def plan():
+    """Compute from local panels when they exist; otherwise show the last
+    decision GitHub Actions published. A dashboard with no disk is the normal
+    case on a free tier, not a degraded one."""
     try:
         strat = get(STATE["strategy"])()
         p = engine.plan_orders(strat, make_broker(), STATE["equity"], STATE["risk"])
+        STATE["last_plan"] = p
+        return p
     except FileNotFoundError as e:
-        raise HTTPException(400, str(e))
-    STATE["last_plan"] = p
-    return p
+        pub = pubstatus.fetch()
+        if pub:
+            pub["read_only"] = True
+            return pub
+        raise HTTPException(
+            400, f"{e}. No local panels and STATUS_URL is not set or unreachable, "
+                 f"so there is nothing to show. Either seed the panels or point "
+                 f"STATUS_URL at the status file Actions publishes.")
 
 
 @app.post("/api/execute")

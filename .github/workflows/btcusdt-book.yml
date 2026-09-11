@@ -30,7 +30,7 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
-  contents: read
+  contents: write   # to publish status/latest.json
 
 jobs:
   decide:
@@ -96,6 +96,20 @@ jobs:
       - name: Keep the plan as a record
         if: always()
         run: python -m webapp.once --strategy "$BOT_STRATEGY" --json > plan.json || true
+
+      - name: Publish the decision for the dashboard
+        # The dashboard reads this instead of carrying market-data panels, which
+        # is what lets it run on a free tier with no disk.
+        if: github.event_name == 'schedule'
+        run: |
+          mkdir -p status
+          cp plan.json status/latest.json || exit 0
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add status/latest.json
+          git diff --staged --quiet || git commit -m "status: decision $(date -u +%Y-%m-%dT%H:%MZ) [skip ci]"
+          git pull --rebase --autostash origin "${GITHUB_REF_NAME}" || true
+          git push origin "HEAD:${GITHUB_REF_NAME}"
 
       - uses: actions/upload-artifact@v4
         if: always()

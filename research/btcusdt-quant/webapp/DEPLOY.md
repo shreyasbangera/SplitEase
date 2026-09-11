@@ -27,15 +27,28 @@ not. It is a viewer. The bot is `.github/workflows/btcusdt-book.yml`.
 
 ## Render — the shortest path
 
+**Render's free tier does not support persistent disks**, which turned out to be
+a useful constraint: it forced the dashboard to stop needing one. Actions
+already decides twice a day and publishes the result to
+`research/btcusdt-quant/status/latest.json`; the dashboard reads that file over
+HTTPS. No panels, no 36-month seed on every cold start, no disk.
+
 1. Push this repo to GitHub (done).
 2. render.com → **New → Blueprint** → pick the repo. It reads `render.yaml`.
 3. Render generates `APP_PASSWORD` — open the service's **Environment** tab and
    copy it. That is your login, username `trader`.
-4. Paste `BINANCE_TEST_KEY` and `BINANCE_TEST_SECRET` in the same tab.
-5. Deploy. You get `https://btcusdt-book-xxxx.onrender.com`.
+4. Deploy. You get `https://btcusdt-book-xxxx.onrender.com`.
+
+No Binance keys go on Render at all. The dashboard runs in `paper` mode and
+never places an order; the keys live in GitHub Actions secrets, where the
+trading happens.
 
 First load after idle takes ~30s while the service wakes. That is the free tier,
-and it does not matter for a dashboard.
+and it does not matter for a viewer.
+
+`STATUS_URL` in `render.yaml` points at the `main` branch. **Until the workflow
+is merged to `main` and has run once, that file is a placeholder** and the
+dashboard will say it has no decision yet.
 
 ## Fly.io
 

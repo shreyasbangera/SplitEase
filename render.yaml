@@ -1,6 +1,7 @@
-# One-click deploy on Render.  The dashboard only - trading runs in GitHub
-# Actions, which is deliberate: Render's free web services sleep when idle, and
-# a sleeping dashboard costs nothing because it is not the thing placing orders.
+# Render free tier.  No disk - free services do not support one - which is fine
+# because the dashboard does not need market-data panels: it reads the decision
+# GitHub Actions publishes twice a day.  Trading happens in Actions; this is the
+# viewer, so a service that sleeps when idle costs nothing.
 services:
   - type: web
     name: btcusdt-book
@@ -11,18 +12,14 @@ services:
     healthCheckPath: /api/status
     envVars:
       - key: BOT_MODE
-        value: test
+        value: paper           # the viewer never places orders
       - key: BOOK_STORE
-        value: /data
+        value: /tmp/book       # ephemeral, and unused when STATUS_URL is set
+      - key: HOST
+        value: 0.0.0.0
+      - key: STATUS_URL
+        value: https://raw.githubusercontent.com/shreyasbangera/SplitEase/main/research/btcusdt-quant/status/latest.json
       - key: APP_USER
         value: trader
       - key: APP_PASSWORD
-        generateValue: true      # Render generates one; read it in the dashboard
-      - key: BINANCE_TEST_KEY
-        sync: false              # paste in the Render UI
-      - key: BINANCE_TEST_SECRET
-        sync: false
-    disk:
-      name: data
-      mountPath: /data
-      sizeGB: 1
+        generateValue: true    # Render generates one; read it in the Environment tab
