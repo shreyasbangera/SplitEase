@@ -100,7 +100,12 @@ jobs:
       - name: Publish the decision for the dashboard
         # The dashboard reads this instead of carrying market-data panels, which
         # is what lets it run on a free tier with no disk.
-        if: github.event_name == 'schedule'
+        # Publishes from the DEFAULT BRANCH on any run, scheduled or manual, so
+        # you can press "Run workflow" once after merging and watch the dashboard
+        # fill in rather than waiting up to 12 hours for the next schedule. Never
+        # publishes from a feature branch, so an experiment cannot overwrite the
+        # record the dashboard reads.
+        if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         run: |
           mkdir -p status
           cp plan.json status/latest.json || exit 0
