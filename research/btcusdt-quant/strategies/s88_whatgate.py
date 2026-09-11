@@ -83,23 +83,34 @@ def sim(cfg, start, end, risk):
 
 
 def rankings():
-    if os.path.exists(RANKS):
-        return [(s, e, [tuple(c) for c in cs]) for s, e, cs in json.load(open(RANKS))]
+    """Checkpointed after every quarter.  The first run of this file died
+    silently seven quarters in and lost all of it, because the cache was only
+    written at the end."""
+    part = RANKS + ".part"
+    done = {}
+    for f in (RANKS, part):
+        if os.path.exists(f):
+            for s_, e_, cs in json.load(open(f)):
+                done[s_] = (s_, e_, [tuple(c) for c in cs])
     t0 = pd.Timestamp(S.FULL_START, tz="UTC")
     t = t0 + pd.DateOffset(months=LOOKBACK); end = pd.Timestamp(OOS_END, tz="UTC")
     out = []
     while t < end:
         te = min(t + pd.DateOffset(months=RESELECT), end)
+        key = str(t.date())
+        if key in done:
+            out.append(done[key]); t = te; continue
         tr0 = t - pd.DateOffset(months=LOOKBACK)
-        sc = sorted(((calmar_of(sim(cfg, str(tr0.date()), str(t.date()), 0.10)), cfg)
+        sc = sorted(((calmar_of(sim(cfg, str(tr0.date()), key, 0.10)), cfg)
                      for cfg in GRID), key=lambda x: -x[0])
-        out.append((str(t.date()), str(te.date()), [c for _, c in sc]))
+        out.append((key, str(te.date()), [c for _, c in sc]))
         b = sc[0][1]
-        print(f"    {str(t.date())[:7]}  exp {b[0]} {b[1]}ATR x{b[2]}R {b[3]}d  "
+        print(f"    {key[:7]}  exp {b[0]} {b[1]}ATR x{b[2]}R {b[3]}d  "
               f"gate {(str(b[4]) + str(b[5])) if b[4] else 'none':>8}  Calmar {sc[0][0]:.2f}",
               flush=True)
+        json.dump([[a_, b_, [list(c) for c in cs]] for a_, b_, cs in out], open(part, "w"))
         t = te
-    json.dump([[s, e, [list(c) for c in cs]] for s, e, cs in out], open(RANKS, "w"))
+    json.dump([[a_, b_, [list(c) for c in cs]] for a_, b_, cs in out], open(RANKS, "w"))
     return out
 
 

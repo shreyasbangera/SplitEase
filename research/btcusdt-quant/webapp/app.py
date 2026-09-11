@@ -1,0 +1,132 @@
+#!/usr/bin/env python3
+"""Local dashboard for the BTCUSDT books.  Binds to 127.0.0.1 only.
+
+    pip install fastapi uvicorn pandas numpy pyarrow
+    python -m webapp.app
+
+Then open http://127.0.0.1:8000
+
+Modes, set with BOT_MODE:
+    paper  (default)  no exchange contact; fills simulated at real prices with
+                      the backtest's own costs
+    test              Binance USD-M futures TESTNET
+    live              real money; also needs ALLOW_LIVE=yes and arming here
+
+Keys come from the environment only.  This app never accepts a key through the
+browser, never writes one to disk and never logs one.
+"""
+import os, sys, json, pathlib
+sys.path.insert(0, "/home/user/quant")
+
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import HTMLResponse, JSONResponse
+from pydantic import BaseModel
+import pandas as pd
+
+from webapp import config, engine
+from webapp.strategies.registry import discover, get
+from webapp.broker.paper import PaperBroker
+
+app = FastAPI(title="BTCUSDT book")
+STATIC = pathlib.Path(__file__).parent / "static"
+STATE = {"armed": False, "strategy": "v7", "equity": 10_000.0, "risk": 0.08,
+         "last_plan": None}
+
+
+def make_broker():
+    if config.MODE in ("test", "live"):
+        from webapp.broker.binance import BinanceFutures
+        return BinanceFutures(config.MODE)
+    df = pd.read_parquet(config.STORE / "panel_12h.parquet")
+    return PaperBroker(lambda: float(df.close.iloc[-1]), STATE["equity"])
+
+
+@app.get("/", response_class=HTMLResponse)
+def index():
+    return (STATIC / "index.html").read_text()
+
+
+@app.get("/api/status")
+def status():
+    return dict(mode=config.MODE, allow_live=config.ALLOW_LIVE,
+                key=config.key_fingerprint(), armed=STATE["armed"],
+                strategy=STATE["strategy"], equity=STATE["equity"], risk=STATE["risk"],
+                strategies={n: c.description for n, c in discover().items()})
+
+
+class Settings(BaseModel):
+    strategy: str | None = None
+    equity: float | None = None
+    risk: float | None = None
+
+
+@app.post("/api/settings")
+def settings(s: Settings):
+    if s.strategy:
+        get(s.strategy)
+        STATE["strategy"] = s.strategy
+        STATE["armed"] = False          # changing strategy always disarms
+    if s.equity is not None:
+        STATE["equity"] = float(s.equity)
+    if s.risk is not None:
+        STATE["risk"] = max(0.0, min(float(s.risk), 0.25))
+    return status()
+
+
+class Arm(BaseModel):
+    armed: bool
+    confirm: str = ""
+
+
+@app.post("/api/arm")
+def arm(a: Arm):
+    if a.armed and config.MODE == "live":
+        config.guard_live()
+        if a.confirm != "TRADE REAL MONEY":
+            raise HTTPException(400, "live arming requires confirm='TRADE REAL MONEY'")
+    STATE["armed"] = bool(a.armed)
+    return status()
+
+
+@app.get("/api/plan")
+def plan():
+    try:
+        strat = get(STATE["strategy"])()
+        p = engine.plan_orders(strat, make_broker(), STATE["equity"], STATE["risk"])
+    except FileNotFoundError as e:
+        raise HTTPException(400, str(e))
+    STATE["last_plan"] = p
+    return p
+
+
+@app.post("/api/execute")
+def execute():
+    if not STATE["last_plan"]:
+        raise HTTPException(400, "call /api/plan first")
+    r = engine.execute(STATE["last_plan"], make_broker(), STATE["armed"])
+    return JSONResponse(r)
+
+
+@app.post("/api/flatten")
+def flatten():
+    """Kill switch: cancel everything and close the position at market."""
+    b = make_broker()
+    b.cancel_all()
+    p = b.position()
+    if abs(p.qty) > 0:
+        b.market("SELL" if p.qty > 0 else "BUY", abs(p.qty), note="KILL SWITCH")
+    STATE["armed"] = False
+    return dict(ok=True, closed=p.qty)
+
+
+@app.get("/api/ledger")
+def ledger():
+    b = make_broker()
+    return getattr(b, "b", {}).get("ledger", [])[-100:]
+
+
+if __name__ == "__main__":
+    import uvicorn
+    print(f"mode={config.MODE}  key={config.key_fingerprint()}  "
+          f"allow_live={config.ALLOW_LIVE}")
+    uvicorn.run(app, host="127.0.0.1", port=8000, log_level="info")

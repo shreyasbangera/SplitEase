@@ -2631,3 +2631,128 @@ drawdown suggests — 45% for the gated top-5 at 8% risk against a realised −1
 configurations smooths the realised path but does not thin the tail of the return distribution, so
 the resampled drawdown distribution is not improved as much as the single realised number implies.
 The realised max drawdown is the more flattering of the two measures and should be read that way.
+
+## S88 — What is the trend gate measuring? Price level, and nothing subtler
+"Price above its long average" conflates three claims: *direction* (the trend is up), *strength*
+(the move is efficient rather than choppy) and *level* (price is above a reference, whatever the
+path). S72 measured that book returns track market trendiness at +0.61, and S73/S80 closed
+trendiness as a *sizing* input in both directions — but it was never tested as a *directional
+filter*, which asks nothing of persistence: the gate only has to describe the bar it stands on.
+
+So the menu became four questions rather than four spans, each at 100 and 200 bars, chosen
+causally by the quarterly rule: `ema` (price > EMA), `mom` (n-bar return > 0, direction alone),
+`slope` (the average rising), `er` (efficiency ratio > 0.35 **and** the n-bar return > 0 —
+direction and strength). 360 configurations.
+
+**Which gate the selection reaches for:**
+
+| | none | ema | mom | slope | er |
+|---|---|---|---|---|---|
+| chosen top-1 (of 18) | 5 | **8** | 2 | 3 | **0** |
+| chosen top-5 (of 90) | 16 | **37** | 11 | 8 | 18 |
+
+`ema` dominates at both depths. **`er` is never chosen first** and appears in the top five only as
+a near-tie, so trend *strength* adds nothing once direction is known. `mom` — direction with no
+reference level — is picked twice. The gate is about **where price sits relative to a smoothed
+reference**, not about direction alone and not about how efficient the move is.
+
+**And widening the menu made the book worse:**
+
+| | CAGR | MaxDD | PF | Sharpe | Calmar |
+|---|---|---|---|---|---|
+| S87 ema-only menu, top-1 | 81.3% | −13.7% | 3.24 | 2.07 | **5.92** |
+| S88 four-kind menu, top-1 | 77.8% | −23.2% | 2.99 | 1.93 | 3.35 |
+| S87 ema-only menu, top-3 | 86.2% | −12.3% | 3.17 | 2.15 | **7.01** |
+| S88 four-kind menu, top-3 | 81.0% | −15.2% | 2.89 | 2.10 | 5.34 |
+| S87 ema-only menu, top-5 | 85.4% | −14.1% | 3.01 | 2.14 | 6.08 |
+| S88 four-kind menu, top-5 | 84.1% | −13.2% | 2.89 | 2.16 | 6.36 |
+
+Top-1 Calmar falls from 5.92 to 3.35 and the drawdown nearly doubles. 90 extra configurations gave
+the trailing-Calmar rule 90 more chances at a lucky window, and it took them. Only the widest
+blend recovers, and even then it does not reach the ema-only top-3.
+
+**This is the cleanest measurement of search cost in the study.** The candidates added were not
+junk — `mom` and `slope` are reasonable trend definitions and `er` is the variable that correlates
++0.61 with returns. Adding sensible-but-redundant options to a selection grid still costs real
+performance, because the selection cannot tell a genuinely better configuration from a luckier
+one. The ema-only menu was already right, and S87 stands.
+
+**An operational note.** The first run of this file died silently after seven quarters and lost
+~2,500 backtests because the ranking cache was written only at the end. It now checkpoints after
+every quarter.
+
+## S89 — The gate is a step, and the sample cannot resolve anything finer
+Blocking every short while price is above its average is a step function, which asserts that a
+short one dollar above the average is as bad as one thirty percent above. Price is above EMA200 on
+52% of bars, and when it is, the median distance is **+10.1%** with a 90th percentile of +24.3% —
+so there is plenty of range for a shape to show itself. Overlay on the 40-configuration plan, short
+side only:
+
+| gate shape | CAGR | MaxDD | PF | N | Sharpe | Calmar | P(DD>20%) |
+|---|---|---|---|---|---|---|---|
+| no gate (control) | 73.2% | −14.8% | 2.64 | 771 | 2.12 | 4.94 | 22% |
+| **binary at the average** | **75.6%** | −11.3% | **3.35** | 528 | 1.99 | **6.68** | 26% |
+| band, allow to +2% | 69.4% | −16.0% | 2.87 | 554 | 1.99 | 4.33 | 43% |
+| band, allow to +5% | 64.6% | −32.0% | 2.57 | 590 | 1.75 | 2.02 | 81% |
+| band, allow to +10% | 72.6% | −11.3% | 2.89 | 643 | 2.10 | 6.42 | 19% |
+| near-only, block 0 to +5% | 67.3% | −19.2% | 2.63 | 719 | 1.90 | 3.50 | 27% |
+| taper over 5% | 64.3% | −14.4% | 2.86 | 587 | 2.01 | 4.46 | 28% |
+| taper over 10% | 67.4% | −11.3% | 2.96 | 630 | 2.12 | 5.95 | **13%** |
+| taper over 20% | 69.8% | −11.3% | 2.87 | 709 | 2.13 | 6.17 | 14% |
+
+The binary step wins, but **the band results are the interesting ones because they are erratic**:
+allowing shorts to +2% is worse than the control, +5% is catastrophic (Calmar 2.02), +10% is nearly
+as good as binary. A real monotone relationship in distance-above-average cannot produce that
+ordering. The shape parameter is not identifiable on this sample, and the robust finding is
+**gate versus no gate**, not the precise cut.
+
+Two things worth carrying forward. **Four different gated variants share an identical −11.3% max
+drawdown**, which says the gate removes the 2024-10 → 2025-02 episode outright and what binds
+afterwards is a different, gate-independent drawdown — so the realised max DD has stopped
+responding to the gate and further tuning of it is measuring noise. And the **graded tapers have
+materially better bootstrap risk than the binary step** (13–14% against 26% chance of breaching
+20%) at three to eight points less return. Since this study's own advice is to size on the
+bootstrap rather than the realised path, the taper is the defensible choice for anyone actually
+trading it, even though the binary step prints the better backtest.
+
+Given S88's lesson about search cost, the shape is **not** added as a grid axis.
+
+## S90 — Gate the signals, not the net: funding is the whole problem
+The net gate is blunt — it zeroes the entire composite's short side regardless of which signals
+asked to be short. The drawdown attribution said that is heavier than necessary, so the gate was
+applied to one signal's short contribution at a time.
+
+**A correction first.** The first run of this file built the composite from the six-signal list,
+which adds implied volatility as a hard zero for the 15 months before BVOL exists, diluting every
+other signal by a sixth. Its control returned 62.6% at −25.7% where the same plan returns 73.2% at
+−14.8%, and nothing was concluded from it. Rebuilt from `s45.unit`, the control now reproduces the
+traded composite to 4.4e-16 — floating-point noise — so the control provably *is* the book.
+
+| gated signal (short side only, above EMA200) | CAGR | MaxDD | PF | N | Sharpe | Calmar | P(DD>20%) |
+|---|---|---|---|---|---|---|---|
+| none (control) | 73.2% | −14.8% | 2.64 | 771 | 2.12 | 4.94 | **22%** |
+| flow | 74.1% | −11.3% | 2.62 | 795 | 1.97 | 6.54 | 25% |
+| cmpx | 60.8% | −17.8% | 2.41 | 746 | 1.94 | 3.41 | 40% |
+| btcdom | 70.5% | −14.4% | 2.58 | 719 | 1.98 | 4.90 | 40% |
+| **fundz** | **84.1%** | **−11.3%** | **2.92** | 762 | **2.24** | **7.43** | 19% |
+| posn | 69.2% | −21.7% | 2.51 | 827 | 1.89 | 3.19 | 33% |
+| ALL five | 73.7% | −14.3% | 2.92 | 651 | 1.92 | 5.14 | 39% |
+| all but cmpx | 70.0% | −14.1% | 2.69 | 745 | 1.82 | 4.96 | 48% |
+
+**Gating funding alone beats gating everything** — Calmar 7.43 against 5.14, return 84.1% against
+73.7%, and it is the only variant that raises **Sharpe** (2.24 against the control's 2.12). Every
+other gate buys Calmar by cutting drawdown while *lowering* Sharpe; this one improves the bet
+itself. Gating `cmpx` is the worst thing on the list, which matches the attribution exactly —
+`cmpx` was the one signal that *made* money inside the melt-up (+271 while flow lost 805).
+
+The mechanism is the textbook failure of crowding data, and it is specific rather than general.
+`s_fundz` is minus the funding z-score, so persistently high funding in a melt-up holds the signal
+persistently short, and it stays wrong for months rather than days. The other four recover; funding
+does not, because the crowding it measures is *correct* — longs really are crowded — and being
+correct about crowding tells you nothing about when it unwinds.
+
+**Not adopted on this evidence.** Five signals were tested on one sample, so the best of five is
+expected to flatter itself. It also explains why per-signal gating differs from net gating at all:
+zeroing each signal's negative contribution lets a bar that netted short flip to a small *long*,
+which the net gate would have left flat — 651 trades under the net gate against 762 here. S91 puts
+it in the quarterly grid and makes the selection choose it causally.
