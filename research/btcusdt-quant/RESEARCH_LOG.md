@@ -2453,3 +2453,181 @@ trend is strongest.
 which is how overfitting starts. S84 measures a trend gate as an overlay only. Nothing is adopted
 from it — if it looks real it goes into the quarterly grid and must be chosen causally, quarter by
 quarter, on trailing Calmar alone.
+
+## S83c — The top-up, priced against the risk dial
+Every top-up variant raised return and drawdown together. That is not interesting on its own,
+because the risk dial does the same thing for free. The only comparison that settles the mechanism
+is at matched drawdown:
+
+| | risk | CAGR | MaxDD | PF | Sharpe | Calmar | P(DD>20%) |
+|---|---|---|---|---|---|---|---|
+| control | 8% | 73.2% | −14.8% | 2.64 | 2.12 | 4.94 | 22% |
+| control | 10% | 93.7% | −18.3% | 2.64 | 2.10 | 5.13 | 52% |
+| control | 12% | 117.2% | −21.6% | 2.65 | 2.10 | 5.42 | 76% |
+| control | 14% | 142.1% | −25.0% | 2.66 | 2.10 | 5.68 | 91% |
+| control | 16% | 169.2% | −28.2% | 2.67 | 2.10 | 6.00 | 97% |
+| control | 18% | 198.1% | −31.3% | 2.69 | 2.11 | 6.33 | 100% |
+| control | 20% | **222.1%** | −34.3% | 2.67 | 2.08 | 6.48 | 100% |
+| top-up m1 2×, max 1 | 8% | 92.3% | −31.9% | 2.15 | 1.75 | 2.89 | 98% |
+| top-up m2 2×, max 1 | 8% | 77.7% | −31.1% | 2.03 | 1.57 | 2.50 | 99% |
+
+At the ≈−31% drawdown the top-up produces, the plain control returns about **198%**. The top-up
+returns 92%. **It buys drawdown at less than half the price of the risk dial, and the mechanism is
+closed for good.**
+
+Two things in this ladder matter beyond the top-up. Profit factor and Sharpe are flat across the
+whole dial (2.64→2.67, 2.12→2.08), which is the signature of a book whose shape does not change
+with size — the ATR sizing is doing its job. And **Calmar rises with risk**, 4.94 at 8% to 6.48 at
+20%, because compounding inside winning streaks accelerates faster than the drawdowns deepen. That
+is why the honest headline is quoted at the risk that puts realised drawdown at the 20% gate rather
+than at an arbitrary 8%.
+
+## S84 — The trend gate as an overlay: a real 35% on Calmar, and a reason to distrust it
+Blocking SHORT entries while price is above a long exponential average, measured as an overlay on
+the existing quarterly plan (nothing adopted — see S85 for the causal test):
+
+| variant | CAGR | MaxDD | PF | N | Sharpe | Calmar | P(DD>20%) |
+|---|---|---|---|---|---|---|---|
+| **no gate (control)** | 73.2% | −14.8% | 2.64 | 771 | **2.12** | 4.94 | 22% |
+| EMA100 block shorts | 74.1% | −15.6% | 2.96 | 544 | 1.95 | 4.74 | 52% |
+| EMA100 block shorts +exit | 59.1% | −23.3% | 2.47 | 608 | 1.72 | 2.54 | 67% |
+| **EMA200 block shorts** | **75.6%** | **−11.3%** | **3.35** | 528 | 1.99 | **6.68** | 26% |
+| EMA200 block shorts +exit | 65.5% | −11.3% | 2.95 | 590 | 1.93 | 5.78 | 16% |
+| EMA200 block longs | 56.2% | −14.8% | 2.80 | 508 | 1.89 | 3.79 | 19% |
+| EMA200 block both | 53.2% | −21.1% | 3.81 | 268 | 1.58 | 2.52 | 52% |
+| EMA200 block both +exit | 45.7% | −10.5% | 2.89 | 394 | 1.62 | 4.33 | 15% |
+
+The direction is coherent — gating shorts helps, gating longs hurts, gating both is worse than
+either — and the sign matches the attribution exactly. Blocking only the *entry* beats also forcing
+an exit, which says the damage is in initiating shorts into strength, not in holding one when the
+trend turns.
+
+**Three reasons not to believe it yet.** The rule was derived by looking at the worst drawdown. The
+EMA100 version is flat (Calmar 4.74) while the EMA200 version is the best result in the study,
+which is more span-sensitivity than a robust effect should show. And applied to a single fixed
+configuration rather than the quarterly plan, the gate makes things *worse* — 64.7% at −22.1%
+against 70.2% at −15.6% ungated — so the overlay gain is an interaction with which configurations
+the selection happened to choose, not a standalone property of the gate.
+
+S85 settles it by putting the gate into the quarterly grid as a third axis and making the selection
+choose it causally, on trailing Calmar alone.
+
+## S86 — Pick one configuration, or hold several? Blending finally wins
+The quarterly selection keeps exactly one configuration out of 40 — a bet that the trailing-Calmar
+ranking is informative *at the top*, which throws away whatever diversification the runners-up
+would add. A single account can hold several at once, because they all trade the same instrument
+and the positions simply add. S77 found blending the 12/18/24-month *lookbacks* lost to picking,
+but those three selections agree with each other most quarters; configurations differ in exponent,
+stop, target and hold, so they disagree far more often.
+
+Nothing new is fitted: rank all 40 each quarter by the existing trailing-Calmar rule, hold the top
+k at risk/k each.
+
+| k | CAGR | MaxDD | PF | N | Sharpe | Calmar | P(DD>20%) |
+|---|---|---|---|---|---|---|---|
+| **1 (current book)** | 73.2% | **−14.8%** | **2.64** | 771 | 2.12 | 4.94 | **22%** |
+| 2 | 74.5% | −16.4% | 2.59 | 1,502 | 2.13 | 4.55 | 22% |
+| 3 | 83.1% | −16.7% | 2.72 | 2,180 | 2.21 | 4.99 | 20% |
+| 5 | **87.7%** | −17.5% | 2.71 | 3,417 | **2.23** | 5.02 | 22% |
+| 8 | 85.4% | −16.7% | 2.59 | 5,065 | 2.22 | 5.11 | 25% |
+| 12 | 85.4% | −16.2% | 2.53 | 6,724 | 2.18 | **5.27** | 32% |
+| 20 | 81.6% | −21.9% | 2.37 | 9,173 | 2.08 | 3.72 | 47% |
+
+**Every k from 3 to 12 beats k=1 on both CAGR and Calmar**, and the curve is broad and smooth
+rather than a spike — the shape a real effect has, and the reason this is not simply a new
+parameter to overfit. It degrades at k=20, where the blend is reaching configurations the ranking
+has already judged bad, so the ranking is doing *something*.
+
+Two honest caveats. Reading k=12 off this table is itself in-sample selection; the defensible
+adoption is a mid-range k, not the argmax. And the k=2 dip below k=1 on Calmar says the second-best
+configuration each quarter is often a near-duplicate of the first — diversification only starts
+paying once the blend is wide enough to hold genuinely different bets.
+
+Blending at risk/k is the conservative model of a netted single account: P&L is additive, and where
+two sleeves take opposite sides the real account pays *less* in fees than the blend charges.
+
+## S86b — The blend gain is the RANKING, not diversification
+Blending five configurations drawn **at random** each quarter, against blending the top five by
+trailing Calmar:
+
+| | CAGR | MaxDD | PF | N | Sharpe | Calmar |
+|---|---|---|---|---|---|---|
+| top-1 (current book) | 73.2% | −14.8% | 2.64 | 771 | 2.12 | 4.94 |
+| random-5, seed 1 | 75.8% | −15.6% | 2.39 | 3,383 | 2.08 | 4.86 |
+| random-5, seed 2 | 74.8% | −14.5% | 2.39 | 3,507 | 2.26 | 5.17 |
+| random-5, seed 3 | 71.7% | −15.0% | 2.35 | 3,531 | 2.22 | 4.78 |
+| **top-5 by trailing Calmar** | **87.7%** | −17.5% | **2.71** | 3,417 | 2.23 | **5.02** |
+
+**Random blending is worth nothing** — 71.7–75.8% against 73.2% for the single best, with Calmar
+indistinguishable. The 18% of extra return in the top-5 blend is the ranking, not the
+diversification, which is the reverse of what the k=2 dip suggested. The ranking is informative
+*down the list*, not just at the top: the five best trailing-Calmar configurations are all good, and
+holding all five harvests that more reliably than betting everything on the single noisiest
+estimate of which one is first.
+
+Risk ladder, top-5 blend: 101.8% at −19.3% (9% risk), 117.3% at −20.7% (10%). At the 20% gate the
+blend is worth about **110%**, against 105% for the single-configuration book.
+
+## S85 — The trend gate survives the causal test
+The gate demoted to a third axis of the quarterly grid — 120 configurations instead of 40, chosen
+each quarter on trailing Calmar over the preceding 12 months and nothing else, with the 40-config
+plan as control so the comparison also prices the 3× bigger search:
+
+| | risk | CAGR | MaxDD | PF | N | Sharpe | Calmar |
+|---|---|---|---|---|---|---|---|
+| 40-config control | 8% | 73.2% | −14.8% | 2.64 | 771 | **2.12** | 4.94 |
+| **120-config with gate** | 8% | **80.6%** | **−13.7%** | **3.25** | 602 | 2.07 | **5.87** |
+| 40-config control | 10% | 93.7% | −18.3% | 2.64 | 775 | 2.10 | 5.13 |
+| **120-config with gate** | 10% | **106.8%** | **−16.8%** | **3.30** | 604 | 2.09 | **6.34** |
+| 40-config control | 12% | 117.2% | −21.6% | 2.65 | 780 | 2.10 | 5.42 |
+| **120-config with gate** | 12% | **134.5%** | **−20.0%** | **3.33** | 607 | 2.10 | **6.72** |
+
+The gate is chosen in **10 of 18 quarters**, and the gated book wins at every point on the risk
+dial — more return, less drawdown, profit factor 2.64 → 3.33. At 12% risk it lands exactly on the
+−20.0% gate at **134.5%**, which replaces 105.2% as the honest bear-inclusive headline.
+
+2022 goes from −6% to +1%: the gate blocks shorts only *above* the average, so it is inactive
+through the bear market, and the gain there comes from the selection choosing different
+configurations once the gated variants are in the menu.
+
+**The remaining weakness is the menu, not the selection.** Both spans in the grid, EMA100 and
+EMA200, were picked after looking at the full sample. The per-quarter choice is causal; the
+*candidate list* was not. S87 widens it to {100, 150, 200, 300} — spans never inspected — so the
+selection has to find trend gating useful without being handed the lucky number.
+
+## S87 — Both improvements at once, and the gate passes a menu it never saw
+S85's gate menu was {EMA100, EMA200} and both spans had been inspected on the full sample before
+they were offered to the selection. The per-quarter choice was causal; the *candidate list* was
+not. Widening it to {100, 150, 200, 300} — two spans never looked at — tests whether the effect is
+trend gating or one lucky number. 200 configurations, ranked each quarter on trailing Calmar over
+the preceding 12 months.
+
+**Gate choices, top-1 of each quarter:** none 7, EMA100 6, EMA200 4, EMA300 1 — a gate in **11 of
+18 quarters**, spread across three different spans. Across the top five of every quarter: none 30,
+EMA100 31, EMA150 4, EMA200 16, EMA300 9 — a gate in 60 of 90 slots. The selection reaches for
+trend gating without being handed the lucky number, and the recent quarters favour EMA200/EMA300
+where the narrow menu had only EMA100 to pick. **The gate is a property of trend gating, not of a
+span.**
+
+| k | CAGR | MaxDD | PF | N | Sharpe | Calmar |
+|---|---|---|---|---|---|---|
+| gated top-1 | 81.3% | −13.7% | **3.24** | 602 | 2.07 | 5.92 |
+| **gated top-3** | 86.2% | **−12.3%** | 3.17 | 1,697 | **2.15** | **7.01** |
+| gated top-5 | 85.4% | −14.1% | 3.01 | 2,643 | 2.14 | 6.08 |
+| gated top-8 | 86.1% | −14.0% | 2.99 | 3,855 | 2.11 | 6.13 |
+| gated top-12 | **87.2%** | −14.2% | 2.92 | 5,126 | 2.10 | 6.15 |
+
+**Calmar 7.01 at the top-3 blend is the best measured in this study**, against 4.94 for the
+ungated single-configuration book — a 42% improvement from two changes that between them fit one
+new number (k). Risk ladder on the top-5: 105.2% at −17.4% (10%), 132.2% at −21.1% (12%), 164.4%
+at −24.4% (14%).
+
+The two improvements compose only partially. Gate alone (S85) gave Calmar 6.72 at the 20% gate;
+blend alone (S86) gave 5.27; together 7.01 rather than anything like the sum. They overlap because
+both work by the same route — removing the trades where the configuration and the regime disagree.
+
+**Note on bootstrap risk.** The blends carry a materially worse P(DD>20%) than their realised
+drawdown suggests — 45% for the gated top-5 at 8% risk against a realised −14.1%. Holding several
+configurations smooths the realised path but does not thin the tail of the return distribution, so
+the resampled drawdown distribution is not improved as much as the single realised number implies.
+The realised max drawdown is the more flattering of the two measures and should be read that way.

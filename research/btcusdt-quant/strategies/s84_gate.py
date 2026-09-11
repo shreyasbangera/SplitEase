@@ -34,15 +34,18 @@ from strategies.s69_calsel import ctx, shape, daily
 from strategies.s77_lookback import stats
 
 
+_T = {}
 def trend(span):
-    c = ctx()
-    px = pd.Series(c["g"].close.to_numpy(float))
-    return (px > px.ewm(span=span, adjust=False).mean()).to_numpy()
+    if span not in _T:
+        c = ctx()
+        px = pd.Series(c["g"].close.to_numpy(float))
+        _T[span] = (px > px.ewm(span=span, adjust=False).mean()).to_numpy()
+    return _T[span]
 
 
 def sim_gate(cfg, start, end, risk, span=0, mode="", force_exit=False):
     p, stp, rr, hold = cfg
-    c = ctx(); u = np.nan_to_num(shape(p)); a = c["a"]
+    c = ctx(); u0 = np.nan_to_num(shape(p)); u = u0; a = c["a"]
     if span:
         up = trend(span)
         block = np.zeros(len(u), bool)
@@ -51,7 +54,7 @@ def sim_gate(cfg, start, end, risk, span=0, mode="", force_exit=False):
         u = np.where(block, 0.0, u)
     arr = dict(entry=u, stop=stp * a, tp=stp * rr * a,
                exit=(np.abs(u) <= 0.0).astype(float) if force_exit
-                    else (np.abs(np.nan_to_num(shape(p))) <= 0.0).astype(float))
+                    else (np.abs(u0) <= 0.0).astype(float))
     return backtest(c["g"], arr, "12h", start=start, end=end, risk=risk,
                     max_lev=10.0, max_bars_h=hold * 24)
 

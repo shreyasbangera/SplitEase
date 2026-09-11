@@ -153,7 +153,7 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
     <span class="eyebrow">2021-01 → 2026-08</span>
   </div>
   <h1>The 300% Problem</h1>
-  <p class="lede">Seventy-nine strategies on the BTCUSDT perpetual, against a target of 300% net
+  <p class="lede">Eighty-seven strategies on the BTCUSDT perpetual, against a target of 300% net
   annual profit at under 20% drawdown. One account, one position at a time. This is the record of
   what was tested, what survived walk-forward validation, and the measured reason the target stays
   out of reach — which turns out not to be signal quality at all, but which year you are standing
@@ -162,56 +162,281 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
   <div class="verdict">
     <div class="verdict-top"><span class="verdict-label">Verdict</span></div>
     <h2>No strategy qualified.</h2>
-    <p>The best strategy returns <strong>105.2% net annual at a 20.0% drawdown</strong> over four
+    <p>The best strategy returns <strong>179.0% net annual at a 19.99% drawdown</strong> over four
     and a half years <em>including</em> the 2022 bear market — five signals reduced to one position,
-    with the conviction curve re-chosen every quarter on trailing data. Profit factor 2.64, 775
-    trades, Sharpe 2.10. It passes every gate except the return, and misses that by
-    <strong>2.9×</strong>. On the shorter post-bear window the same machinery reaches 136.2%; at a
-    size the bootstrap calls genuinely safe it returns <strong>73.2%</strong>. The gains came from
-    three places and none was a better signal: <em>less correlated</em> signals, the <em>shape</em>
-    of the bet, and matching the selection objective to the target. Section&nbsp;11 shows why all
-    three run out.</p>
+    with the conviction curve and a trend gate re-chosen every quarter on trailing data, three
+    configurations held at once. Profit factor 3.18, 1,769 trades, Sharpe 2.13, Calmar 8.95. It
+    passes every gate except the return, and misses that by <strong>1.7×</strong>. At a size the
+    bootstrap calls survivable it returns <strong>86.2% at −12.3%</strong>. The gains came from
+    four places and not one was a better signal: <em>less correlated</em> signals, the
+    <em>shape</em> of the bet, matching the selection objective to the target, and refusing to
+    short a market that is trending up. Section&nbsp;12 shows why all four run out.</p>
     <div class="gap-row">
       <div class="gap-item"><div class="k">Required net / year</div><div class="v">300%</div></div>
-      <div class="gap-item"><div class="k">Best under 20% drawdown</div><div class="v" style="color:var(--fail)">105.2%</div></div>
-      <div class="gap-item"><div class="k">At a genuinely safe size</div><div class="v">73.2%</div></div>
-      <div class="gap-item"><div class="k">Strategies tested</div><div class="v">79</div></div>
-      <div class="gap-item"><div class="k">Parameter sets run</div><div class="v">28,000+</div></div>
+      <div class="gap-item"><div class="k">Best under 20% drawdown</div><div class="v" style="color:var(--fail)">179.0%</div></div>
+      <div class="gap-item"><div class="k">At a survivable size</div><div class="v">86.2%</div></div>
+      <div class="gap-item"><div class="k">Best single year</div><div class="v" style="color:var(--pass)">+392%</div></div>
+      <div class="gap-item"><div class="k">Strategies tested</div><div class="v">87</div></div>
+      <div class="gap-item"><div class="k">Parameter sets run</div><div class="v">35,000+</div></div>
+    </div>
+    </div>
+</header>
+
+<section>
+  <div class="stack-lg">
+    <div class="stack-sm">
+      <span class="eyebrow">1 — The registry</span>
+      <h2>Seven versions, ranked</h2>
+      <p class="prose" style="color:var(--ash)">Every headline this study produced is kept
+      runnable, not merely described: <span class="mono">strategies/registry.py</span> re-measures
+      all seven from the same data and prints this table, so no figure here is taken on trust and a
+      later version never quietly replaces an earlier one. Each is sized to the largest risk whose
+      realised drawdown stays <em>strictly</em> under the 20% gate — a limit stated as hard should
+      not pass on a rounding.</p>
+    </div>
+
+    <div class="chart-card">
+      <svg viewBox="0 0 720 258" width="100%" role="img"
+           aria-label="Net annual return of each version at the 20% drawdown gate, against the 300% target">
+        <line x1="100" y1="26" x2="100" y2="214" stroke="var(--line)" stroke-width="1"/>
+        <g fill="var(--faint)" font-size="10">
+          <text x="100" y="232" text-anchor="middle">0</text>
+          <text x="275" y="232" text-anchor="middle">100%</text>
+          <text x="450" y="232" text-anchor="middle">200%</text>
+          <text x="625" y="232" text-anchor="middle">300%</text>
+        </g>
+        <line x1="275" y1="26" x2="275" y2="214" stroke="var(--hair)" stroke-width="1"/>
+        <line x1="450" y1="26" x2="450" y2="214" stroke="var(--hair)" stroke-width="1"/>
+        <line x1="625" y1="20" x2="625" y2="214" stroke="var(--fail)" stroke-width="1.5"
+              stroke-dasharray="4 3"/>
+        <text x="625" y="14" text-anchor="middle" fill="var(--fail)" font-size="10"
+              font-weight="600">TARGET 300%</text>
+        <g font-size="11" font-family="var(--mono)">
+          <rect x="100" y="30"  width="313" height="16" fill="var(--signal)"/>
+          <text x="94" y="42"  text-anchor="end" fill="var(--ink)">V7</text>
+          <text x="421" y="42" fill="var(--ink)" font-weight="600">179.0%</text>
+
+          <rect x="100" y="56"  width="238" height="16" fill="var(--s2)"/>
+          <text x="94" y="68"  text-anchor="end" fill="var(--ink)">V2</text>
+          <text x="346" y="68" fill="var(--ash)">136.2%</text>
+
+          <rect x="100" y="82"  width="230" height="16" fill="var(--s2)"/>
+          <text x="94" y="94"  text-anchor="end" fill="var(--ink)">V4</text>
+          <text x="338" y="94" fill="var(--ash)">131.6%</text>
+
+          <rect x="100" y="108" width="215" height="16" fill="var(--s2)"/>
+          <text x="94" y="120" text-anchor="end" fill="var(--ink)">V6</text>
+          <text x="323" y="120" fill="var(--ash)">122.6%</text>
+
+          <rect x="100" y="134" width="195" height="16" fill="var(--s2)"/>
+          <text x="94" y="146" text-anchor="end" fill="var(--ink)">V5</text>
+          <text x="303" y="146" fill="var(--ash)">111.2%</text>
+
+          <rect x="100" y="160" width="184" height="16" fill="var(--s2)"/>
+          <text x="94" y="172" text-anchor="end" fill="var(--ink)">V3</text>
+          <text x="292" y="172" fill="var(--ash)">105.2%</text>
+
+          <rect x="100" y="186" width="151" height="16" fill="var(--btc)"/>
+          <text x="94" y="198" text-anchor="end" fill="var(--ink)">V1</text>
+          <text x="259" y="198" fill="var(--ash)">86.0%</text>
+        </g>
+      </svg>
+      <div class="legend">
+        <span class="lg"><span class="sw" style="background:var(--signal)"></span>best measured</span>
+        <span class="lg"><span class="sw" style="background:var(--s2)"></span>quarterly-selected books</span>
+        <span class="lg"><span class="sw" style="background:var(--btc)"></span>fixed configuration</span>
+      </div>
+    </div>
+
+    <div class="stack-sm">
+      <h3>Ranked at the 20% drawdown gate</h3>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Version</th><th>Risk</th><th>CAGR</th><th>Max DD</th><th>PF</th>
+            <th>Trades</th><th>Sharpe</th><th>Calmar</th><th>P(DD&gt;20%)</th><th>Window</th></tr></thead>
+          <tbody>
+            <tr class="best"><td><span class="rk">1</span> <span class="name">V7</span><br>
+              <span class="sub">wide gate menu, top-3 blend</span></td>
+              <td class="n">14.4%</td><td class="n pos">179.0%</td><td class="n neg">−19.99%</td>
+              <td class="n">3.18</td><td class="n">1,769</td><td class="n">2.13</td>
+              <td class="n">8.95</td><td class="n neg">98%</td><td class="sub">4.5y, incl. bear</td></tr>
+            <tr><td><span class="rk">2</span> <span class="name">V2</span><br>
+              <span class="sub">quarterly Calmar, 24m lookback</span></td>
+              <td class="n">11.0%</td><td class="n">136.2%</td><td class="n neg">−19.97%</td>
+              <td class="n">3.26</td><td class="n">546</td><td class="n">2.44</td>
+              <td class="n">6.82</td><td class="n pos">32%</td><td class="sub">3.5y, NO bear</td></tr>
+            <tr><td><span class="rk">3</span> <span class="name">V4</span><br>
+              <span class="sub">trend gate in the grid, top-1</span></td>
+              <td class="n">11.8%</td><td class="n">131.6%</td><td class="n neg">−19.70%</td>
+              <td class="n">3.33</td><td class="n">606</td><td class="n">2.10</td>
+              <td class="n">6.68</td><td class="n">82%</td><td class="sub">4.5y, incl. bear</td></tr>
+            <tr><td><span class="rk">4</span> <span class="name">V6</span><br>
+              <span class="sub">wide gate menu, top-5 blend</span></td>
+              <td class="n">11.3%</td><td class="n">122.6%</td><td class="n neg">−19.57%</td>
+              <td class="n">2.95</td><td class="n">2,794</td><td class="n">2.08</td>
+              <td class="n">6.27</td><td class="n">86%</td><td class="sub">4.5y, incl. bear</td></tr>
+            <tr><td><span class="rk">5</span> <span class="name">V5</span><br>
+              <span class="sub">top-5 blend, no gate</span></td>
+              <td class="n">9.6%</td><td class="n">111.2%</td><td class="n neg">−19.96%</td>
+              <td class="n">2.73</td><td class="n">3,526</td><td class="n">2.25</td>
+              <td class="n">5.57</td><td class="n pos">42%</td><td class="sub">4.5y, incl. bear</td></tr>
+            <tr><td><span class="rk">6</span> <span class="name">V3</span><br>
+              <span class="sub">quarterly Calmar, 12m lookback</span></td>
+              <td class="n">11.0%</td><td class="n">105.2%</td><td class="n neg">−19.97%</td>
+              <td class="n">2.64</td><td class="n">775</td><td class="n">2.10</td>
+              <td class="n">5.27</td><td class="n">65%</td><td class="sub">4.5y, incl. bear</td></tr>
+            <tr><td><span class="rk">7</span> <span class="name">V1</span><br>
+              <span class="sub">fixed configuration, no selection</span></td>
+              <td class="n">12.0%</td><td class="n">86.0%</td><td class="n neg">−19.78%</td>
+              <td class="n">2.04</td><td class="n">1,009</td><td class="n">2.15</td>
+              <td class="n">4.35</td><td class="n">75%</td><td class="sub">5.5y, incl. bear</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="stack-sm">
+      <h3>Year on year, at those sizes</h3>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Version</th><th>2021</th><th>2022</th><th>2023</th><th>2024</th>
+            <th>2025</th><th>2026 *</th><th>Years clearing 300%</th></tr></thead>
+          <tbody>
+            <tr class="best"><td><span class="name">V7</span></td><td class="n sub">—</td>
+              <td class="n pos">+3%</td><td class="n pos">+392%</td><td class="n pos">+326%</td>
+              <td class="n pos">+108%</td><td class="n pos">+126%</td><td class="n">2 of 5</td></tr>
+            <tr><td><span class="name">V2</span></td><td class="n sub">—</td><td class="n sub">—</td>
+              <td class="n pos">+266%</td><td class="n pos">+150%</td><td class="n pos">+49%</td>
+              <td class="n pos">+49%</td><td class="n">0 of 4</td></tr>
+            <tr><td><span class="name">V4</span></td><td class="n sub">—</td><td class="n">+0%</td>
+              <td class="n pos">+290%</td><td class="n pos">+206%</td><td class="n pos">+104%</td>
+              <td class="n pos">+79%</td><td class="n">0 of 5</td></tr>
+            <tr><td><span class="name">V6</span></td><td class="n sub">—</td><td class="n pos">+1%</td>
+              <td class="n pos">+256%</td><td class="n pos">+205%</td><td class="n pos">+70%</td>
+              <td class="n pos">+96%</td><td class="n">0 of 5</td></tr>
+            <tr><td><span class="name">V5</span></td><td class="n sub">—</td><td class="n neg">−3%</td>
+              <td class="n pos">+289%</td><td class="n pos">+155%</td><td class="n pos">+60%</td>
+              <td class="n pos">+88%</td><td class="n">0 of 5</td></tr>
+            <tr><td><span class="name">V3</span></td><td class="n sub">—</td><td class="n neg">−9%</td>
+              <td class="n pos">+292%</td><td class="n pos">+152%</td><td class="n pos">+63%</td>
+              <td class="n pos">+73%</td><td class="n">0 of 5</td></tr>
+            <tr><td><span class="name">V1</span></td><td class="n pos">+86%</td><td class="n pos">+7%</td>
+              <td class="n pos">+209%</td><td class="n pos">+81%</td><td class="n pos">+35%</td>
+              <td class="n pos">+103%</td><td class="n">0 of 6</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">* 2026 is a partial year, through 31 August. <strong>The year column is the
+      finding.</strong> V7 clears the 300% target in 2023 and again in 2024 — the target is not
+      impossible for this strategy, it is impossible as a multi-year <em>average</em>. Returns
+      track how strongly the market trends (measured at +0.61 in section&nbsp;10), 2023 and 2024
+      trended, and 2022 and 2025 did not. No version loses more than 9% in the bear year, which is
+      the more reassuring half of the same table.</p>
+    </div>
+
+    <div class="stack-sm">
+      <h3>The same seven at a survivable size</h3>
+      <p class="prose" style="color:var(--ash)">Sizing to the drawdown a book <em>printed</em> is
+      not the same as sizing to the drawdown it can <em>expect</em>. At the gate, V7's stationary
+      block bootstrap puts the chance of breaching 20% at <strong>98%</strong> — its realised
+      −19.99% is a favourable draw from a distribution whose median is worse than the limit. Held
+      to a common 8% risk, where every book's breach probability is tolerable, the order changes:</p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Version</th><th>CAGR</th><th>Max DD</th><th>PF</th><th>Sharpe</th>
+            <th>Calmar</th><th>P(DD&gt;20%)</th><th>Rank at the gate</th></tr></thead>
+          <tbody>
+            <tr><td><span class="rk">1</span> <span class="name">V2</span></td>
+              <td class="n pos">90.7%</td><td class="n">−14.8%</td><td class="n">3.26</td>
+              <td class="n">2.43</td><td class="n">6.12</td><td class="n pos">6%</td>
+              <td class="n sub">2 — but no bear market</td></tr>
+            <tr><td><span class="rk">2</span> <span class="name">V5</span></td>
+              <td class="n">87.7%</td><td class="n">−17.5%</td><td class="n">2.71</td>
+              <td class="n">2.23</td><td class="n">5.02</td><td class="n pos">22%</td>
+              <td class="n sub">5</td></tr>
+            <tr class="best"><td><span class="rk">3</span> <span class="name">V7</span></td>
+              <td class="n">86.2%</td><td class="n pos">−12.3%</td><td class="n">3.17</td>
+              <td class="n">2.15</td><td class="n pos">7.01</td><td class="n">34%</td>
+              <td class="n sub">1</td></tr>
+            <tr><td><span class="rk">4</span> <span class="name">V6</span></td>
+              <td class="n">85.4%</td><td class="n">−14.1%</td><td class="n">3.01</td>
+              <td class="n">2.14</td><td class="n">6.08</td><td class="n neg">45%</td>
+              <td class="n sub">4</td></tr>
+            <tr><td><span class="rk">5</span> <span class="name">V4</span></td>
+              <td class="n">80.6%</td><td class="n">−13.7%</td><td class="n">3.25</td>
+              <td class="n">2.07</td><td class="n">5.87</td><td class="n">32%</td>
+              <td class="n sub">3</td></tr>
+            <tr><td><span class="rk">6</span> <span class="name">V3</span></td>
+              <td class="n">73.2%</td><td class="n">−14.8%</td><td class="n">2.64</td>
+              <td class="n">2.12</td><td class="n">4.94</td><td class="n pos">22%</td>
+              <td class="n sub">6</td></tr>
+            <tr><td><span class="rk">7</span> <span class="name">V1</span></td>
+              <td class="n">54.9%</td><td class="n pos">−12.7%</td><td class="n">2.03</td>
+              <td class="n">2.20</td><td class="n">4.32</td><td class="n pos">18%</td>
+              <td class="n sub">7</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note"><strong>The two rankings disagree, and the disagreement is the useful part.</strong>
+      V5 is second at a survivable size and fifth at the gate: it has the best Sharpe of the group
+      (2.25) and the worst drawdown scaling, so it is the safest book to hold and the wrong one to
+      lever. V7 is the reverse. If you size to the drawdown you should expect rather than the one
+      that happened to print, V7's advantage over V2 largely evaporates.</p>
+    </div>
+
+    <div class="stack-sm">
+      <h3>Three things this table is not telling you</h3>
+      <p class="note"><strong>V2's window contains no bear market.</strong> Its 24-month selection
+      lookback pushes the first tradeable quarter to 2023-03, and the panel cannot begin before
+      2021-03 because BTC dominance and positioning data both start 2021-01. So V2 competes with
+      V4 on return while never having traded 2022. That is not a fair fight, and it is why V3 — the
+      same machinery on a 12-month lookback, measured on the harder sample — exists at all.</p>
+      <p class="note"><strong>Every drawdown here is marked on daily closes.</strong> The quarterly
+      books are assembled from per-quarter segments and have no continuous intraday equity curve,
+      so daily marks are the only measure all seven share. It is mildly optimistic: V1 measured on
+      its own 15-minute curve draws down 14.9% where daily marks say 12.7%. Read every drawdown as
+      "on daily closes" and add roughly two points for the path within the day.</p>
+      <p class="note"><strong>V7 fits one number the others do not.</strong> The blend width k was
+      read off a curve that was flat from k=3 to k=12, which is why a mid-range k rather than the
+      argmax was adopted — but it is still a parameter chosen with the whole sample in view. The
+      trend gate underneath it is not: it was demoted to an axis of the quarterly grid and chosen
+      causally, from a menu of four spans, of which two were never inspected.</p>
     </div>
   </div>
-</header>
+</section>
 
 <section>
   <div class="stack">
     <div class="stack-sm">
-      <span class="eyebrow">1 — Qualification gates</span>
+      <span class="eyebrow">2 — Qualification gates</span>
       <h2>The best qualifying-shaped strategy, gate by gate</h2>
-      <p class="prose" style="color:var(--ash)">Measured on S77 — five signals reduced to one net
+      <p class="prose" style="color:var(--ash)">Measured on V7 — five signals reduced to one net
       number every 12 hours, one BTCUSDT position at a time in a single account, with the
-      conviction curve re-chosen every quarter by trailing <em>Calmar</em> on the previous twelve
-      months. No sub-accounts, no rebalancing, no spot leg. Net of fees, slippage and real funding.
-      Window 2022-03 → 2026-08, which <strong>includes the 2022 bear market</strong> — the shorter
-      lookback is chosen precisely so that it does.</p>
+      conviction curve, the holding rules and a trend gate all re-chosen every quarter by trailing
+      <em>Calmar</em> on the previous twelve months, and the best three configurations held
+      together. No sub-accounts, no rebalancing, no spot leg. Net of fees, slippage and real
+      funding. Window 2022-03 → 2026-08, which <strong>includes the 2022 bear market</strong> — the
+      shorter lookback is chosen precisely so that it does.</p>
     </div>
     <div class="gates">
       <div class="gate">
         <div class="req">Net yearly profit &gt; 300%</div>
-        <div class="got" style="color:var(--fail)">105.2%</div>
+        <div class="got" style="color:var(--fail)">179.0%</div>
         <span class="tag f">Fail</span>
       </div>
       <div class="gate">
         <div class="req">At least 100 completed trades</div>
-        <div class="got">775</div>
+        <div class="got">1,769</div>
         <span class="tag p">Pass</span>
       </div>
       <div class="gate">
         <div class="req">Profit factor &gt; 1.10</div>
-        <div class="got">2.64</div>
+        <div class="got">3.18</div>
         <span class="tag p">Pass</span>
       </div>
       <div class="gate">
         <div class="req">Maximum drawdown &lt; 20%</div>
-        <div class="got">20.0%</div>
+        <div class="got">19.99%</div>
         <span class="tag p">Pass</span>
       </div>
       <div class="gate">
@@ -226,25 +451,25 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
       </div>
     </div>
     <p class="note"><strong>Read the drawdown from the bootstrap, not from the sample.</strong> A
-    stationary block bootstrap puts the median drawdown at −22.0% and the chance of breaching 20%
-    at <strong>65%</strong>, so the measured −20.0% is a favourable draw and this gate passes on a
-    technicality. Backed off to 8% risk the book returns <strong>73.2% at −14.8%</strong> with a
-    22% breach probability. That is the number to plan around. Every gate passes except the return,
-    and that one misses by 2.9×.</p>
-    <p class="note"><strong>Yearly: 2022 −8%, 2023 +250%, 2024 +134%, 2025 +56%, 2026 +66%.</strong>
-    Losing eight percent through the 2022 bear market is the most reassuring figure in this report —
-    more so than any of the returns. It is also why this window was chosen. The panel cannot begin
-    before 2021-03, because BTC dominance and positioning data both start 2021-01, so a 24-month
-    selection lookback would push the first tradeable quarter to 2023-03 and drop the bear market
-    entirely into the warm-up. That longer lookback selects better and reports
-    <strong>136.2%</strong> — on a window with no drawdown regime in it. The smaller number is the
-    one measured against a harder sample.</p>
+    stationary block bootstrap puts the chance of breaching 20% at <strong>98%</strong> at this
+    size, so the measured −19.99% is a favourable draw and this gate passes on a technicality.
+    Backed off to 8% risk the book returns <strong>86.2% at −12.3%</strong> with a 34% breach
+    probability. That is the number to plan around. Every gate passes except the return, and that
+    one misses by 1.7× — down from 2.9× before the trend gate, and still a miss.</p>
+    <p class="note"><strong>Yearly: 2022 +3%, 2023 +392%, 2024 +326%, 2025 +108%, 2026 +126%.</strong>
+    Two of those five years clear the 300% target outright, and the bear year costs 3% rather than
+    the 9% the ungated book gave up — so the target is reachable in a trending year and unreachable
+    as an average. The panel cannot begin before 2021-03, because BTC dominance and positioning
+    data both start 2021-01; a 24-month selection lookback would push the first tradeable quarter
+    to 2023-03 and drop the bear market entirely into the warm-up. That is version V2, which
+    reports 136.2% on a window with no drawdown regime in it. The figures here are measured against
+    the harder sample.</p>
   </div>
 </section>
 <section>
   <div class="stack">
     <div class="stack-sm">
-      <span class="eyebrow">2 — Equity curves</span>
+      <span class="eyebrow">3 — Equity curves</span>
       <h2>The finalists against the perpetual itself</h2>
       <p class="prose" style="color:var(--ash)">Log scale, 10,000 USDT start, weekly points, net
       of fees, slippage and real funding. Starts 2022-09, after the eighteen months of history the
@@ -295,7 +520,7 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
 <section>
   <div class="stack-lg">
     <div class="stack-sm">
-      <span class="eyebrow">3 — What actually moved the number</span>
+      <span class="eyebrow">4 — What actually moved the number</span>
       <h2>Correlation, not signal quality</h2>
       <p class="prose" style="color:var(--ash)">The best strategy improved from 22% to 51% a
       year at the same drawdown during this study. Not one point of that came from finding a
@@ -612,7 +837,7 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
 <section>
   <div class="stack">
     <div class="stack-sm">
-      <span class="eyebrow">4 — The binding constraint</span>
+      <span class="eyebrow">5 — The binding constraint</span>
       <h2>Compound growth has a maximum</h2>
       <p class="prose" style="color:var(--ash)">The intuition that a good strategy can simply be
       levered to any return target is wrong, and measurably so. Below the growth-optimal size
@@ -686,8 +911,13 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
 <section>
   <div class="stack">
     <div class="stack-sm">
-      <span class="eyebrow">5 — Ranking</span>
+      <span class="eyebrow">6 — Ranking</span>
       <h2>The finalists, ranked by robustness</h2>
+      <p class="note" style="max-width:68ch"><strong>Superseded by section&nbsp;1 for the headline
+      books.</strong> This table predates the trend gate and the blend, so its rank 1 is V3 at
+      105.2%. It is kept because of what sits underneath it: ranks 5–9 are the five signals
+      measured <em>on their own</em>, which is the evidence that no single one of them carries the
+      book.</p>
       <p class="prose" style="color:var(--ash)">Ranked on out-of-sample agreement first, then
       cost tolerance, then drawdown behaviour, then raw return. <strong>None qualify;</strong>
       this is a ranking of near-misses. All are BTCUSDT perpetual futures only, one account, one
@@ -793,11 +1023,11 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
 <section>
   <div class="stack-lg">
     <div class="stack-sm">
-      <span class="eyebrow">6 — Reproduction</span>
+      <span class="eyebrow">7 — Reproduction</span>
       <h2>Complete specifications</h2>
       <p class="prose" style="color:var(--ash)">Everything needed to rebuild the top books.
       Rolling windows are counted in decision bars. Costs and execution rules are identical across
-      every strategy and listed once in section&nbsp;12. An earlier version of this work ran the
+      every strategy and listed once in section&nbsp;13. An earlier version of this work ran the
       signals as separate sub-accounts rebalancing monthly; that structure is not tradable in one
       account and, when rebuilt as a single net position, was beaten outright — profit factor 1.51
       against 2.09. The sub-account results are kept in the research log but are not specified
@@ -1062,7 +1292,7 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
 <section>
   <div class="stack">
     <div class="stack-sm">
-      <span class="eyebrow">7 — The ledger</span>
+      <span class="eyebrow">8 — The ledger</span>
       <h2>Every attempt, and why it died</h2>
       <p class="prose" style="color:var(--ash)">Four ideas were killed at the signal screen
       before a backtest was written — measuring predictive power against the round-turn cost
@@ -1191,7 +1421,7 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
 <section>
   <div class="stack">
     <div class="stack-sm">
-      <span class="eyebrow">8 — What was not the problem</span>
+      <span class="eyebrow">9 — What was not the problem</span>
       <h2>Ruling out the usual suspects</h2>
     </div>
     <div class="why stack-sm">
@@ -1225,7 +1455,7 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
 <section>
   <div class="stack-lg">
     <div class="stack-sm">
-      <span class="eyebrow">7b — Closing the remaining avenues</span>
+      <span class="eyebrow">9b — Closing the remaining avenues</span>
       <h2>Seven more things that were not the problem</h2>
       <p class="prose" style="color:var(--ash)">Once the growth-optimal curve showed leverage
       could not close the gap, the remaining hypothesis was that the <em>signal</em> was
@@ -1376,7 +1606,7 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
 <section>
   <div class="stack-lg">
     <div class="stack-sm">
-      <span class="eyebrow">7c — The selection rule was the problem</span>
+      <span class="eyebrow">9c — The selection rule was the problem</span>
       <h2>What a stability screen does to 91 features</h2>
       <p class="prose" style="color:var(--ash)">Every screen up to this point ranked features by
       in-sample rank-IC and built on the winner. The breadth signal exposed that as unsafe: top
@@ -1444,7 +1674,7 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
 <section>
   <div class="stack-lg">
     <div class="stack-sm">
-      <span class="eyebrow">9 — What actually drives the returns</span>
+      <span class="eyebrow">10 — What actually drives the returns</span>
       <h2>Not decay. Regime.</h2>
       <p class="prose" style="color:var(--ash)">Every version of this book shows returns falling
       year on year — at the headline size, 2023 +250%, 2024 +134%, 2025 +56%, 2026 +66%. Two
@@ -1495,8 +1725,9 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
       <p class="prose"><strong>And the number that reframes the target.</strong> The best
       12-month window in six and a half years returned <strong>152% at 8% risk with a −7.5%
       drawdown</strong> — sized to the 20% limit, roughly <strong>408%</strong>. Over the full
-      period, sized to the same limit, the book does about 105%. <em>The entire gap is regime.</em>
-      300% is not beyond this strategy; it is what this strategy does in a 2024.</p>
+      period, sized to the same limit, the book does <strong>179%</strong>. <em>Most of the gap is
+      regime.</em> 300% is not beyond this strategy — V7 clears it in 2023 <em>and</em> 2024. It is
+      beyond the strategy's average year.</p>
     </div>
 
     <div class="why">
@@ -1530,7 +1761,7 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
 <section>
   <div class="stack-lg">
     <div class="stack-sm">
-      <span class="eyebrow">10 — Validation</span>
+      <span class="eyebrow">11 — Validation</span>
       <h2>Does it survive being chosen honestly?</h2>
       <p class="prose" style="color:var(--ash)">A single in-sample/out-of-sample split tests one
       decision boundary. It does not test the <em>process</em> that made the choices — and by this
@@ -1651,7 +1882,7 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
 <section>
   <div class="stack">
     <div class="stack-sm">
-      <span class="eyebrow">11 — Why the target is out of reach</span>
+      <span class="eyebrow">12 — Why the target is out of reach</span>
       <h2>The arithmetic behind the shortfall</h2>
     </div>
 
@@ -1717,10 +1948,13 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
       <div class="stack-sm">
         <h3>What 300% at 20% drawdown would actually require</h3>
         <p style="color:var(--ash)">A Calmar ratio of 15. The best measured here is
-        <strong>6.82</strong>, and it took three levers to get there — five near-independent signals
-        to reach Sharpe 2.44, an adaptive conviction curve to push the Calmar/Sharpe ratio from
-        1.68 to 2.8, and ranking the quarterly selection by Calmar rather than Sharpe. On the
-        window that includes the 2022 bear market the same machinery runs at <strong>5.27</strong>.</p>
+        <strong>8.95</strong>, and it took four levers to get there — five near-independent signals
+        to reach Sharpe 2.4, an adaptive conviction curve to push the Calmar/Sharpe ratio from 1.68
+        to 2.8, ranking the quarterly selection by Calmar rather than Sharpe, and refusing to short
+        a market trading above its long moving average. The ungated single-configuration book on
+        the same bear-inclusive window runs at <strong>5.27</strong>, so the last two levers
+        together are worth about 70% of the Calmar — and still leave the target a factor of 1.7
+        away.</p>
         <p style="color:var(--ash)"><strong>But section&nbsp;9 reframes what the shortfall even
         is.</strong> The book's return tracks market trendiness at +0.61, and in its best twelve
         months — sized to the same 20% limit — it returned about <strong>408%</strong>. The target
@@ -1751,7 +1985,7 @@ footer{padding-block:36px 60px;border-top:1px solid var(--hair);color:var(--fain
 <section>
   <div class="stack-lg">
     <div class="stack-sm">
-      <span class="eyebrow">12 — Method</span>
+      <span class="eyebrow">13 — Method</span>
       <h2>Data, costs and the controls against self-deception</h2>
     </div>
 
