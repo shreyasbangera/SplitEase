@@ -1,0 +1,59 @@
+# Twice-daily decision on GitHub's runners, so nothing of yours has to stay on.
+#
+# READ THE CAVEAT BEFORE USING THIS. GitHub's scheduled workflows are
+# best-effort: under load they are commonly delayed by 10-30 minutes and can be
+# skipped entirely. The backtest assumes a fill at the next bar's open, so a
+# late run is a worse fill, and a skipped run is a missed decision the backtest
+# never missed. For a 12h book that is survivable but it is not free, and it is
+# the reason a $4 VPS is the better answer if you are trading anything you mind
+# losing.
+name: trade
+
+on:
+  schedule:
+    - cron: "5 0 * * *"     # 00:05 UTC
+    - cron: "5 12 * * *"    # 12:05 UTC
+  workflow_dispatch:         # and a manual button
+
+concurrency:
+  group: trade               # never let two decisions overlap
+  cancel-in-progress: false
+
+jobs:
+  decide:
+    runs-on: ubuntu-latest
+    env:
+      BOOK_STORE: ${{ github.workspace }}/data
+      BOT_MODE: test                       # test | paper.  Not live from CI.
+      BINANCE_TEST_KEY: ${{ secrets.BINANCE_TEST_KEY }}
+      BINANCE_TEST_SECRET: ${{ secrets.BINANCE_TEST_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r webapp/requirements.txt
+
+      # The panels are large and rebuilt incrementally, so they are cached
+      # rather than committed. A cold cache falls back to a full seed.
+      - uses: actions/cache@v4
+        with:
+          path: data
+          key: panels-${{ github.run_id }}
+          restore-keys: panels-
+
+      - name: Top up market data
+        run: python live/fetch.py update || python live/fetch.py seed --months 36
+
+      - name: Decide
+        run: python -m webapp.once --strategy v7 --equity 10000 --risk 0.08 --arm
+
+      - name: Keep the plan as a record
+        if: always()
+        run: python -m webapp.once --strategy v7 --json > plan.json || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: plan-${{ github.run_id }}
+          path: plan.json

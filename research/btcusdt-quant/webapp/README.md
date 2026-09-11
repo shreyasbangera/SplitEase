@@ -180,3 +180,53 @@ top-trader positioning metrics, and its funding is its own. Signals always come
 from **production public data**, which needs no API key at all; only the orders
 go to testnet. `live/fetch.py` already does this, and it is why the app needs no
 credentials to compute a decision.
+
+---
+
+## You do not need to leave a laptop on
+
+The long-running scheduler is convenient, not necessary. Targets only change on a
+closed 12h bar, and **the stops are reduce-only orders resting on the exchange**,
+so they fire whether or not anything of yours is running. The holding cap and the
+flat-signal exit are both evaluated at a 12h close, which is exactly what the
+backtest does.
+
+So a process that wakes twice a day, decides, places orders and exits is not a
+cut-down bot. It is the same bot, and it is *more* faithful to the backtest than a
+laptop that sleeps at 3am.
+
+```bash
+python -m webapp.once --strategy v7 --equity 10000 --risk 0.08          # dry run
+python -m webapp.once --strategy v7 --equity 10000 --risk 0.08 --arm    # sends
+```
+
+`--arm` is required to place anything, so a mis-fired cron job cannot trade.
+
+### Where to run it
+
+| | cost | reliability | notes |
+|---|---|---|---|
+| **Small VPS** (Hetzner, Vultr, DigitalOcean) | ~$4–6/mo | high | the straightforward answer; run the container, or just two cron lines |
+| **Oracle Cloud Always Free** | $0 | high | genuinely free ARM instances; the container builds on ARM |
+| **Raspberry Pi at home** | one-off | high | ~3 W. Needs your home internet to stay up |
+| **GitHub Actions** (`.github/workflows/trade.yml`) | $0 | **best-effort** | see the caveat below |
+| **Cloud Run Jobs / Lambda + EventBridge** | ~$0 | high | a container or zip on a cron trigger; no idle cost |
+
+Two cron lines on a VPS are all it takes:
+
+```cron
+5 0,12 * * *  cd /opt/quant && BOOK_STORE=/opt/quant/data BOT_MODE=test \
+  python live/fetch.py update && python -m webapp.once --arm >> /var/log/book.log 2>&1
+```
+
+### The GitHub Actions caveat
+
+Scheduled workflows are **best-effort**. Under load they are commonly delayed by
+10–30 minutes and can be skipped outright. The backtest assumes a fill at the
+next bar's open, so a late run is a worse fill and a skipped run is a decision
+the backtest never missed. For a 12h book that is survivable, and it is still
+the reason a $4 VPS is the better answer for anything you mind losing.
+
+Whatever you use, **log every run and check for gaps.** A week of silently
+missed decisions makes the comparison against the backtest meaningless, and
+silence looks identical to "nothing to do".
