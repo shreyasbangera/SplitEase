@@ -1,0 +1,33 @@
+36 weightings x 18 quarters, trailing and realised Calmar for each
+
+    2022-03 done (1/18)
+    2022-06 done (2/18)
+    2022-09 done (3/18)
+    2022-12 done (4/18)
+    2023-03 done (5/18)
+    2023-06 done (6/18)
+    2023-09 done (7/18)
+    2023-12 done (8/18)
+    2024-03 done (9/18)
+    2024-06 done (10/18)
+    2024-09 done (11/18)
+    2024-12 done (12/18)
+    2025-03 done (13/18)
+    2025-06 done (14/18)
+    2025-09 done (15/18)
+    2025-12 done (16/18)
+    2026-03 done (17/18)
+    2026-06 done (18/18)
+
+                            book     CAGR   MaxDD    Shp    Clm   at -20%     vs V7
+    control - equal weights (V7)    86.2%  -12.3%   2.15   7.00     168.8%
+    causal - trailing 12m Calmar   120.7%  -18.5%   2.13   6.51     134.5%    -34.3
+        ORACLE - realised Calmar   359.9%  -13.4%   2.84  26.95     836.7%   +667.9
+
+what the oracle picks, and what the causal rule picks
+  oracle : {'1|1|0|0|0': 3, '0|0|0|1|0': 2, '0|1|1|0|1': 2, '0|0|1|0|0': 1, '0|1|0|0|0': 1, '1|1|1|1|0': 1}
+  causal : {'1|2|1|1|1': 7, '1|1|1|1|1': 3, '1|0|0|0|1': 2, '2|1|1|1|1': 2, '1|0|1|0|1': 1, '1|1|0|0|1': 1}
+  the causal rule picks the oracle's weighting in 0/18 quarters
+  rho(trailing Calmar, next-quarter Calmar) over all weightings = +0.038
+
+done: weight bound

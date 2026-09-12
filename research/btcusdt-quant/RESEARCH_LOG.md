@@ -3878,3 +3878,100 @@ one afternoon.*
 of bars and costs 9 points in the worse half, against an account that otherwise reaches 5.18× under
 an effective 30× rail. That is a rail worth having on a live account for reasons that have nothing
 to do with CAGR — and it is honest about its cost.
+
+### S102 Stage B — the full V7 stack rebuilt at each horizon
+
+The fixed-config screen could have been unfair to the alternatives: 12h gets a quarterly selection
+fitted on 200 configurations and the others got three hand-picked cells. So the whole stack was
+rebuilt at each horizon — rankings recomputed from scratch on each panel, top-3 blend at risk/3.
+
+| horizon | CAGR | MaxDD | Sharpe | Calmar | trades | at −20% |
+|---|---|---|---|---|---|---|
+| **12h — deployed** | 86.2% | −12.3% | **2.15** | **7.00** | 1,697 | **168.8%** |
+| 6h | 40.5% | −18.7% | 1.32 | 2.17 | 3,132 | 43.8% |
+| 8h | 38.2% | −24.9% | 1.36 | 1.53 | 2,438 | 29.5% |
+| 24h | 18.2% | −36.8% | 0.73 | 0.49 | 1,064 | 10.1% |
+
+Selection does not rescue any of them; the lift from fixed-config to full stack is the same ~1.2–1.5×
+everywhere. And 6h's full-stack Sharpe of 1.32 is still below the 1.79 that S102c's admission bar
+requires at its measured correlation. **12h is 3.9× the best alternative on the same machinery.**
+
+## S106 — The weight oracle: the one channel that looked unbounded, and the control that closed it
+
+Every oracle in this log so far has ranged over **configurations** — exponent, stop, target, hold,
+gate. S96b gave that selector perfect foresight and got 268.9%, below the brief, which closed
+config selection permanently rather than by exhaustion.
+
+V7 has a second free parameter no selection rule has ever touched: **which of the five signals are
+in the composite, and in what proportion.** They are equal-weighted because S46 found the
+five-signal set best on the full sample, and nobody revisited it. Bet size is held constant across
+weightings by construction — `shape()` renormalises so mean |conviction| matches the equal-weight
+book — so a narrower composite cannot win merely by betting bigger.
+
+The menu is 36 weightings: all 31 non-empty subsets of the five, plus double weight on each one
+inside the full set.
+
+| book | CAGR | MaxDD | Sharpe | Calmar | at −20% | vs V7 |
+|---|---|---|---|---|---|---|
+| **control — equal weights (V7)** | 86.2% | −12.3% | 2.15 | 7.00 | **168.8%** | — |
+| causal — trailing 12m Calmar | 120.7% | −18.5% | 2.13 | 6.51 | 134.5% | −34.3 |
+| **ORACLE on realised Calmar** | 359.9% | −13.4% | 2.84 | **26.95** | **836.7%** | **+667.9** |
+| ORACLE on realised Sharpe | 228.6% | −13.6% | 3.04 | 16.85 | 466.1% | +297.3 |
+| ORACLE on realised return | 434.3% | −24.4% | 2.66 | 17.83 | 300.7% | +131.9 |
+
+**On its face this reverses the whole study.** 836.7% against a 300% brief, from the five signals
+already in the book, with no new data source — the headroom would be in *which signals to use*,
+not in finding more of them. That reading lasted exactly as long as it took to run the controls.
+
+### The controls, and they close it
+
+**The criterion alone moves the answer by 2.8×** — 836.7% / 466.1% / 300.7% for foresight of
+Calmar, Sharpe and return. S96b saw the same instability from the other side (CAGR-foresight 93.1%
+against Sharpe-foresight 268.9%) and it means the same thing: the oracle is reading a quarter's
+*path*, not its edge. Calmar's denominator is one bad day, so a quarter that happened to avoid one
+scores enormously.
+
+**Random-of-36, 200 draws** — the same selection pressure with none of the foresight — gives a
+median of **30.3%** (mean 32.6%, sd 17.0, best of 200 draws 77.2%). Equal weights reads 168.8%, or
+**+8.0 sd** above that mean. *The equal-weight five-signal composite is not an arbitrary default.
+It beats a random weighting overwhelmingly.*
+
+**And the decisive one.** Pick each quarter's weighting on the **first half of that quarter's own
+realised returns**, then collect only the **second half**. This is still look-ahead — no tradable
+rule knows the first six weeks of a quarter before it begins — but it can only exploit structure
+that *persists* across six weeks rather than the single lucky day Calmar rewards:
+
+| second halves only | at −20% |
+|---|---|
+| **equal weights (control)** | **341.6%** |
+| half-sample oracle on Calmar | **9.6%** |
+| half-sample oracle on Sharpe | **54.4%** |
+
+**The weighting that was best in the first half of a quarter is catastrophically worse than equal
+weights in the second half of the same quarter.** Not merely non-predictive — anti-predictive, at a
+six-week horizon, with real data and real hindsight. The 836.7% exists only when the selection
+window and the collection window are the same window.
+
+The causal attempt agrees. Trailing 12m Calmar reaches 134.5% against equal weights' 168.8%, picks
+the oracle's weighting in **0 of 18 quarters**, and rho(trailing Calmar, next-quarter Calmar) over
+all weightings is **+0.038** — the same null S97 found at config and axis level, now confirmed at
+signal level.
+
+### What this settles
+
+**The channel is closed, and so is the architecture.** Put beside S96b:
+
+| oracle over | ceiling | persists? |
+|---|---|---|
+| configurations (200 cells) | 268.9% | n/a — already below the brief |
+| signal weights (36 cells) | 836.7% | **no** — 9.6% at a six-week horizon |
+
+There is no selection over V7's existing degrees of freedom that reaches 300%: config selection is
+bounded below it even with perfect foresight, and weight selection is above it only with foresight
+that demonstrably does not survive being moved six weeks.
+
+**The positive result is worth as much as the negative.** Equal weights over all five signals beats
+a random weighting by 8 sd, beats the causal trailing-Calmar rule by 34 points, and beats both
+half-sample oracles by 287–332 points. This extends S96e one level down: there, the *config*
+ranking was found to work by left-tail exclusion rather than by picking winners. At the *signal*
+level not even exclusion works. **Hold all five, equally, and do not try to choose between them.**

@@ -1,0 +1,47 @@
+    2022-03 (1/18)
+    2022-06 (2/18)
+    2022-09 (3/18)
+    2022-12 (4/18)
+    2023-03 (5/18)
+    2023-06 (6/18)
+    2023-09 (7/18)
+    2023-12 (8/18)
+    2024-03 (9/18)
+    2024-06 (10/18)
+    2024-09 (11/18)
+    2024-12 (12/18)
+    2025-03 (13/18)
+    2025-06 (14/18)
+    2025-09 (15/18)
+    2025-12 (16/18)
+    2026-03 (17/18)
+    2026-06 (18/18)
+
+36 weightings x 18 quarters
+
+                                  book      CAGR    MaxDD    Shp     Clm    at -20%      vs V7
+          control - equal weights (V7)     86.2%   -12.3%   2.15    7.00      168.8%
+          causal - trailing 12m Calmar    120.7%   -18.5%   2.13    6.51      134.5%     -34.3
+
+             ORACLE on realised calmar    359.9%   -13.4%   2.84   26.95      836.7%    +667.9
+             ORACLE on realised sharpe    228.6%   -13.6%   3.04   16.85      466.1%    +297.3
+                ORACLE on realised ret    434.3%   -24.4%   2.66   17.83      300.7%    +131.9
+
+control 1 - random of 36 each quarter: the same selection pressure,
+            none of the foresight (200 draws)
+                          random-of-36                                          30.3%    -138.6
+                                         mean 32.6%  sd 17.0  p95 66.5%  max 77.2%
+
+control 2 - pick on the FIRST half of each quarter, collect the SECOND.
+            Still look-ahead, but only rewards structure that persists.
+          half-sample oracle on calmar                                           9.6%    -332.0
+          half-sample oracle on sharpe                                          54.4%    -287.2
+     (2nd-half control, equal weights)                                         341.6%
+
+what the oracle actually asks for
+   calmar: {'1|1|0|0|0': 3, '0|0|0|1|0': 2, '0|1|1|0|1': 2, '0|0|1|0|0': 1, '0|1|0|0|0': 1}
+           signals dropped per quarter: 5sig:2 4sig:2 3sig:3 2sig:6 1sig:5
+   sharpe: {'1|1|0|0|0': 2, '1|0|0|0|1': 2, '1|1|2|1|1': 2, '0|1|0|1|1': 2, '1|1|1|1|0': 1}
+           signals dropped per quarter: 5sig:5 4sig:2 3sig:2 2sig:8 1sig:1
+
+done: weight bound, controlled
