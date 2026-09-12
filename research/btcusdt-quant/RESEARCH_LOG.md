@@ -3975,3 +3975,61 @@ a random weighting by 8 sd, beats the causal trailing-Calmar rule by 34 points, 
 half-sample oracles by 287–332 points. This extends S96e one level down: there, the *config*
 ranking was found to work by left-tail exclusion rather than by picking winners. At the *signal*
 level not even exclusion works. **Hold all five, equally, and do not try to choose between them.**
+
+## S107 — Where the return comes from, and the one sentence that describes V7
+
+S103 opened the drawdowns. The mirror question was never asked. It matters now because every route
+to the brief through selection is bounded — S96b over configurations, S106b over signal weights —
+so what is left to establish is not how to improve V7 but **what it is**.
+
+| | share of all log-growth |
+|---|---|
+| best **1** of 18 quarters (5.6% of the record) | **21.1%** |
+| best **3** of 18 quarters (16.7%) | **52.1%** |
+| best 6 of 18 (33.3%) | 84.6% |
+| best 9 of 18 (50.0%) | 94.8% |
+| losing quarters | **3 of 18** |
+
+Dropping the best quarters and re-gating: 168.8% → **140.9%** (−27.9) → **106.7%** (−62.1) →
+**92.5%** (−76.3).
+
+By calendar year at 8% risk: 2022 **+3.2%** (Sharpe 0.31), 2023 +150.8%, 2024 +136.5%, 2025 +55.9%,
+2026 +72.0% to date.
+
+**V7 wins in 15 quarters out of 18 but earns half of everything in three of them.** Those are two
+different facts and both are true: the book is remarkably consistent in *sign* and highly
+concentrated in *magnitude*. The 2022 bear market is not a losing year — it is a flat one, +3.2% at
+Sharpe 0.31, which is the honest read of "the edge is not decaying, the market is" (S72).
+
+### The best quarter and the worst drawdown are the same trade
+
+The single largest contributor is **2024-06**, +80.3%, 21.1% of all growth. Its maximum drawdown is
+**−12.3%** — the global maximum of the entire record, the number that sets the −20% gate and
+therefore the headline. S103 dissected exactly that episode: three sleeves long at 3.05× aggregate,
+BTC down 4.1% over three days, nothing closed, and the position exited two weeks later for +3,759.
+
+**The book's largest drawdown and its largest gain are the same position.** That is the most compact
+true statement about V7, and it explains why every intervention aimed at the denominator has failed:
+S104's exits, S105's account caps and S94's portfolio overlays were all, in the end, trying to sell
+the best trade in the record three days after entering it.
+
+### Where the brief stands
+
+300% at −20% requires Calmar **15.0**. V7 is at **8.95**. The gap must come from either +68% return
+at the same drawdown, or the same return at −12% drawdown. The channels that could supply either:
+
+| channel | status |
+|---|---|
+| new signals | every source on disk mined; S95 macro, S76 cross-instrument, S36/opt skew all negative |
+| config selection | **oracle-bounded at 268.9%** (S96b) — below the brief with perfect foresight |
+| signal weighting | oracle 836.7% but **9.6% when moved six weeks** (S106b) — no persistence |
+| blending | closed, with an admission bar (S102c) no available sleeve clears |
+| bar phase / length | closed; 12h/00:00 is a spike, every neighbour 2.4–10× worse (S101, S102) |
+| payoff shape, portfolio level | closed (S34, S94) |
+| payoff shape, trade level | closed (S104) |
+| account-level risk caps | closed; the full-sample gain is negative in both halves (S105b) |
+
+**No strategy in this study meets the brief.** V7 stands at 179.0% CAGR at −19.99% — realistically
+160–175% after S100's execution haircut and S96c's 24-point noise band — against a 300% target, and
+the search space reachable from the data on disk is now bounded on every axis that has been
+measured. Reaching the brief requires a data source this study does not have.
