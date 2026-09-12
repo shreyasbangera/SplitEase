@@ -3158,3 +3158,187 @@ that delivered it before are each at their measured optimum, with portfolio-leve
 closed by S94 and the bet-count lever closed by S55.
 
 **V7 remains at 179.0% CAGR at −19.99%, 1.7× short of the target, and S95 does not change it.**
+
+---
+
+## S96 — The ranking estimator, an oracle bound, and a number that revises V7 downward
+
+S95 located the load-bearing mechanism: the study's entire 2.5× improvement (V1 71.2% → V7 179.0%
+at the gate) came with **no Sharpe improvement at all**, and S86b had already shown the blend gain
+is the *ranking*, not the diversification — blending five configurations at random is worth nothing.
+So the ranking is what matters, and it is the one thing nobody had varied. S68–S69 varied the
+selection *objective* (Sharpe vs Calmar vs their product) and settled it. This asks a different
+question: given that we rank on Calmar, is **trailing Calmar a good estimator of it?**
+
+The complaint is specific. Calmar's denominator is max drawdown over a 12-month window carrying
+~40 trades — the single worst point of one realised path, with no averaging in it at all, while
+every other available statistic pools information across the whole path. Ranking 200 configurations
+on something that noisy means the winner is partly just the luckiest.
+
+**Method.** Every configuration's trailing metrics at every selection date were computed once and
+cached (200 × 18 quarters × 3 lookbacks), so eight ranking rules are eight different *sorts of the
+same numbers* and no rule gets a different backtest. Nothing tuned: the shrinkage weight fixed, the
+lookbacks the three that fit before the panel starts. All compared at the −20% gate by S94's
+return-scaling method with the control measured identically.
+
+| rule | family | shares control's top 3 | CAGR at −20% | Sharpe | vs control |
+|---|---|---|---|---|---|
+| **calmar** | **control — what V7 deploys** | 100% | **168.8%** | 2.15 | +0.0pt |
+| ulcer | stable denominator | 50.0% | **179.6%** | 2.17 | **+10.7pt** |
+| sortino | stable denominator | 40.7% | 73.1% | 1.92 | −95.7pt |
+| bootdd | stable denominator | 48.1% | 165.9% | 2.05 | −2.9pt |
+| rank_cs | rank averaging | 46.3% | 143.6% | 2.25 | −25.2pt |
+| rank_cup | rank averaging | 44.4% | **181.2%** | 2.20 | **+12.3pt** |
+| multilb | rank averaging | 46.3% | 107.3% | 1.97 | −61.5pt |
+| shrunk | shrinkage | 83.3% | 123.7% | 2.12 | −45.1pt |
+
+**Neither family beats the control together**, which was the pre-registered bar and the same defence
+S68–S69 used against a lucky cell. Two cells win and they are not independent — `rank_cup` contains
+the ulcer index, so both winners are the same component arriving twice. S96c below prices those
++10.7 and +12.3 points against the noise and they do not survive it.
+
+**A note on the shrinkage rule.** The first version shrank every configuration's Calmar toward the
+grid mean by a constant factor, which is an affine transform and leaves the ranking *identical* —
+caught before the run, not after. Re-specified as reliability weighting, λ = n/(n+40) on trade
+count, so configurations with more evidence keep more of their estimate. It still moves only 17% of
+the top 3, because trade counts across the grid are too similar for it to bite.
+
+### S96b — the oracle bound, and the reason the control works is not the reason assumed
+
+Before spending more of the loop on estimators it is worth knowing what the channel can be worth at
+all. Rank each quarter's 200 configurations by what they **actually go on to deliver**, blend the
+top 3. Flagrant look-ahead, not a strategy — an upper bound, since no causal estimator can beat a
+ranking built from the answer.
+
+| ranked by, k=3 | CAGR at −20% | Sharpe | Calmar |
+|---|---|---|---|
+| V7 trailing Calmar (**real, causal**) | 168.8% | 2.15 | 8.44 |
+| ORACLE realised CAGR | **93.1%** | 2.36 | 4.66 |
+| ORACLE realised Calmar | **86.9%** | 2.45 | 4.34 |
+| **ORACLE realised Sharpe** | **268.9%** | **2.85** | **13.44** |
+
+**Perfect foresight of next quarter's profit builds a worse book than the deployed one**, and
+perfect foresight of next quarter's Calmar is worse still. That is not a bug, it is what those
+objectives are. Ranking on realised quarterly Calmar rewards a lucky denominator — a quarter with a
+freak −0.5% drawdown outranks one with +40%/−8% — and ranking on realised quarterly CAGR picks the
+most aggressive configurations, whose drawdowns then chain across quarter boundaries so the blended
+path has to be scaled *down* to reach −20%. The diagnostic confirms it: the CAGR oracle's picks
+have median quarterly CAGR 151.2% against the grid's 39.8%, and it still loses 75.7 points.
+
+**So the control's edge was never prediction — it was smoothing.** Trailing Calmar over 12 months
+does not forecast the next quarter; it selects configurations that are structurally sound. That
+inverts the premise this experiment opened on.
+
+**And the channel has a ceiling below the brief.** Sharpe is the only one of the three that
+aggregates correctly across concatenated quarters, and its oracle is a clean interior peak rather
+than a lucky cell:
+
+| k | 1 | 2 | **3** | 5 | 8 | 20 |
+|---|---|---|---|---|---|---|
+| CAGR at −20% | 245.3% | 257.2% | **268.9%** | 230.4% | 215.6% | 172.0% |
+
+**268.9% with perfect foresight, against a 300% target.** No causal rule can reach it, and it does
+not reach the brief. Two caveats kept attached: the bound is on ranking *within this 200-config
+menu*, and the oracle's Sharpe of 2.85 is an independent confirmation of the ~3.0 Sharpe ceiling
+S56 asserted from the correlation structure.
+
+### S96c — how much of 168.8% is the ranking, and how much is one lucky draw
+
+Eight defensible rules spanning **73.1% to 181.2%** is a 108-point range from changing only the sort
+order, with V7's own rule near the top of it. Trailing-Calmar scores were perturbed with Gaussian
+noise scaled to their own cross-sectional spread, re-ranked and re-blended, twelve draws per level:
+
+| noise × sd | median | min | max | sd | draws ≥ control |
+|---|---|---|---|---|---|
+| 0.00 *(= control)* | 168.8% | | | | 1/1 |
+| **0.10** | **153.8%** | 105.2% | 190.7% | **23.6** | **3/12** |
+| 0.25 | 121.0% | 85.6% | 179.6% | 27.2 | 1/12 |
+| 0.50 | 117.3% | 69.5% | 153.2% | 23.4 | 0/12 |
+| 1.00 | 112.6% | 72.6% | 184.3% | 35.6 | 1/12 |
+
+**Both readings are true and they point in different directions.** The median degrades *monotonically*
+with noise — 168.8 → 153.8 → 121.0 → 117.3 → 112.6 — which is what a real signal looks like; pure
+luck would scatter around the same mean rather than fall. So the ranking carries genuine
+information, and S96d below measures how much (a great deal: +82 points over random).
+
+**But the level is noise-dominated.** A perturbation of only a tenth of the cross-sectional spread
+opens a 23.6-point standard deviation and drops the median 15 points, and the control beats 9 of 12
+such draws. V7's 168.8% is therefore an *optimistic* draw from a wide distribution, not a stable
+property. Read honestly, the central estimate of the deployed book at the gate is **nearer 154%
+than 169%** in this method's units — and the corresponding revision applies to the headline 179.0%.
+
+**This widens the gap to the brief rather than narrowing it, and it is the first result in this log
+to revise a deployed number downward.** It does not change what the live book should do — the
+ranking is still the best available rule, and no alternative beat it — but it does change what the
+book should be expected to return.
+
+### S96d — the control S86b never ran on this grid, and it rescues the ranking
+
+S86b's random-blend test — the basis for "the gain is the ranking, not the diversification" — was
+run on the **40**-configuration grid. V7 selects from **200**. That control had never been re-run
+where it matters, and three results above made it urgent, because they all said the ranking should
+be worthless:
+
+* trailing Calmar's cross-sectional rank correlation with next-quarter Calmar is **−0.051**
+  (sd 0.276, t −0.78, positive in only 7 of 18 quarters). **No predictive power at all**, and if
+  anything the wrong sign.
+* the top 3 by trailing Calmar are **not better than the grid median** on any realised metric —
+  CAGR 36.4% vs 39.8%, drawdown −10.3% vs −9.5%, Sharpe 1.61 vs 1.58.
+* the **bottom 3** look better than the top 3 on all three (42.9% / −8.8% / 1.69).
+
+Random 3-of-200, twelve seeds, same quarters, same blend, same gate:
+
+| | CAGR at −20% |
+|---|---|
+| **V7 trailing Calmar, top 3** | **168.8%** |
+| random-3, median of 12 seeds | **82.6%** |
+| random-3, range | 65.4% – 125.3% |
+
+**V7 sits +5.49 standard deviations above the random mean and beats 12 of 12 draws.** The ranking is
+worth roughly **+82 points**, far more than S86b measured on the smaller grid. So it is emphatically
+not worthless — which leaves the real question: how does a rule with *zero* forecasting power and
+median-average picks beat random selection by 82 points?
+
+### S96e — it works by excluding the left tail, not by finding the best
+
+The book compounds across 18 quarters, so one disaster is permanent while one great quarter is
+merely good. The median is the wrong statistic. Comparing the **worst of the three** held each
+quarter:
+
+| | median CAGR | **worst-of-3 CAGR** | worst-of-3 DD | worst-of-3 Sharpe |
+|---|---|---|---|---|
+| V7 top-3 | 36.4% | **24.9%** | −13.3% | **1.03** |
+| random-3 | 28.1% | **14.0%** | −13.9% | 0.87 |
+
+* quarters where the worst of the three **lost money**: V7 **4/18**, random **7/18**
+* worst single config-quarter held: V7 **−29.7%**, random **−40.6%**, whole grid **−71.6%**
+* paired difference in worst-of-three CAGR: **+101.3pp, t +1.74** — suggestive, not significant
+
+**The selection cannot tell which configuration will do best, and does not try. It reliably avoids
+the ones that will blow up.** That is the precise version of "smoothing, not prediction", it
+explains every result above without contradiction, and it is a different mechanism from the one
+this log has assumed since S86b.
+
+It also explains the two rules that beat the control in S96. `ulcer` and `rank_cup` — the only two
+winners, and not independent, since rank_cup contains the ulcer index — both score on the *shape of
+the whole drawdown path* rather than its single worst point, which is a more direct screen for the
+disasters the ranking is really there to exclude. Their +10.7 and +12.3 points remain inside S96c's
+noise band and are not adopted, but the direction is no longer unexplained.
+
+### Verdict
+
+**The ranking channel is closed, with a measured ceiling of 268.9% under perfect foresight of
+next-quarter Sharpe — below the brief's 300% — and no causal rule improved on the deployed one.**
+
+Three things are now known about it that were not before, and two of them correct this log:
+
+1. The mechanism is **left-tail exclusion**, not selection of the best. Trailing Calmar has no
+   forecasting power (rho −0.051) and its picks are median-average; it earns its +82 points over
+   random by never holding a disaster.
+2. Which quantity you would want foresight of is **Sharpe**, not Calmar and not return — perfect
+   foresight of next-quarter profit builds a *worse* book than the causal rule.
+3. The level is noise-dominated: **sd ≈ 24 points** under a perturbation of a tenth of the
+   cross-sectional spread, with V7 beating 9 of 12 such draws.
+
+V7 stands at **179.0% at the gate** as the point estimate, with S96c's caveat that this is an
+optimistic draw from a wide distribution, still short of 300%.

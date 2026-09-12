@@ -1,0 +1,21 @@
+THE CONTROL S86b NEVER RAN ON THIS GRID.
+S86b's random-blend test used the 40-configuration grid. V7 selects from
+200. If random-3 from 200 matches V7, the ranking is worth nothing here.
+
+                 selection     CAGR      DD    Shp    Clm
+  V7 trailing Calmar top-3   168.8%  -20.0%   2.15   8.44
+           random-3 seed 0    97.8%  -20.0%   1.94   4.89
+           random-3 seed 1    76.1%  -20.0%   1.90   3.80
+           random-3 seed 2    79.9%  -20.0%   1.99   4.00
+           random-3 seed 3   125.3%  -20.0%   2.10   6.26
+           random-3 seed 4    88.0%  -20.0%   1.91   4.40
+           random-3 seed 5    94.0%  -20.0%   1.98   4.70
+           random-3 seed 6    82.6%  -20.0%   1.98   4.13
+           random-3 seed 7    93.3%  -20.0%   1.96   4.66
+           random-3 seed 8    82.6%  -20.0%   2.00   4.13
+           random-3 seed 9    65.4%  -20.0%   1.99   3.27
+          random-3 seed 10    80.2%  -20.0%   1.88   4.01
+          random-3 seed 11    80.4%  -20.0%   1.91   4.02
+
+random-3 over 12 seeds: median 82.6%  mean 87.1%  sd 14.9  range 65.4-125.3%
+V7 = 168.8%, which is +5.49 sd above the random mean, and beats 12/12 random draws

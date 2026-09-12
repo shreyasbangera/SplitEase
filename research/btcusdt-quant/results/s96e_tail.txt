@@ -1,0 +1,16 @@
+WHERE THE RANKING'S VALUE ACTUALLY LIVES
+The top-3's MEDIAN realised metrics match the grid's. But the book
+compounds over 18 quarters, so one disaster is permanent. Compare the
+LEFT TAIL instead of the median.
+
+                         median CAGR   WORST CAGR   WORST DD  worst Shp
+              V7 top-3         36.4%        24.9%     -13.3%       1.03
+              random-3         28.1%        14.0%     -13.9%       0.87
+       grid 5th pctile         39.8%         0.1%
+
+quarters where the worst of the three LOST money:
+   V7 top-3  4/18     random-3  7/18
+worst single config-quarter CAGR seen:
+   V7 top-3   -29.7%   random-3   -40.6%   whole grid   -71.6%
+
+paired difference in worst-of-three CAGR: mean +101.3pp  t +1.74

@@ -1,0 +1,11 @@
+18 quarters, cross-sectional sd of trailing Calmar 2.80 on average
+
+  noise  seeds   median      min      max      sd  >= ctl
+   0.00      1   168.8%   168.8%   168.8%    0.0    1/1
+   0.10     12   153.8%   105.2%   190.7%   23.6    3/12
+   0.25     12   121.0%    85.6%   179.6%   27.2    1/12
+   0.50     12   117.3%    69.5%   153.2%   23.4    0/12
+   1.00     12   112.6%    72.6%   184.3%   35.6    1/12
+
+control (zero noise) = 168.8%
+done: how much of it is the ranking

@@ -1,0 +1,31 @@
+200 configurations x 18 quarters x 3 lookbacks
+caching every training sim once (~40 min cold, instant after)
+
+
+cached.
+
+AGREEMENT with the control's top 3, averaged over quarters:
+
+     calmar (control - what V7 deploys) shares 100.0% of the top 3
+      ulcer (stable denominator      ) shares  50.0% of the top 3
+    sortino (stable denominator      ) shares  40.7% of the top 3
+     bootdd (stable denominator      ) shares  48.1% of the top 3
+    rank_cs (rank averaging          ) shares  46.3% of the top 3
+   rank_cup (rank averaging          ) shares  44.4% of the top 3
+    multilb (rank averaging          ) shares  46.3% of the top 3
+     shrunk (shrinkage               ) shares  83.3% of the top 3
+
+AT THE -20% GATE - daily returns scaled, control measured the same way
+
+     rule  family                       CAGR      DD    Shp    Clm   vs ctl
+   calmar  control - what V7 deploys   168.8%  -20.0%   2.15   8.44    +0.0pt
+    ulcer  stable denominator         179.6%  -20.0%   2.17   8.98   +10.7pt
+  sortino  stable denominator          73.1%  -20.0%   1.92   3.65   -95.7pt
+   bootdd  stable denominator         165.9%  -20.0%   2.05   8.29    -2.9pt
+  rank_cs  rank averaging             143.6%  -20.0%   2.25   7.18   -25.2pt
+ rank_cup  rank averaging             181.2%  -20.0%   2.20   9.06   +12.3pt
+  multilb  rank averaging             107.3%  -20.0%   1.97   5.36   -61.5pt
+   shrunk  shrinkage                  123.7%  -20.0%   2.12   6.19   -45.1pt
+
+A rule counts only if its FAMILY beats the control together.
+done: ranking estimator

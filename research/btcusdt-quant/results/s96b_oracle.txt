@@ -1,0 +1,50 @@
+200 configurations x 18 quarters, realised metrics (LOOK-AHEAD, used only as a bound)
+
+1. DOES TRAILING CALMAR PREDICT NEXT-QUARTER CALMAR?
+   Cross-sectional rank correlation across 200 configurations.
+
+   2022-03-01 -> 2022-06-01   rho -0.123   on 200 configs
+   2022-06-01 -> 2022-09-01   rho -0.107   on 200 configs
+   2022-09-01 -> 2022-12-01   rho -0.414   on 200 configs
+   2022-12-01 -> 2023-03-01   rho +0.291   on 200 configs
+   2023-03-01 -> 2023-06-01   rho -0.540   on 132 configs
+   2023-06-01 -> 2023-09-01   rho +0.226   on 200 configs
+   2023-09-01 -> 2023-12-01   rho +0.011   on 200 configs
+   2023-12-01 -> 2024-03-01   rho +0.241   on 118 configs
+   2024-03-01 -> 2024-06-01   rho -0.119   on 182 configs
+   2024-06-01 -> 2024-09-01   rho +0.137   on 200 configs
+   2024-09-01 -> 2024-12-01   rho -0.106   on 200 configs
+   2024-12-01 -> 2025-03-01   rho +0.242   on 118 configs
+   2025-03-01 -> 2025-06-01   rho +0.414   on 200 configs
+   2025-06-01 -> 2025-09-01   rho -0.503   on  80 configs
+   2025-09-01 -> 2025-12-01   rho -0.001   on 200 configs
+   2025-12-01 -> 2026-03-01   rho -0.112   on 200 configs
+   2026-03-01 -> 2026-06-01   rho -0.304   on 200 configs
+   2026-06-01 -> 2026-09-01   rho -0.150   on 200 configs
+
+   mean rho -0.051   sd 0.276   t -0.78   positive in 7/18 quarters
+
+2. THE BOUND. Same look-ahead, different quantity foreseen.
+   Every row blends top-k at risk/k and is put on the -20% gate by
+   scaling daily returns, control measured the same way.
+
+                   ranked by   k     CAGR      DD    Shp    Clm     vs V7
+ V7 trailing Calmar (causal)   3   168.8%  -20.0%   2.15   8.44     +0.0pt
+        ORACLE realised CAGR   3    93.1%  -20.0%   2.36   4.66    -75.7pt
+        ORACLE realised CAGR  10    91.9%  -20.0%   2.35   4.60    -76.9pt
+      ORACLE realised Calmar   3    86.9%  -20.0%   2.45   4.34    -82.0pt
+      ORACLE realised Calmar  10   103.5%  -20.0%   2.45   5.18    -65.3pt
+      ORACLE realised Sharpe   3   268.9%  -20.0%   2.85  13.44   +100.0pt
+      ORACLE realised Sharpe  10   195.2%  -20.0%   2.66   9.76    +26.4pt
+
+3. WHY THE CAGR AND CALMAR ORACLES LOSE - median over quarters
+
+      Calmar oracle: trades    31   quarterly DD   -7.4%   quarterly CAGR   107.9%
+        CAGR oracle: trades    36   quarterly DD   -8.9%   quarterly CAGR   151.2%
+    all 200 configs: trades    32   quarterly DD   -9.5%   quarterly CAGR    39.8%
+
+4. THE CEILING: perfect foresight of next-quarter SHARPE, over k
+
+   k     CAGR      DD    Shp    Clm
+   1   245.3%  -20.0%   2.89  12.26
+   2   257.2%  -20.0%   2.86  12.86
