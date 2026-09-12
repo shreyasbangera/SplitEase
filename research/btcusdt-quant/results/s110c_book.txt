@@ -1,0 +1,15 @@
+refitting the out-of-sample predictions
+1391 of 1697 trades carry an out-of-sample prediction
+
+                          book      N    PF    Shp    Clm  realDD P>20%     full    1st h    2nd h    vs V7  worse half
+                 V7 unfiltered   1697  3.17   2.15   7.00   -12.3%    33%    168.8%    166.6%    218.9%
+       drop worst 10% by model   1620  3.12   2.12   6.95   -12.4%    36%    168.0%    128.5%    215.5%     -0.9       -38.1
+     random drop 10% (3 draws)                                     181.1%                      +12.3
+       drop worst 20% by model   1561  3.12   2.10   6.87   -12.3%    39%    164.5%    146.4%    204.9%     -4.3       -20.2
+     random drop 20% (3 draws)                                     131.5%                      -37.3
+       drop worst 30% by model   1489  3.25   2.14   7.09   -12.4%    36%    171.7%    155.4%    199.5%     +2.9       -19.4
+     random drop 30% (3 draws)                                     110.3%                      -58.5
+       drop worst 40% by model   1425  3.45   2.19   7.33   -12.3%    35%    178.0%    176.3%    205.1%     +9.2       -13.8
+     random drop 40% (3 draws)                                      81.3%                      -87.5
+
+done: filtered book

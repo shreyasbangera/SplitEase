@@ -4246,3 +4246,62 @@ standing. The edge survives a sampling with **no phase and no length at all** �
 the clock neighbours lost 66–94%. V7's 179% is not an artefact of the clock. That does not move the
 number, but it substantially changes how much the number deserves to be believed, and it is the
 first good news in this log since the trend gate.
+
+## S110 — Meta-labelling, reopened and now closed
+
+S17 was the only experiment in this log recorded as *"inconclusive, not disproven"*, and its blocker
+was specific: **"232 labelled trades — far too few to train a classifier... The technique is sound;
+this signal does not generate enough events to use it."** V7 generates 1,697 trades, so the stated
+obstacle had expired.
+
+**The first correction is to that premise.** 1,697 trades come from only **675 unique entry bars** —
+the three sleeves duplicate every event 2.51× — so this is 2.9× S17's sample, not 7.3×. And the
+target is not obvious: V7 wins **46.9%** of trades at a profit factor of **3.17**, so it makes money
+from skew, and a classifier that skips predicted losers also skips the left tail of a distribution
+whose right tail pays for everything.
+
+Expanding-window walk-forward by quarter, refit each time, with a 21-day embargo (the longest hold
+in the grid) so no training label overlaps a test trade. Features read from the **decision bar**
+that produced the trade, never later. Only out-of-sample predictions scored.
+
+| model | OOS AUC | vs effective n = 675 | rho(pred, P&L) |
+|---|---|---|---|
+| **penalised logistic (C=0.05)** | **0.537** | **+1.6 sd** | +0.079 |
+| gradient boosting (depth 3) | 0.517 | +0.8 sd | +0.038 |
+| shuffled label, 20 draws | median 0.496, sd 0.016, **max 0.526** | — | — |
+
+Weak but real: above the maximum of twenty shuffled runs. Gradient boosting reads *worse* than the
+linear model, which is the correct sign for a flexible model on 675 events and a reason to believe
+the linear one. The coefficients are sane — long-side trades do better below the 300-bar EMA and
+above the 100-bar one, and high |net| conviction helps.
+
+### The filter works, and it is not enough
+
+Applied where it would really act: the trade's entry is **zeroed on its decision bar**, so the book
+is genuinely flat and the engine carries on, rather than removing P&L from a finished equity curve
+and pretending the rest of the path is unchanged.
+
+| book | N | PF | Sharpe | Calmar | at −20% | vs V7 | worse half |
+|---|---|---|---|---|---|---|---|
+| **V7 unfiltered** | 1,697 | 3.17 | 2.15 | 7.00 | **168.8%** | — | — |
+| drop worst 10% by model | 1,620 | 3.12 | 2.12 | 6.95 | 168.0% | −0.9 | −38.1 |
+| *random drop 10%* | | | | | *181.1%* | *+12.3* | |
+| drop worst 20% | 1,561 | 3.12 | 2.10 | 6.87 | 164.5% | −4.3 | −20.2 |
+| *random drop 20%* | | | | | *131.5%* | *−37.3* | |
+| drop worst 30% | 1,489 | 3.25 | 2.14 | 7.09 | 171.7% | +2.9 | −19.4 |
+| *random drop 30%* | | | | | *110.3%* | *−58.5* | |
+| **drop worst 40%** | 1,425 | **3.45** | **2.19** | **7.33** | **178.0%** | **+9.2** | **−13.8** |
+| *random drop 40%* | | | | | *81.3%* | *−87.5* | |
+
+**The classifier is clearly doing real work.** Dropping 40% of trades at random costs 87.5 points;
+dropping the 40% the model dislikes *gains* 9.2 — a 97-point spread, with profit factor rising
+monotonically 3.17 → 3.45. The technique is not the problem.
+
+**The edge is.** +9.2 points is inside S96c's 24-point noise band, and the filtered book is worse
+than V7 in its worse half at **every** drop rate. Same failure mode as every other candidate in this
+log: a full-sample improvement that does not hold in both halves.
+
+**S17's verdict can now be written properly. Meta-labelling on V7 is closed, with a reason rather
+than for want of data:** at 675 effective events the achievable AUC is ~0.537, that is worth ~9
+points at the gate, and 9 points is noise. It would take a materially stronger classifier — not more
+trades — to matter, and the sample says one is not there.
