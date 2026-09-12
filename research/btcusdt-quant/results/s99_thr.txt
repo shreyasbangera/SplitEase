@@ -1,0 +1,27 @@
+panel 4020 bars, 2021-03-01 -> 2026-08-31
+base thresholds {'flow': 1.0, 'ivol': 0.7, 'cmpx': 1.0, 'ethrel': 1.0, 'btcdom': 1.0, 'fundz': 1.0, 'posn': 0.7}
+
+  THR scale     CAGR      DD    PF      N    Shp    Clm   flat% mean|net|  vs base
+       0.50    46.8%  -20.0%  1.47   1011   1.46   2.34    3.9%     0.589   -52.0pt
+       0.70    66.5%  -20.0%  1.75   1033   1.95   3.32    6.1%     0.504   -32.3pt
+       0.85    79.3%  -20.0%  1.98   1004   2.07   3.97   10.1%     0.456   -19.5pt
+     1.00 *    98.8%  -20.0%  2.03   1005   2.20   4.94   15.5%     0.417    +0.0pt
+       1.25    36.3%  -20.0%  1.76    929   1.69   1.81   28.0%     0.368   -62.5pt
+       1.50    39.5%  -20.0%  1.73    836   1.68   1.97   41.8%     0.333   -59.3pt
+       2.00    23.8%  -20.0%  1.65    541   1.30   1.19   67.4%     0.286   -75.0pt
+       2.50     6.3%  -20.0%  1.34    303   0.63   0.32   83.7%     0.264   -92.5pt
+
+* = the deployed thresholds
+
+DOES THE 10x LEVERAGE CAP BIND? (never checked before)
+
+   THR x0.50: trades_df columns = ['entry_dt', 'exit_dt', 'side', 'entry', 'exit', 'qty', 'pnl', 'reason', 'bars']
+
+done: thresholds
+
+DOES THE 10x LEVERAGE CAP BIND? (never checked in this study)
+leverage = qty x entry price / account equity at the moment of entry
+
+   THR x0.85: median  0.25x   90th pct  0.65x   at cap (>=9.9x) on   0.0% of 1004 trades
+   THR x1.00: median  0.25x   90th pct  0.61x   at cap (>=9.9x) on   0.0% of 1005 trades
+   THR x1.25: median  0.24x   90th pct  0.52x   at cap (>=9.9x) on   0.0% of 929 trades

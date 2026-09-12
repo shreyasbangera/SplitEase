@@ -3428,3 +3428,48 @@ risk bisection — the same fixed-config book bisected properly reads 71.2%, not
 uses the identical method, so the comparison stands and only the level is inflated.)*
 
 **V7 unchanged at 179.0% CAGR at −19.99%.**
+
+---
+
+## S99 — The thresholds: a sharp interior optimum that was never tuned, and an inert cap
+
+`THR = {flow 1.0, cmpx 1.0, btcdom 1.0, fundz 1.0, posn 0.7}` was set when the five-signal book was
+first assembled in S45 and carried unchanged through every experiment since. The grid V7 selects
+from varies exponent, stop, reward:risk, hold and gate — it does not vary this.
+
+The mechanism cuts both ways. The threshold sets how *often* a signal speaks and how its conviction
+is scaled once it does. Lower means more trades on more marginal readings; higher means fewer and
+more confident ones — and the drawdown anatomy's finding that the top 10% of trades carry 130% of
+net profit is a direct argument for concentrating into the strong readings. A single scale
+multiplier was applied to all five together, because five thresholds searched separately on one
+sample is how a result gets manufactured rather than found.
+
+| THR scale | CAGR at −20% | PF | trades | Sharpe | Calmar | flat | mean \|net\| |
+|---|---|---|---|---|---|---|---|
+| 0.50 | 46.8% | 1.47 | 1,011 | 1.46 | 2.34 | 3.9% | 0.589 |
+| 0.70 | 66.5% | 1.75 | 1,033 | 1.95 | 3.32 | 6.1% | 0.504 |
+| 0.85 | 79.3% | 1.98 | 1,004 | 2.07 | 3.97 | 10.1% | 0.456 |
+| **1.00 — deployed** | **98.8%** | **2.03** | 1,005 | **2.20** | **4.94** | 15.5% | 0.417 |
+| 1.25 | 36.3% | 1.76 | 929 | 1.69 | 1.81 | 28.0% | 0.368 |
+| 1.50 | 39.5% | 1.73 | 836 | 1.68 | 1.97 | 41.8% | 0.333 |
+| 2.00 | 23.8% | 1.65 | 541 | 1.30 | 1.19 | 67.4% | 0.286 |
+| 2.50 | 6.3% | 1.34 | 303 | 0.63 | 0.32 | 83.7% | 0.264 |
+
+**The deployed value is the optimum, and it was never tuned to be** — z = 1.0 is one standard
+deviation, chosen a priori in S45. Finding it optimal five years of experiments later is
+confirmation rather than a fit, which is the only reason a peak this sharp is reportable at all.
+
+**The asymmetry is the part worth keeping.** Below 1.0 the book degrades gracefully (79.3% at 0.85);
+above it, a 25% increase costs 62 points. Raising the bar compresses conviction as well as firing
+rate — a signal at z = 1.3 contributes 1.04 rather than 1.3 once the threshold is 1.25 — so the
+composite turns binary exactly as the conviction exponent needs it graded. **The profit
+concentration argument for raising thresholds is wrong, and this is why.**
+
+**The 10× leverage cap is inert.** Never checked in this study, and it turns out to bind on **0.0%
+of trades** at every threshold — median leverage 0.25×, 90th percentile 0.61×. Position size is
+`risk × equity / stop distance` and a 3 × ATR stop is wide, so the book is risk-sized rather than
+leverage-sized and nowhere near the limit even at the gate risk. Every conviction and exponent
+result in this log is therefore a statement about conviction, not about a truncation — a lurking
+doubt removed.
+
+**V7 unchanged at 179.0% CAGR at −19.99%.**
