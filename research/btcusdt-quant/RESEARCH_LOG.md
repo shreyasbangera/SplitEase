@@ -3473,3 +3473,47 @@ result in this log is therefore a statement about conviction, not about a trunca
 doubt removed.
 
 **V7 unchanged at 179.0% CAGR at −19.99%.**
+
+---
+
+## S100 — V7 at 1-minute execution resolution: the book survives, with a small haircut
+
+The engine resolves stops and targets on a **15-minute** grid and, whenever one bar straddles both
+levels, assumes the **stop filled first**. That worst case has never been priced for V7 — the
+execution-granularity validation in this log was run on S7, S15 and S4, earlier books with
+different stops, targets and composites. V7 is quarterly-selected, conviction-sized and a
+three-config blend, so it had to be re-checked on its own terms.
+
+The bias does not obviously run one way: a finer grid means fewer bars straddle both levels, so the
+worst-case assumption fires less often — but stops also trigger on wicks a 15-minute bar smoothed
+over.
+
+| exec grid | CAGR | MaxDD | Sharpe | Calmar | trades | win rate | **at −20% gate** |
+|---|---|---|---|---|---|---|---|
+| 15m *(as deployed)* | 86.2% | −12.3% | 2.15 | 7.00 | 1,697 | 46.9% | **168.8%** |
+| **1m** | 84.0% | −12.3% | 2.12 | 6.85 | 1,695 | 45.7% | **164.5%** |
+| delta | −2.1pp | +0.0pp | −0.03 | −0.15 | −2 | −1.2pp | **−4.3pp** |
+
+**The wick effect slightly outweighs the straddle assumption, so the 15-minute grid was optimistic
+rather than conservative** — the opposite of the expectation this was run on. The per-trade
+distribution shows where: the worst single trade is −374 at 1m against −338 at 15m, and the 5th
+percentile is essentially unchanged, which is the signature of stops being caught by wicks a coarse
+bar had smoothed.
+
+**The haircut is small — about 2.5% in relative terms — so V7 survives the finer grid**, which is
+the outcome the earlier validation found for the older books. Applied to the headline, the true
+bisection moves from **179.0% to roughly 174.5%**.
+
+### The deployed book's number, with every correction now known
+
+Three corrections have accumulated and they all point the same way:
+
+| | effect on the gate number |
+|---|---|
+| S100 execution granularity | −2.5% relative → ~174.5% |
+| S96c selection noise | sd ≈ 24 points; V7 beats 9 of 12 perturbed draws, so the point estimate is an optimistic draw |
+| registry drawdown convention | daily marks are ~2 points optimistic on DD, so the true 20% *intraday* gate binds at a lower risk still |
+
+**Read together, V7 is realistically 160–175% at a true 20% intraday drawdown gate, against a
+300% target — 1.7× to 1.9× short, slightly worse than the headline has been saying.** Nothing here
+changes what the live book should trade; it changes what it should be expected to return.
