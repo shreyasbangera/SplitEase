@@ -1,0 +1,18 @@
+panel 4020 bars, 2021-03-01 -> 2026-08-31
+every book at risk/m so total risk is held constant across rows
+
+                   partition  m     CAGR      DD    Shp    Clm      N   vs ctl
+          netted 5 (control)  1    98.8%  -20.0%   2.20   4.94   1005    +0.0pt
+            flow+cmpx | rest  2    64.4%  -20.0%   2.00   3.22   1715   -34.4pt
+          flow+btcdom | rest  2    56.8%  -20.0%   1.68   2.84   1768   -42.0pt
+   flow | cmpx+dom | fnd+pos  3    41.5%  -20.0%   1.44   2.07   2140   -57.3pt
+           all five separate  5    22.4%  -20.0%   1.32   1.12   2705   -76.4pt
+
+THE PREMISE: how decorrelated are the split books actually?
+
+               flow+cmpx | rest: pairwise daily corr mean +0.311  range +0.311 to +0.311
+             flow+btcdom | rest: pairwise daily corr mean +0.318  range +0.318 to +0.318
+      flow | cmpx+dom | fnd+pos: pairwise daily corr mean +0.167  range +0.059 to +0.305
+              all five separate: pairwise daily corr mean +0.068  range -0.077 to +0.316
+
+done: disjoint books

@@ -1,0 +1,16 @@
+S96b: only next-quarter SHARPE is worth foreseeing (268.9% vs the causal
+168.8%). So: does ANY trailing metric predict next-quarter Sharpe?
+Cross-sectional Spearman, 200 configs, per quarter, then across quarters.
+
+      predictor               next SHARPE               next Calmar                 next CAGR
+                   mean rho      t    +ve    mean rho      t    +ve    mean rho      t    +ve
+   trail calmar      -0.034  -0.49   7/18      -0.051  -0.78   7/18      -0.062  -0.85   6/18
+   trail sharpe      +0.011  +0.15   7/18      -0.032  -0.48   7/18      -0.038  -0.55   7/18
+       trail PF      -0.047  -0.57   9/18      -0.023  -0.25   8/18      -0.004  -0.05   9/18
+     trail CAGR      -0.085  -1.18   7/18      -0.067  -0.85   7/18      -0.065  -0.74   7/18
+  trail ulcer-r      -0.018  -0.23   8/18      -0.041  -0.59   7/18      -0.044  -0.56   8/18
+    trail -|DD|      +0.065  +0.86   9/18      +0.022  +0.33   9/18      -0.027  -0.39   8/18
+   trail -ulcer      +0.073  +1.07  12/18      +0.026  +0.47  10/18      -0.006  -0.10  13/18
+   trail trades      +0.121  +1.13  12/18      +0.019  +0.19   9/18      -0.001  -0.01  10/18
+
+(t is across quarters: does the per-quarter rho have a consistent sign?)

@@ -3342,3 +3342,89 @@ Three things are now known about it that were not before, and two of them correc
 
 V7 stands at **179.0% at the gate** as the point estimate, with S96c's caveat that this is an
 optimistic draw from a wide distribution, still short of 300%.
+
+---
+
+## S97–S98 — Three more channels closed: prediction, pooling, and partition
+
+Recorded compactly because all three are negatives and none changes the standing number.
+
+### S97 — nothing forecasts next-quarter Sharpe, so S96b's 100 points are unreachable
+
+S96b left a 100-point gap between the causal rule (168.8%) and perfect foresight of next-quarter
+Sharpe (268.9%). Closing any of it requires something that predicts that quantity. Eight trailing
+metrics, cross-sectional Spearman over 200 configurations, per quarter:
+
+| trailing predictor | vs next SHARPE | t | positive |
+|---|---|---|---|
+| calmar | −0.034 | −0.49 | 7/18 |
+| sharpe | +0.011 | +0.15 | 7/18 |
+| profit factor | −0.047 | −0.57 | 9/18 |
+| CAGR | −0.085 | −1.18 | 7/18 |
+| −ulcer | **+0.073** | +1.07 | 12/18 |
+| trade count | **+0.121** | +1.13 | 12/18 |
+
+**Nothing reaches |t| = 1.2.** And the pattern is the S96e story again: every *performance* metric
+carries a **negative** mean rho, while only the *risk and activity* measures lean positive. Trade
+count leading is not an edge — a configuration that trades more has a less noisy realised Sharpe,
+which is arithmetic, not information.
+
+### S97b — pooling to axis level does not rescue it
+
+If configuration-level estimates are too noisy, the fix is to pool. Each axis value of the grid
+averages 40 configurations, which should cut the noise fourfold. Trailing axis mean against
+next-quarter axis mean:
+
+| axis | mean rho | t | realised Sharpe by value |
+|---|---|---|---|
+| exponent p | **−0.211** | −1.11 | 1: +1.62 · 1.5: +1.53 · 2: +1.44 · 2.5: +1.38 · 3: **+1.32** |
+| trend gate | +0.096 | +0.64 | none: +1.75 · 100: +1.36 · 150: +1.18 · 200: +1.61 · 300: +1.38 |
+
+No axis persists either, and no unconditional best-versus-worst difference reaches t = 2 (p +0.99,
+stop +1.40, reward:risk +1.54, hold +1.01, gate +1.67). **The selection has nothing to work with at
+any granularity.**
+
+One observation kept without acting on it: realised Sharpe falls **monotonically** across all five
+levels of the conviction exponent, 1.62 → 1.32. Monotonicity across an ordered axis is better
+evidence than the t-stat suggests, and it sits oddly beside S56–S60, which adopted the quadratic
+exponent. It is not a contradiction — S60 chose on Calmar, not Sharpe, and concentrating risk into
+high-conviction bets is expected to raise profit factor while lowering Sharpe — but it is a loose
+end, and trimming the menu on full-sample realised performance would be exactly the in-sample
+selection this log keeps warning about. Left alone.
+
+### S98 — disjoint books: the premise was right again, and it lost again
+
+S86b closed blending *configurations* of one composite (they take nearly the same positions) and
+S42 closed blending *phases* (correlation 0.70–0.82). Neither is a **partition**: splitting the five
+signals into disjoint groups, netting each into its own composite, and trading each as its own book
+with its own stop and target at risk/m. Those books hold genuinely different positions.
+
+| partition | m | CAGR at −20% | Sharpe | trades | vs control |
+|---|---|---|---|---|---|
+| **netted 5 (control)** | 1 | **98.8%** | 2.20 | 1,005 | +0.0pt |
+| flow+cmpx │ rest | 2 | 64.4% | 2.00 | 1,715 | −34.4pt |
+| flow+btcdom │ rest | 2 | 56.8% | 1.68 | 1,768 | −42.0pt |
+| flow │ cmpx+dom │ fundz+posn | 3 | 41.5% | 1.44 | 2,140 | −57.3pt |
+| all five separate | 5 | 22.4% | 1.32 | 2,705 | −76.4pt |
+
+**The decorrelation is real and it is worthless.** Mean pairwise daily correlation falls from +0.311
+for the two-way split to **+0.068** for five separate books — near-independent equity paths, exactly
+what the Calmar lever is supposed to need — and the result degrades **monotonically** with every
+additional split.
+
+The mechanism is clear from the trade counts: 1,005 → 2,705. **Netting the five signals IS the
+diversification, and it is the efficient form of it.** The composite only takes a position when the
+*net* of five reads is non-zero and sizes it by conviction |net|; split apart, each book trades its
+own signal whether or not the others contradict it, so it takes exactly the trades the netted book
+correctly declines — and pays m sets of fees to do it.
+
+**This is S95's rule a second time, and now it should be treated as a law of this study: a
+decorrelated signal with no edge is only a decorrelated way to lose money.** Low correlation has
+been used repeatedly in this log as evidence that something *could* add. It is not evidence of
+anything.
+
+*(Levels in the S98 table come from S94's return-scaling method, which is optimistic against a true
+risk bisection — the same fixed-config book bisected properly reads 71.2%, not 98.8%. Every row
+uses the identical method, so the comparison stands and only the level is inflated.)*
+
+**V7 unchanged at 179.0% CAGR at −19.99%.**

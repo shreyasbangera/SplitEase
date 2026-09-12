@@ -1,0 +1,30 @@
+CONFIG-level ranking is noise-dominated (S96c) and predicts nothing (S97).
+AXIS-level statistics pool 40 configs each, so they should be far less
+noisy. Does a trailing axis mean predict the next-quarter axis mean?
+
+         axis  vals   mean rho      t     +ve   per-value mean realised Sharpe
+   exponent p     5     -0.211  -1.11    7/18   1:+1.62 1.5:+1.53 2:+1.44 2.5:+1.38 3:+1.32
+<stdin>:31: RuntimeWarning: Mean of empty slice
+/usr/local/lib/python3.11/dist-packages/numpy/_core/_methods.py:142: RuntimeWarning: invalid value encountered in scalar divide
+  ret = ret.dtype.type(ret / rcount)
+/usr/local/lib/python3.11/dist-packages/numpy/_core/_methods.py:219: RuntimeWarning: Degrees of freedom <= 0 for slice
+  ret = _var(a, axis=axis, dtype=dtype, out=out, ddof=ddof,
+/usr/local/lib/python3.11/dist-packages/numpy/_core/_methods.py:178: RuntimeWarning: invalid value encountered in divide
+  arrmean = um.true_divide(arrmean, div, out=arrmean,
+/usr/local/lib/python3.11/dist-packages/numpy/_core/_methods.py:211: RuntimeWarning: invalid value encountered in scalar divide
+  ret = ret.dtype.type(ret / rcount)
+<stdin>:33: RuntimeWarning: Mean of empty slice
+     stop ATR     2       +nan   +nan    0/0   2.5:+1.46 3:+1.46
+  reward:risk     2       +nan   +nan    0/0   2:+1.43 3:+1.50
+    hold days     2       +nan   +nan    0/0   14:+1.49 21:+1.43
+<stdin>:27: RuntimeWarning: Mean of empty slice
+   trend gate     5     +0.096  +0.64   10/17   0:+1.75 100:+1.36 150:+1.18 200:+1.61 300:+1.38
+
+Is any axis value UNCONDITIONALLY better? (realised Sharpe, all quarters)
+If so the menu itself can be trimmed, which needs no forecasting at all.
+      exponent p: best 1 (+1.62) vs worst 3 (+1.32)   paired t +0.99 on 18 quarters
+        stop ATR: best 3 (+1.46) vs worst 2.5 (+1.46)   paired t +1.40 on 18 quarters
+     reward:risk: best 3 (+1.50) vs worst 2 (+1.43)   paired t +1.54 on 18 quarters
+       hold days: best 14 (+1.49) vs worst 21 (+1.43)   paired t +1.01 on 18 quarters
+<stdin>:40: RuntimeWarning: Mean of empty slice
+      trend gate: best 0 (+1.75) vs worst 150 (+1.18)   paired t +1.67 on 17 quarters
