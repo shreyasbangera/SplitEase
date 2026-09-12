@@ -4422,3 +4422,98 @@ the limit is breached on ~88% of paths, and the −19.99% on record is the favou
 
 **Effect on the brief.** The target was 1.7× away against the 179% headline. Against the honest
 135% it is **2.2× away**. Nothing in S110, S111 or anything before them closes a gap that size.
+
+## S113 — Is the configuration MENU the binding constraint? The one question the oracle bound cannot answer
+
+S96b bounded config selection at 268.9% with perfect foresight. But that bound is over a **fixed
+menu of 200 configurations**, and widening the menu raises the ceiling by construction. It is the
+one axis the oracle argument does not cover, and there was direct evidence the menu was too narrow:
+over 18 quarters and three sleeves, the selection's modal pick sits **on a grid boundary on four of
+five axes**.
+
+| axis | modal pick | of 54 | position in grid |
+|---|---|---|---|
+| exponent | 3.0 | 27 | **maximum** |
+| stop | 2.5 | 37 | **minimum** |
+| hold | 14 | 37 | **minimum** |
+| reward:risk | 3.0 | 32 | **maximum** |
+| gate | EMA100 | 21 | interior |
+
+One fence is already known to be real: **S78** extended the exponent to 6.0 and the book got worse
+(Calmar 6.58 → 5.22) while profit factor *rose* to 3.72 — concentration keeps improving the
+win/loss ratio long after it stops improving risk-adjusted return. Exponent stays capped.
+
+### The other three, swept for the first time
+
+Full-sample single-configuration screen around the modal pick. **In-sample by construction** — it
+can say whether a fence binds, never what to adopt.
+
+| stop (ATR) | 1.25 | 1.5 | 2.0 | **2.5** | **3.0** | 4.0 | 5.0 |
+|---|---|---|---|---|---|---|---|
+| at −20% vs centre | −65.1 | −2.1 | −11.6 | **0.0** | **+3.8** | −8.0 | −11.7 |
+| trades stopped out | 17.9% | 13.9% | 6.1% | 2.8% | 1.1% | 0.6% | 0.3% |
+
+| hold (days) | 3 | 5 | 7 | 10 | **14** | **21** | 35 |
+|---|---|---|---|---|---|---|---|
+| at −20% vs centre | −68.0 | −37.4 | −37.0 | −21.5 | **0.0** | **−20.0** | −21.5 |
+
+| reward:risk | 1.5 | **2.0** | 2.5 | **3.0** | 4.0 | 5.0 | 6.0 |
+|---|---|---|---|---|---|---|---|
+| at −20% vs centre | −57.0 | −38.3 | −18.4 | **0.0** | **+9.9** | −10.3 | −13.1 |
+
+**Two of the three fences are not fences.** The stop optimum lies *inside* {2.5, 3.0} — tightening
+it collapses the book, which is S104's exit result arriving from a different direction. Hold is a
+sharp interior peak at 14 days. The selection preferring the lower value in each pair is a
+within-grid preference, not pressure against a wall.
+
+**Only reward:risk pushes past its edge**, +9.9 at R:R 4.0 with 5.0 and 6.0 falling away again.
+
+### S113b — widening it, and letting the selection earn it
+
+R:R menu widened to {2.0, 3.0, 4.0}, 200 configurations become 300, and the quarterly rankings
+recomputed from scratch so the new value has to be earned on trailing Calmar with no knowledge of
+the full sample.
+
+| book | N | PF | Sharpe | Calmar | realDD | medDD | at −20% | 1st half | 2nd half | vs V7 | worse half |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| **V7 (R:R 2 or 3)** | 1,697 | 3.17 | 2.15 | 7.00 | −12.3% | −14.3% | **168.8%** | 166.6% | 218.9% | — | — |
+| wide (R:R 2, 3 or 4) | 1,721 | 3.08 | 2.05 | 5.46 | −15.3% | −15.4% | **120.0%** | 160.5% | 139.0% | **−48.8** | **−79.9** |
+
+**An in-sample gain of +9.9 became a causal loss of −48.8 — a 59-point swing.** And the selection
+genuinely reaches for the new value: R:R 4.0 is picked 20 times of 54 in the top three, more than
+either incumbent. It takes it, and it pays.
+
+This is S109's law arriving from the other side. There, enlarging the pool a selection draws from
+made more of its maximum noise, and the event panel's ranking went *anti*-informative. Here, adding
+a genuinely better cell to the menu degraded the selection more than the cell helped.
+
+**Recorded as closed, and it strengthens S96b rather than qualifying it.** The one objection the
+oracle bound could not answer — "the ceiling is only 268.9% because the menu is too small" — is now
+answered: the menu is approximately right, two of its three untested edges are interior optima, and
+the one edge that binds in-sample costs 49 points when it is opened honestly. **The grid is not the
+constraint.**
+
+### What the brief actually costs, now that the drawdown limit has moved
+
+The owner has accepted a ~25% typical drawdown and moved the live book to 14.4% risk. That changes
+the brief's arithmetic, because the 20% limit — not the strategy — was always what made 300%
+unreachable. **The target is available today from the existing book, purely by size:**
+
+| risk | CAGR | typical worst | 1 in 4 worse than | 1 in 20 | 1 in 100 |
+|---|---|---|---|---|---|
+| **14.4% — current live setting** | **179%** | **−25%** | −28% | −33% | −37% |
+| 18.0% | 247% | −30% | −34% | −40% | −45% |
+| 20.0% | 287% | −33% | −37% | −43% | −48% |
+| **20.6%** | **300%** | **~−34%** | ~−38% | ~−44% | ~−49% |
+| 22.0% | 332% | −36% | −40% | −46% | −52% |
+| 25.0% | 396% | −40% | −45% | −52% | −58% |
+
+**300% a year is reached at a bet size of 20.6%, and it costs a typical worst drawdown of about
+−34%, with one run in twenty going past −44% and one in a hundred past −49%.**
+
+This is not a research result and must not be read as one. It is the same book, with the same
+Calmar of roughly 7, levered further up a dial that S94 established is close to a pure scale knob
+(profit factor 3.18 ± 0.05 and Sharpe 2.15 ± 0.03 across a six-fold range of size). Nothing about
+the edge improved. **The brief was never impossible — it was priced in drawdown, and the original
+20% limit is what put it out of reach.** Stated plainly so the choice is the owner's and is made
+with the tail in view rather than the median alone.
