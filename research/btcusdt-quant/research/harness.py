@@ -79,14 +79,21 @@ def _ctx(start, end, fee, slip, eq0, max_lev, sig_df, exec_df=None, exec_key=Non
     which instrument's signals it was given - silently, and catastrophically
     for anything else.
     """
+    sig_dt = pd.Series(sig_df.dt).to_numpy()
     tfd = pd.Series(sig_df.dt).diff().median()
-    key = (start, end, fee, slip, eq0, max_lev, str(tfd),
-           exec_key or EXEC_TF[0])
+    # The cache key must identify the decision GRID, not just its average pitch:
+    # two event-based panels with different thresholds can share a median
+    # duration and would otherwise collide on a stale `first` mask.
+    key = (start, end, fee, slip, eq0, max_lev, str(tfd), len(sig_dt),
+           str(sig_dt[0]), str(sig_dt[-1]), exec_key or EXEC_TF[0])
     if key not in _ctxc:
         ex_s, _ = slice_period(exec_grid() if exec_df is None else exec_df, start, end)
         eng = Engine(ex_s, fee_bps=fee, slip_bps=slip, eq0=eq0, max_leverage=max_lev,
                      funding_df=funding_df)
-        dec_id = ((pd.Series(ex_s.dt) - pd.Series(sig_df.dt).iloc[0]) // tfd).to_numpy()
+        # Which decision bar each execution bar falls inside. Integer division
+        # by the median pitch says the same thing on an evenly spaced grid and
+        # drifts out of step on any other, so the boundaries are looked up.
+        dec_id = np.searchsorted(sig_dt, ex_s.dt.to_numpy(), side="right") - 1
         first = np.r_[True, np.diff(dec_id) != 0]
         _ctxc[key] = (ex_s, eng, first)
     return _ctxc[key]

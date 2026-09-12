@@ -1,0 +1,40 @@
+PREDICTION, stated before the controls run: if only the Sharpe gain is
+real, the sustainable figure is about 135-160%, not 332%.
+
+1. SPLIT HALF - each half scaled to the -20% gate separately
+
+                          book      full   1st half   2nd half  worse half
+               12h clock alone    116.9%      98.4%     161.6%            
+           clock + event 2/day    135.4%      94.1%     209.7%       -4.3
+           clock + event 3/day    332.4%     285.4%     481.7%     +186.9
+           clock + event 4/day    177.1%     555.0%     147.6%      -14.1
+           clock + event 8/day    169.4%     178.0%     223.7%      +62.1
+
+2. FULL STACK - against what V7 actually deploys, not one config
+
+                          book      CAGR    MaxDD    Shp     Clm   at -20%      vs V7
+       V7 (clock, top-3 blend)     86.2%   -12.3%   2.15    7.00     168.8%
+              V7 + event 2/day     55.5%   -10.1%   2.15    5.50     135.3%     -33.5
+              V7 + event 3/day     79.5%   -10.5%   2.47    7.57     197.5%     +28.7
+              V7 + event 4/day     87.3%   -11.9%   2.43    7.33     182.3%     +13.5
+              V7 + event 8/day    101.1%   -14.3%   2.33    7.05     161.4%      -7.4
+
+3. EXTRA LAG - act one whole decision bar later than the book does
+
+                          book      CAGR    MaxDD    Shp     Clm   at -20%   vs lag 1
+            event 3/day, lag 1     82.0%   -19.2%   2.21    4.26      86.4%
+            event 3/day, lag 2     43.1%   -27.1%   1.30    1.59      30.2%     -56.2
+            event 4/day, lag 1     87.4%   -21.6%   1.91    4.05      79.3%
+            event 4/day, lag 2     55.2%   -21.2%   1.46    2.61      51.7%     -27.6
+              12h clock, lag 1     63.5%   -12.5%   2.16    5.10     116.9%
+              12h clock, lag 2     43.4%   -14.0%   1.69    3.10      66.5%     -50.5
+
+4. BOOTSTRAP DRAWDOWN - is -7.5% the blend, or this path?
+
+               12h clock alone  realised  -12.5%   bootstrap median  -15.1%   P(worse than 20%)  15%
+           clock + event 2/day  realised   -9.3%   bootstrap median  -13.1%   P(worse than 20%)   6%
+           clock + event 3/day  realised   -7.5%   bootstrap median  -12.5%   P(worse than 20%)   4%
+           clock + event 4/day  realised  -11.7%   bootstrap median  -14.9%   P(worse than 20%)  13%
+           clock + event 8/day  realised  -13.6%   bootstrap median  -18.7%   P(worse than 20%)  39%
+
+done: event-bar controls

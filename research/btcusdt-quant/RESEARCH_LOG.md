@@ -4033,3 +4033,89 @@ at the same drawdown, or the same return at −12% drawdown. The channels that c
 160–175% after S100's execution haircut and S96c's 24-point noise band — against a 300% target, and
 the search space reachable from the data on disk is now bounded on every axis that has been
 measured. Reaching the brief requires a data source this study does not have.
+
+## S108 — Bars with no clock, and the first candidate in this study to clear the admission bar
+
+S101 and S102 are the two most serious findings in this log and they say the same thing. V7's
+168.8% lives in one cell of a **clock grid**, and every neighbour in phase (16.4%, 46.3%) and in
+length (43.8%, 29.5%, 10.1%) is 2.4× to 10× worse — the funding grid and the daily candle among
+them. The "00:00 UTC is crypto's anchor" defence died in S102.
+
+A **dollar bar** closes when a fixed amount of value has changed hands. It has no phase, because
+there is no origin to shift, and no length, because duration is whatever the market takes. *The
+question S101 asked cannot be posed of it.* This is not one more cell in the grid; it is a test of
+whether the edge needs a grid at all.
+
+### The engine had to be corrected first
+
+Two places assumed evenly spaced decision bars, and both failed **in the look-ahead direction** on
+bars longer than the median:
+
+- `align_to_exec` inferred a bar's close as its open plus the **median** spacing. It now reads the
+  close from the next bar's open, which is what a contiguous grid means.
+- `_ctx` assigned execution bars to decision bars by integer division on that same median. It now
+  looks the boundaries up.
+
+Both are exact on an evenly spaced grid, and V7 on the 12h clock reproduces **bit-for-bit** after
+the change — 168.8194% at the gate, 1,697 trades — so nothing earlier in this log moved.
+
+### Calibration
+
+The threshold tracks a lagged 30-day mean of daily dollar volume, targeting N bars a day, so the
+comparison is sampling rather than frequency. At 2/day it yields **4,979 bars against the clock's
+4,870**, within 10% in every year. A fixed threshold is reported as a control and shows exactly the
+problem it was expected to: 349 bars in 2020 against 1,991 in 2024.
+
+### The edge survives, which answers S101
+
+| sampling | at the −20% gate, three fixed configs | mean |
+|---|---|---|
+| **12h clock (deployed)** | 98.8 / 116.9 / 113.0 | **109.6** |
+| event, 2 bars/day *(matched bar count)* | 63.8 / 41.9 / 47.4 | 51.0 |
+| event, 3 bars/day | 73.8 / 86.4 / 91.4 | 83.9 |
+| **event, 4 bars/day** | 97.1 / 79.3 / 94.6 | **90.3** |
+| event, 8 bars/day | 48.2 / 53.3 / 47.7 | 49.7 |
+| fixed threshold | 38.8 / 37.2 / 42.7 | 39.6 |
+
+**The nearest clock neighbours lost 66–94% of the edge. Clock-free sampling loses 18%.** If 168.8%
+were an artefact of the 00:00/12:00 grid, a grid with no phase and no length should have collapsed
+like the 04:00 phase did. It did not. *The edge is not a property of the clock* — which is the
+strongest defence the deployed book has ever had, and it is the first good news in this log since
+the trend gate.
+
+The two families also respond to frequency in **opposite directions**: doubling the event rate
+recovers the gap, doubling the clock rate destroys the book. No prior result predicts that.
+
+### The first sleeve ever to clear S102c's admission bar
+
+S102c set the bar a second sleeve must clear beside the deployed book: S₂ > 2.16·(√(2+2ρ) − 1).
+Every horizon sleeve failed it. Event bars clear it at **every rate tested**, because their
+correlation to the clock book is far lower than any horizon achieved — **ρ = 0.27 to 0.43**, against
+0.556–0.650 for 6h/8h/24h and 0.70–0.82 for S42's phases.
+
+And the Sharpe gain is exactly the arithmetic, not a fitted result: two sleeves at 2.16 and 2.21
+correlated 0.499 predict (2.16+2.21)/√(2+2·0.499) = **2.52**; observed **2.51**.
+
+### Then the controls, and the honest number is a fifth of the headline
+
+Against **one** configuration the blend reads 116.9% → **332.4%** (+215.5). Against **V7's actual
+deployed top-3 blend** it reads 168.8% → **197.5%** (+28.7). A book that already holds three
+configurations at risk/3 is already smoothed, and has far less room for a fourth stream. *The real
+number is +28.7 points — 1.2 sd of S96c's 24-point noise band.*
+
+| control | verdict |
+|---|---|
+| admission bar, ρ = 0.43 | **pass** — first ever, and by a wide margin |
+| Sharpe 2.15 → 2.47 on the full stack | **pass** — matches the decorrelation formula exactly |
+| P(drawdown > 20%), bootstrapped: 33% → **7%** | **pass** — the largest risk improvement in the log |
+| realised drawdown −7.5% | **fail** — bootstrap median is −12.5%; half the improvement is this path |
+| split half, on the full stack | **fail** — −5.6 in the first half; *every* rate is negative in its worse half |
+| frequency stability | **fail** — 3.5/day reads 128.4% between 3/day's 197.5% and 4/day's 182.3% |
+
+A 70-point swing from a 17% change in bar rate is the interior-spike signature that was noise in
+S99, S105 and S106. And a one-bar delay costs the event book 65% against the clock book's 43% —
+from a *shorter* delay, 8h against 12h. Construction is causal by inspection and the clock book
+loses heavily to delay too (S92), so this reads as edge concentrated at the boundary rather than
+leakage — but it is an operational warning, not a clean pass: **an event-bar book's bars close at
+unpredictable times**, and the deployed bot runs hourly against a 12h grid with 13 hours of
+tolerance.

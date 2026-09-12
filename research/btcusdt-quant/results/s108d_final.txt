@@ -1,0 +1,40 @@
+1. the sweep and the split half, both on V7's ACTUAL top-3 blend
+
+                        book    Shp    Clm   realDD      full   1st half   2nd half  worse half
+              V7 as deployed   2.15   7.00   -12.3%    168.8%     166.6%     218.9%            
+            V7 + event 2/day   2.15   5.50   -10.1%    135.3%      84.3%     228.8%      -82.3
+          V7 + event 2.5/day   2.30   7.68   -10.5%    201.1%     146.9%     277.1%      -19.7
+            V7 + event 3/day   2.47   7.57   -10.5%    197.5%     161.0%     324.5%       -5.6
+          V7 + event 3.5/day   2.25   5.58   -13.1%    128.4%     186.3%     172.1%      -46.8
+            V7 + event 4/day   2.43   7.33   -11.9%    182.3%     292.6%     184.4%      -34.5
+            V7 + event 5/day   1.99   5.06   -14.1%    113.6%      91.8%     180.5%      -74.8
+            V7 + event 6/day   2.05   4.04   -16.6%     85.4%     128.2%     101.1%     -117.8
+            V7 + event 8/day   2.33   7.05   -14.3%    161.4%     129.2%     242.5%      -37.4
+
+2. drawdown: realised against bootstrap, and the gate re-read on the
+   bootstrap median instead of the single realised path
+
+                        book   realDD   bootDD   P>20%     CAGR  gate on real  gate on boot
+              V7 as deployed   -12.3%   -18.1%     33%    86.2%        168.8%        115.0%
+            V7 + event 2/day   -10.1%   -13.5%      6%    55.5%        135.3%        101.0%
+          V7 + event 2.5/day   -10.5%   -13.6%      6%    80.4%        201.1%        154.9%
+            V7 + event 3/day   -10.5%   -13.7%      7%    79.5%        197.5%        151.7%
+          V7 + event 3.5/day   -13.1%   -15.1%     13%    72.9%        128.4%        111.3%
+            V7 + event 4/day   -11.9%   -15.9%     18%    87.3%        182.3%        136.4%
+            V7 + event 5/day   -14.1%   -19.1%     43%    71.4%        113.6%         83.9%
+            V7 + event 6/day   -16.6%   -18.8%     41%    67.2%         85.4%         75.4%
+            V7 + event 8/day   -14.3%   -19.2%     43%   101.1%        161.4%        120.5%
+
+3. the correlation that the whole thing rests on
+
+  bars/day   rho vs V7   ev Sharpe   needs  clears
+         2       0.362        1.53    1.40     YES
+       2.5       0.385        1.85    1.43     YES
+         3       0.430        2.19    1.49     YES
+       3.5       0.387        1.78    1.43     YES
+         4       0.331        2.02    1.36     YES
+         5       0.382        1.44    1.43     YES
+         6       0.268        1.38    1.27     YES
+         8       0.387        1.97    1.43     YES
+
+done: event-bar candidate

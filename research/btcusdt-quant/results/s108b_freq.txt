@@ -1,0 +1,52 @@
+1. the event-bar frequency sweep, three fixed configs, risk 8%
+
+  bars/day      n  exp     CAGR   MaxDD      N    Shp    Clm   at -20%
+         2   4028  1.0    37.3%  -14.1%   1066   1.75   2.65     63.8%
+         2   4028  2.0    37.3%  -19.3%    990   1.53   1.93     41.9%
+         2   4028  2.0    46.0%  -23.4%   1003   1.51   1.97     47.4%
+          mean at the gate 51.0%   (12h clock reference 109.6%)
+
+         3   6011  1.0    64.3%  -20.4%   1504   2.16   3.15     73.8%
+         3   6011  2.0    82.2%  -21.5%   1451   2.21   3.83     86.4%
+         3   6011  2.0    87.3%  -21.3%   1452   1.97   4.10     91.4%
+          mean at the gate 83.9%   (12h clock reference 109.6%)
+
+         4   7971  1.0    73.2%  -21.3%   1948   2.08   3.44     97.1%
+         4   7971  2.0    87.5%  -24.7%   1868   1.91   3.54     79.3%
+         4   7971  2.0   116.7%  -26.8%   1887   1.82   4.35     94.6%
+          mean at the gate 90.3%   (12h clock reference 109.6%)
+
+         6  11823  1.0    54.1%  -34.5%   2904   1.53   1.57     29.5%
+         6  11823  2.0    62.5%  -34.4%   2776   1.46   1.82     40.0%
+         6  11823  2.0    89.7%  -39.5%   2801   1.53   2.27     44.2%
+          mean at the gate 37.9%   (12h clock reference 109.6%)
+
+         8  15611  1.0    85.0%  -32.8%   3597   1.83   2.59     48.2%
+         8  15611  2.0   114.3%  -44.5%   3487   1.88   2.57     53.3%
+         8  15611  2.0   121.3%  -41.3%   3523   1.78   2.93     47.7%
+          mean at the gate 49.7%   (12h clock reference 109.6%)
+
+best event-bar rate: 4 bars/day at 90.3% mean, against the clock's 109.6%
+
+2. is the event book a DIFFERENT stream, or the same one resampled?
+
+  bars/day   Sharpe  rho vs clock    needs  clears?
+         2     1.53         0.534     1.62       no
+         3     2.21         0.499     1.58      YES
+         4     1.91         0.401     1.46      YES
+         6     1.46         0.324     1.35      YES
+         8     1.88         0.435     1.50      YES
+
+(clock sleeve Sharpe 2.16; the bar is S2 > 2.16 x (sqrt(2+2rho) - 1))
+
+3. the blend, measured the way S87 blends configurations
+
+                      book     CAGR   MaxDD    Shp    Clm   at -20%  vs clock
+           12h clock alone    63.5%  -12.5%   2.16   5.10    116.9%
+       clock + event 2/day    52.5%   -9.3%   2.13   5.65    135.4%     +18.5
+       clock + event 3/day    76.2%   -7.5%   2.51  10.17    332.4%    +215.5
+       clock + event 4/day    83.8%  -11.7%   2.46   7.17    177.1%     +60.1
+       clock + event 6/day    64.1%  -15.1%   2.06   4.24     92.3%     -24.7
+       clock + event 8/day    97.6%  -13.6%   2.36   7.19    169.4%     +52.4
+
+done: event frequency and blend

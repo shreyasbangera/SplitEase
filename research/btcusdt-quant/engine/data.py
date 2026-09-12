@@ -71,15 +71,32 @@ def align_to_exec(sig_df, exec_df, arrays, lag=1):
     """
     Map per-signal-bar values onto the execution grid WITHOUT look-ahead.
 
-    A value computed from signal bar t (which closes at sig_dt[t] + tf) may only
-    influence execution bars that begin at or after that close.  `lag=1` shifts
-    the signal series forward by one signal bar, then forward-fills onto the
-    execution timestamps.  Execution bars before the first valid signal get NaN.
+    A value computed from signal bar t may only influence execution bars that
+    begin at or after that bar CLOSES.  `lag=1` shifts the signal series forward
+    by one signal bar, then forward-fills onto the execution timestamps.
+    Execution bars before the first valid signal get NaN.
+
+    Bars are labelled by OPEN time and are contiguous, so bar t closes exactly
+    when bar t+1 opens: bar t becomes usable at sig_dt[t+lag].  Reading the
+    close as sig_dt[t] + tf, with tf the MEDIAN spacing, is the same thing only
+    while the bars are evenly spaced - and where it differs it fails silently,
+    in the look-ahead direction, on every bar longer than the median.
+    Event-based bars (one per N dollars traded) have no fixed duration at all,
+    so the close is taken from the next bar's open rather than inferred from an
+    average.
     """
     out = {}
     sd = pd.Series(sig_df.dt.to_numpy())
-    tf = sd.diff().median()
-    valid_from = sd + tf * lag          # timestamp at which signal bar t becomes usable
+    valid_from = sd.shift(-lag)         # timestamp at which signal bar t becomes usable
+    if valid_from.isna().any():
+        # The final `lag` bars close after the panel ends. Nothing can act on
+        # them, but they still need a timestamp; extending by the median
+        # duration reproduces sd + tf*lag exactly on an evenly spaced grid.
+        d = sd.diff().dropna()
+        step = d.median() if len(d) else pd.Timedelta(0)
+        m = valid_from.isna().to_numpy()
+        valid_from = valid_from.copy()
+        valid_from[m] = sd.iloc[-1] + step * np.arange(1, int(m.sum()) + 1)
     ed = exec_df.dt.to_numpy()
     idx = np.searchsorted(valid_from.to_numpy(), ed, side="right") - 1
     ok = idx >= 0
