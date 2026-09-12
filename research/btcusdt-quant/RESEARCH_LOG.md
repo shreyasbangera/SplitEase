@@ -3719,3 +3719,162 @@ zero. The horizon axis is closed.
 reads 132.2% on the 4%-risk series and 116.9% on the 8%-risk one for the same book, because the
 real risk dial compounds where a linear rescaling does not. Rows are only ever compared against
 other rows measured the same way.)*
+
+## S103 — What the drawdown is actually made of, and it is not losing trades
+
+Exactly one thing in this study has improved Calmar without costing more than it gave: the trend
+gate. It was not found by searching a grid. It was found by opening the worst drawdown episode and
+reading what was inside it — 50 trades, 29 of them shorts into a melt-up, 89% of the loss — then
+building a rule against that cause and selecting it causally. V7 now carries that gate. The brief
+needs Calmar 8.95 → 15. So the same method was applied a second time, to what is left.
+
+**The answer is that what is left is not losing trades at all.**
+
+| # | peak → trough | depth | days | held | their P&L | BTC | agg lev | BTC×lev |
+|---|---|---|---|---|---|---|---|---|
+| **1** | 2024-07-21 → 07-24 | **−12.3%** | **3** | **3** | **+3,758** | **−4.1%** | **3.05×** | **−12.5%** |
+| 2 | 2025-03-10 → 04-10 | −11.6% | 31 | 61 | −292 | +1.3% | 1.65× | +2.1% |
+| 3 | 2024-12-17 → 2025-02-03 | −10.5% | 48 | 28 | −732 | −4.5% | 1.62× | −7.3% |
+| 4 | 2022-09-01 → 10-25 | −10.2% | 54 | 115 | −1,014 | −0.3% | 1.20× | −0.3% |
+| 5 | 2025-10-06 → 11-02 | −10.2% | 27 | 35 | −386 | −11.3% | 0.73× | −8.3% |
+| 6 | 2026-02-05 → 03-19 | −10.1% | 42 | 59 | −130 | +11.2% | 0.95× | +10.6% |
+
+Decomposed against the equity curve, in dollars:
+
+| # | Δ equity | realised by trades that CLOSED inside | mark-to-market on open positions |
+|---|---|---|---|
+| 1 | −5,815 | **0** | −5,815 (100%) |
+| 2 | −7,558 | −265 | −7,294 (96%) |
+| 3 | −6,616 | −702 | −5,914 (89%) |
+| 4 | −1,130 | −1,014 | −116 (10%) |
+| 5 | −10,322 | −365 | −9,957 (96%) |
+| 6 | −11,508 | −85 | −11,423 (99%) |
+
+**94% of the six deepest drawdowns is mark-to-market on positions still open at the trough.** The
+one exception is 2022, the only episode from the pre-2023 regime and the shallowest in dollars.
+
+### The maximum drawdown, explained completely
+
+The deepest episode in the record — the number that sets the −20% gate and therefore the entire
+headline — **closed nothing**. Three sleeves entered the same long at the same minute on
+2024-07-14:
+
+```
+2024-07-14 00:15 -> 2024-07-28 00:30  LONG  0.181 BTC  P&L +1,524  (signal exit)
+2024-07-14 00:15 -> 2024-07-28 00:30  LONG  0.154 BTC  P&L +1,303  (signal exit)
+2024-07-14 00:15 -> 2024-08-01 00:15  LONG  0.181 BTC  P&L   +932  (signal exit)
+daily path through the episode:  -2.9%  -7.2%  -2.7%
+```
+
+BTC fell **4.1%**. The account was holding **3.05×**. 4.1 × 3.05 = 12.5%, against the 12.3%
+observed. The position closed two weeks later for **+3,759**. *The worst drawdown in the record is
+leverage applied to a position that was right.*
+
+### Two measurements missed this, and both missed it the same way
+
+The blend is simulated as three accounts whose daily returns are summed, so **no quantity anywhere
+in it reports what the one real account holds**.
+
+- **S99** recorded "the 10× leverage cap binds on 0.0% of trades, median leverage 0.25×" —
+  measured *per sleeve*. Measured on the netted account: median **0.26×**, 90th percentile
+  **1.36×**, 99th **3.46×**, **max 5.18×**. And since the 10× cap is applied per sleeve, the
+  account's effective cap is **30×**, not 10×. The live book inherits this exactly — `v7.py` passes
+  the full equity and `risk/3` to `size_for` three times — so it is a faithful reproduction of the
+  backtest rather than a divergence, but the safety rail is three times weaker than it reads.
+- **S71** recorded the `|net|` cap of 3.0 as "inert — above 3 it never binds". True of the cap. But
+  the conviction scaling it permits means one high-conviction bar can carry **three times** the
+  nominal risk budget: at 8%, **24% of equity risked to the stop on a single bar.**
+
+Neither was wrong. They were each checked in isolation and never multiplied together.
+
+*(A diagnostic in the first version of this file read the market move off the 12h decision grid at
+a daily timestamp — 00:00 closes against 23:45 equity marks — and reported the worst drawdown as a
+12.3% loss on a 0.7% market move. The book was fine; the clock was not. Corrected before anything
+was concluded from it.)*
+
+## S104 — How a trade ENDS: the trade-level half of the shape lever, closed
+
+S94 closed the shape lever but closed a specific version of it: every overlay there multiplied the
+book's **daily returns**. None changed which trades existed or how they finished. The engine's
+trade-level exit parameters were used in the pre-S45 studies and never once on this book.
+
+S103 makes this a falsifiable test rather than a fishing trip. If the drawdowns are excursions on
+positions that recover, an exit rule that cuts the excursion must cut the recovery with it.
+
+Overlay only, on V7's own cached quarterly selection — only the exit differs.
+
+| variant | CAGR | MaxDD | PF | Sharpe | Calmar | at −20% | vs base |
+|---|---|---|---|---|---|---|---|
+| **baseline — V7 as deployed** | 86.2% | −12.3% | 3.17 | 2.15 | 7.00 | **168.8%** | — |
+| breakeven after 0.5R | 80.2% | −12.3% | 3.21 | 2.10 | 6.52 | 155.4% | −13.4 |
+| breakeven after 1.0R | 85.0% | −12.3% | 3.21 | 2.15 | 6.91 | 166.4% | −2.4 |
+| breakeven after 1.5R | 84.9% | −13.1% | 3.18 | 2.14 | 6.50 | 152.4% | −16.4 |
+| trail 1 ATR after 1.0R | 57.7% | −32.1% | 2.14 | 1.59 | 1.79 | **32.6%** | **−136.2** |
+| trail 2 ATR after 1.0R | 81.3% | −15.6% | 2.99 | 2.08 | 5.20 | 113.4% | −55.5 |
+| trail 3 ATR after 1.0R | 82.4% | −15.0% | 3.04 | 2.10 | 5.49 | 120.0% | −48.9 |
+| trail 3 ATR after 2.0R | 86.9% | −12.3% | 3.16 | 2.18 | 7.07 | 170.8% | +2.0 |
+
+**The prediction holds exactly, and the ordering is textbook.** The tighter and earlier the trail,
+the worse: 1 ATR at 1R destroys the book (Calmar 7.00 → 1.79), 2 ATR recovers to 113%, 3 ATR to
+120%, and 3 ATR after 2R — a trail as wide as the stop, armed at the take-profit level, so it
+essentially never fires — returns to baseline. **The family converges on "do nothing" from below
+and only reaches the baseline by ceasing to be an intervention**, the same signature S94 found for
+the daily-return overlays.
+
+Two details worth keeping. **Breakeven stops lose too**, which kills the one hypothesis S103 could
+not rule out: there is no give-back in this book to harvest. And the trade count *rises* under
+them (1,697 → 1,783) — the stop fires, flattens, and the still-live signal re-enters, paying a
+round turn for nothing. **The maximum drawdown is −12.3% under every breakeven variant**, unmoved,
+because it is mark-to-market on positions that never came near any of these levels.
+
+## S105 — Capping the account that actually exists, and a full-sample gain that is negative in both halves
+
+S103 leaves one intervention that has never been tried and that aims at exactly what sets the
+gate: a cap on the **netted account**, rather than on each sleeve separately. Both ceilings the
+book has were checked in isolation; this multiplies them. Both caps are computed from bar *t*'s own
+conviction, price and ATR and applied to bar *t*, and both are implemented by scaling the entry
+array, so a cap that never binds is the unmodified book exactly.
+
+| cap | binds on | CAGR | MaxDD | Sharpe | Calmar | at −20% | vs base |
+|---|---|---|---|---|---|---|---|
+| **baseline — no account cap** | — | 86.2% | −12.3% | 2.15 | 7.00 | **168.8%** | — |
+| notional ≤ 4.0× equity | 0.9% | 86.3% | −12.3% | 2.16 | 7.01 | 169.1% | +0.3 |
+| notional ≤ 3.0× | 2.2% | 84.8% | −12.2% | 2.16 | 6.95 | 168.1% | −0.8 |
+| notional ≤ 2.5× | 2.8% | 81.3% | −11.6% | 2.17 | 6.99 | 173.2% | +4.4 |
+| notional ≤ 2.0× | 3.7% | 76.9% | −11.6% | 2.17 | 6.61 | 162.5% | −6.3 |
+| notional ≤ 1.5× | 5.9% | 68.0% | −11.2% | 2.14 | 6.05 | 148.6% | −20.2 |
+| notional ≤ 1.0× | 9.5% | 50.6% | −10.2% | 2.09 | 4.95 | 118.8% | −50.1 |
+| risk ≤ 16% of equity | 2.7% | 80.1% | −11.6% | 2.18 | 6.88 | 170.3% | +1.4 |
+| **risk ≤ 12%** | 4.0% | 73.7% | −10.5% | 2.17 | 7.00 | **177.6%** | **+8.7** |
+| risk ≤ 10% | 4.9% | 67.3% | −10.3% | 2.15 | 6.54 | 165.3% | −3.6 |
+| risk ≤ 8% | 6.9% | 58.3% | −10.2% | 2.12 | 5.71 | 140.0% | −28.9 |
+
+Both families trace a hump with a small interior best — +4.4 and +8.7 — already inside S96c's
+24-point selection-noise band, so neither clears the bar for a candidate. **S105b settles which
+kind of nothing it is**, splitting at the midpoint of the record and scaling each half to the gate
+separately:
+
+| variant | full sample | 1st half | 2nd half | worse half |
+|---|---|---|---|---|
+| baseline | 168.8% | 166.6% | 218.9% | — |
+| notional ≤ 2.5× | **173.2%** | 170.8% | 209.7% | **−9.2** |
+| notional ≤ 2.0× | 162.5% | 171.9% | 184.9% | −34.0 |
+| risk ≤ 16% | 170.3% | 167.8% | 205.9% | −13.0 |
+| **risk ≤ 12%** | **177.6%** | **166.5%** | **198.9%** | **−19.9** |
+| risk ≤ 10% | 165.3% | 159.2% | 174.8% | −44.1 |
+
+**The best cell on the full sample is worse in both halves of it** — −0.1 in the first, −19.9 in the
+second — and every other variant is negative in its worse half too. The full-sample gain is an
+aggregation artefact: the cap clips the single deepest excursion, which is also the *global*
+maximum drawdown, so the bisection to −20% is allowed to scale everything up. That is tail surgery
+on one event in July 2024, not a better book.
+
+**Recorded as a law, because this trap will recur:** *an at-the-gate improvement produced by
+clipping the single deepest episode is not an improvement. Any overlay whose gain comes through
+the max-drawdown denominator must be shown to help in both halves separately, or it is measuring
+one afternoon.*
+
+**What does survive is a safety statement, not a return one.** A cap at 2.5× notional binds on 2.8%
+of bars and costs 9 points in the worse half, against an account that otherwise reaches 5.18× under
+an effective 30× rail. That is a rail worth having on a live account for reasons that have nothing
+to do with CAGR — and it is honest about its cost.

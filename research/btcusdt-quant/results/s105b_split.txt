@@ -1,0 +1,13 @@
+the account cap, measured separately on each half of the record
+
+             variant      full   1st half   2nd half  worse half   DD 1st   DD 2nd
+            baseline    168.8%     166.6%     218.9%       +0.0   -10.2%   -12.3%
+    notional <= 2.5x    173.2%     170.8%     209.7%       -9.2   -10.2%   -11.6%
+    notional <= 2.0x    162.5%     171.9%     184.9%      -34.0   -10.2%   -11.6%
+         risk <= 16%    170.3%     167.8%     205.9%      -13.0   -10.2%   -11.6%
+         risk <= 12%    177.6%     166.5%     198.9%      -19.9   -10.2%   -10.5%
+         risk <= 10%    165.3%     159.2%     174.8%      -44.1   -10.2%   -10.3%
+
+split at day 822 of 1645
+
+done: account cap, split

@@ -36,7 +36,14 @@ REASON = {1: "stop", 2: "target", 3: "signal", 4: "eod"}
 
 
 def replay():
-    """V7 exactly as deployed, but keeping the trade frames blend() throws away."""
+    """V7 exactly as deployed, but keeping the trade frames blend() throws away.
+
+    Also records each trade's LEVERAGE against its own sleeve's equity at entry.
+    The three sleeves are simulated as three accounts and only their daily
+    returns are summed, so no single number in the blend ever shows what the one
+    real account is actually holding - which turns out to be the whole
+    explanation of the book's worst drawdown.
+    """
     R = S87.rankings()
     segs, trades = [], []
     for s, e, cfgs in R:
@@ -49,6 +56,10 @@ def replay():
                 td = td.copy()
                 td["quarter"] = s; td["rank"] = rank; td["cfg"] = str(cfg)
                 td["gate"] = cfg[4]
+                eq = pd.Series(m["equity"], index=pd.to_datetime(m["dt"]))
+                ent = pd.to_datetime(td.entry_dt, utc=True)
+                td["eq_at_entry"] = [float(eq.asof(t)) for t in ent]
+                td["lev"] = (td.qty.abs() * td.entry) / td.eq_at_entry
                 trades.append(td)
         segs.append(pd.DataFrame({j: r for j, r in enumerate(rs)}).fillna(0.0).sum(axis=1))
     daily = pd.concat(segs)
@@ -98,6 +109,38 @@ def context():
     return g.set_index("dt")
 
 
+def btc_daily():
+    """BTC marked on the SAME clock the equity curve is marked on.
+
+    The 12h decision grid closes at 00:00 and 12:00; daily equity marks are the
+    last execution bar of the calendar day. Reading the move off the decision
+    grid at a daily timestamp compares 00:00 closes against 23:45 marks, which
+    made the book's worst drawdown look like a 12.3% loss on a 0.7% market move.
+    It was 4.1%, at 3x leverage.
+    """
+    from engine.data import load
+    d = load("fut_15m").copy()
+    d["dt"] = pd.to_datetime(d.dt, utc=True)
+    return d.set_index("dt")["close"].resample("1D").last().dropna()
+
+
+def agg_leverage(T, index):
+    """Aggregate leverage of the ONE real account, day by day.
+
+    The blend is simulated as K independent accounts whose daily returns are
+    summed, so nothing in it ever reports what the single netted account holds.
+    All K sleeves read the same composite and the conviction exponent cannot
+    change a sign, so they are always on the same side or flat: the account's
+    leverage is the SUM of the sleeves', and no number in the study had measured
+    it.
+    """
+    lev = pd.Series(0.0, index=index)
+    for _, t in T.iterrows():
+        m = (index >= t.entry_dt.normalize()) & (index <= t.exit_dt.normalize())
+        lev[m] += t.lev
+    return lev
+
+
 def window(T, a, b):
     """Trades whose HOLDING PERIOD overlaps the episode, not just those that exit in it.
 
@@ -125,27 +168,38 @@ if __name__ == "__main__":
           f"terminal {eq[-1]:.2f}x, max DD {(eq/np.maximum.accumulate(eq)-1).min()*100:.1f}%\n")
 
     G = context()
+    P = btc_daily()
+    LEV = agg_leverage(T, daily.index)
     E = episodes(daily)
     tot = T.pnl.sum()
+
+    print(f"aggregate leverage of the ONE netted account (sum over the {K} sleeves)")
+    print(f"  median {LEV[LEV > 0].median():.2f}x   90th pct "
+          f"{LEV[LEV > 0].quantile(0.9):.2f}x   99th {LEV[LEV > 0].quantile(0.99):.2f}x"
+          f"   max {LEV.max():.2f}x   flat on {(LEV == 0).mean()*100:.0f}% of days")
+    print(f"  per-sleeve max {T.lev.max():.2f}x against a {10.0:.0f}x cap that is "
+          f"applied PER SLEEVE, so the account's effective cap is {10.0*K:.0f}x\n")
 
     print("the deepest episodes that remain AFTER the trend gate")
     print("(trades = positions HELD during the window, so a 3-day episode that "
           "closes nothing is still attributable)\n")
     print(f"{'#':>2}{'peak':>13}{'trough':>13}{'depth':>8}{'days':>6}{'heal':>6}"
           f"{'trades':>8}{'P&L':>10}{'longs':>9}{'shorts':>9}{'BTC':>8}"
-          f"{'worst day':>11}{'down days':>11}")
+          f"{'lev':>7}{'BTCxlev':>9}{'worst day':>11}{'down days':>11}")
     rows = []
     for i, e in enumerate(E, 1):
         w = window(T, e["peak"], e["trough"])
         L = w[w.side > 0]; S = w[w.side < 0]
-        px = G.close.reindex(G.index[(G.index >= e["peak"]) & (G.index <= e["trough"])])
-        btc = (px.iloc[-1] / px.iloc[0] - 1) * 100 if len(px) > 1 else float("nan")
+        btc = (float(P.asof(e["trough"])) / float(P.asof(e["peak"])) - 1) * 100
         seg = daily[(daily.index > e["peak"]) & (daily.index <= e["trough"])]
+        lv = LEV[(LEV.index >= e["peak"]) & (LEV.index <= e["trough"])]
+        lev = float(lv.max()) if len(lv) else float("nan")
         rows.append((e, w, L, S, btc))
         print(f"{i:2d}{str(e['peak'].date()):>13}{str(e['trough'].date()):>13}"
               f"{e['depth']*100:7.1f}%{e['days']:6d}{e['healdays']:6d}{len(w):8d}"
               f"{w.pnl.sum():10.0f}{L.pnl.sum():9.0f}{S.pnl.sum():9.0f}{btc:7.1f}%"
-              f"{seg.min()*100:10.1f}%{int((seg < 0).sum()):6d}/{len(seg):<4d}")
+              f"{lev:6.2f}x{btc*lev:8.1f}%{seg.min()*100:10.1f}%"
+              f"{int((seg < 0).sum()):6d}/{len(seg):<4d}")
     print(f"\n   total P&L over the whole record {tot:,.0f}; the {len(E)} episodes "
           f"above cost {sum(r[1].pnl.sum() for r in rows):,.0f}")
 

@@ -1,15 +1,19 @@
 V7 replayed: 1697 trades, 1645 days, terminal 16.42x, max DD -12.3%
 
+aggregate leverage of the ONE netted account (sum over the 3 sleeves)
+  median 0.26x   90th pct 1.36x   99th 3.46x   max 5.18x   flat on 9% of days
+  per-sleeve max 1.62x against a 10x cap that is applied PER SLEEVE, so the account's effective cap is 30x
+
 the deepest episodes that remain AFTER the trend gate
 (trades = positions HELD during the window, so a 3-day episode that closes nothing is still attributable)
 
- #         peak       trough   depth  days  heal  trades       P&L    longs   shorts     BTC  worst day  down days
- 1   2024-07-21   2024-07-24  -12.3%     3    12       3      3758     3758        0   -0.7%      -7.2%     3/3   
- 2   2025-03-10   2025-04-10  -11.6%    31    11      61      -292     -310       18   -2.0%      -5.8%    18/31  
- 3   2024-12-17   2025-02-03  -10.5%    48    23      28      -732     -299     -432  -11.0%      -5.5%    19/48  
- 4   2022-09-01   2022-10-25  -10.2%    54   115     115     -1014     -545     -469   -3.8%      -3.5%    32/54  
- 5   2025-10-06   2025-11-02  -10.2%    27    73      35      -386     -283     -103  -10.5%      -7.1%    18/27  
- 6   2026-02-05   2026-03-19  -10.1%    42    47      59      -130     -762      631   -0.5%      -2.1%    26/42  
+ #         peak       trough   depth  days  heal  trades       P&L    longs   shorts     BTC    lev  BTCxlev  worst day  down days
+ 1   2024-07-21   2024-07-24  -12.3%     3    12       3      3758     3758        0   -4.1%  3.05x   -12.5%      -7.2%     3/3   
+ 2   2025-03-10   2025-04-10  -11.6%    31    11      61      -292     -310       18    1.3%  1.65x     2.1%      -5.8%    18/31  
+ 3   2024-12-17   2025-02-03  -10.5%    48    23      28      -732     -299     -432   -4.5%  1.62x    -7.3%      -5.5%    19/48  
+ 4   2022-09-01   2022-10-25  -10.2%    54   115     115     -1014     -545     -469   -0.3%  1.20x    -0.3%      -3.5%    32/54  
+ 5   2025-10-06   2025-11-02  -10.2%    27    73      35      -386     -283     -103  -11.3%  0.73x    -8.3%      -7.1%    18/27  
+ 6   2026-02-05   2026-03-19  -10.1%    42    47      59      -130     -762      631   11.2%  0.95x    10.6%      -2.1%    26/42  
 
    total P&L over the whole record 32,993; the 6 episodes above cost 1,204
 
@@ -21,6 +25,23 @@ what was KNOWABLE at the start of each episode (state at the peak bar)
  4         False     0.25    0.15   0.00    0.00                   3/0/112/0
  5          True     0.15    1.06   0.40    0.40                    3/0/32/0
  6         False     0.99    0.09  -0.69    0.69                    0/0/56/3
+
+DECOMPOSITION - how much of each drawdown was actually LOST, in dollars
+(equity change over the window, against the P&L of trades that CLOSED inside it;
+ the gap is mark-to-market on positions still open at the trough)
+ #  equity at peak   at trough   d equity   realised   MTM gap  closed
+ 1          47,280      41,465     -5,815          0    -5,815       0
+ 2          64,964      57,405     -7,558       -265    -7,294      59
+ 3          62,835      56,219     -6,616       -702    -5,914      26
+ 4          11,047       9,917     -1,130     -1,014      -116     115
+ 5         101,175      90,852    -10,322       -365    -9,957      32
+ 6         113,410     101,902    -11,508        -85   -11,423      56
+
+the trades held through the single deepest episode
+   2024-07-14 00:15 -> 2024-07-28 00:30  LONG   qty   0.181  P&L      1524  signal
+   2024-07-14 00:15 -> 2024-07-28 00:30  LONG   qty   0.154  P&L      1303  signal
+   2024-07-14 00:15 -> 2024-08-01 00:15  LONG   qty   0.181  P&L       932  signal
+   daily path -2.9% -7.2% -2.7%
 
 is the loss concentrated by SIDE, as it was before the gate?
  1  longs    3 trades      3758   shorts    0 trades         0   shorts are   nan% of the episode loss
