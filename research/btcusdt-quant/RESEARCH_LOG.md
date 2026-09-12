@@ -4119,3 +4119,50 @@ loses heavily to delay too (S92), so this reads as edge concentrated at the boun
 leakage — but it is an operational warning, not a clean pass: **an event-bar book's bars close at
 unpredictable times**, and the deployed bot runs hourly against a 12h grid with 13 hours of
 tolerance.
+
+### S108e — the fair comparison, and it destroys the candidate
+
+Every number above handicapped the event sleeve: V7's clock side had the full apparatus — 200
+configurations, quarterly Calmar selection, top-3 at risk/3, trend gate — and the event side had
+**one hand-picked configuration** with no selection and no gate. Removing that handicap should have
+helped. It did the opposite.
+
+| book | Sharpe | Calmar | realDD | bootDD | P>20% | at −20% | 1st half | 2nd half | vs V7 |
+|---|---|---|---|---|---|---|---|---|---|
+| **V7 as deployed** | 2.15 | 7.00 | −12.3% | −18.1% | 33% | **168.8%** | 166.6% | 218.9% | — |
+| event 3/day, *one config* | 2.21 | 4.26 | −19.2% | — | — | 86.4% | — | — | — |
+| **event 3/day, full stack** | **1.49** | 1.79 | −30.9% | −25.9% | **85%** | **32.9%** | 35.5% | 72.7% | −135.9 |
+| event 4/day, full stack | 1.56 | 3.59 | −28.0% | −36.1% | 99% | 67.5% | 119.5% | 34.9% | −101.4 |
+| V7 + event 3/day, full stack | 2.08 | 4.56 | −16.0% | −18.2% | 35% | 97.9% | 82.6% | 229.2% | **−70.9** |
+| V7 + event 4/day, full stack | 2.07 | 5.57 | −18.1% | −22.2% | 66% | 115.8% | 204.5% | 86.7% | −53.0 |
+
+**Giving the event sleeve V7's own selection machinery takes it from Sharpe 2.21 to 1.49 and from
+86.4% to 32.9% at the gate.** The blend follows it down: +28.7 becomes −70.9.
+
+The reason is visible in the ranking logs. Training-window Calmars on the event panel run **42 to
+69**, against 3 to 40 on the clock panel. More bars and more homogeneous bars mean more chances for
+a configuration to look extraordinary in-sample by luck, and trailing Calmar has no defence against
+that — it is a maximum over 200 cells, and the noisier the cells the more of that maximum is noise.
+This is S96e's finding from the other side: the quarterly ranking earns its keep by **left-tail
+exclusion**, and exclusion only works when the training scores are informative.
+
+**Recorded as a law: the quarterly selection is not portable.** It was fitted and validated on the
+12h clock panel. Moved to a different sampling of the same data it destroys a sleeve that was
+perfectly sound without it. Any future change to how bars are formed invalidates the selection rule
+on top of them, and the two cannot be tested separately.
+
+### Verdict
+
+**Nothing here beats V7.** The one configuration that appeared to (+28.7 on the full stack) does not
+survive being given the same machinery, is negative in the first half of the sample, and sits inside
+a family that is not better than V7 on average: across the eight bar rates tested the blend reads
+**150.6% ± 41.8**, and V7's 168.8% is **+0.44 sd above that family mean**. Two rates of eight beat
+V7 by more than the noise band, and nothing chooses the rate in advance.
+
+**But the negative and the positive are separate, and the positive is the larger one.** S101 and
+S102 left the deployed book's headline resting on a clock grid it never chose, with every neighbour
+2.4× to 10× worse and no structural defence left standing. S108 shows the edge surviving a sampling
+with **no phase and no length at all** — 90.3% against 109.6% on matched fixed configurations, an
+18% loss where the clock neighbours lost 66–94%. *The edge is not an artefact of the clock.* That is
+the strongest defence V7 has ever had, and it is the first genuinely good news in this log since
+the trend gate in S84.

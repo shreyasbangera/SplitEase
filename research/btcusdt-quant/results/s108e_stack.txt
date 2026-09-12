@@ -1,0 +1,54 @@
+
+ranking the event panel at 3 bars/day
+    2022-03  best Calmar   7.18  [1/18]
+    2022-06  best Calmar   6.44  [2/18]
+    2022-09  best Calmar   4.24  [3/18]
+    2022-12  best Calmar   2.82  [4/18]
+    2023-03  best Calmar   4.63  [5/18]
+    2023-06  best Calmar   6.65  [6/18]
+    2023-09  best Calmar   4.60  [7/18]
+    2023-12  best Calmar  10.11  [8/18]
+    2024-03  best Calmar  22.33  [9/18]
+    2024-06  best Calmar  20.16  [10/18]
+    2024-09  best Calmar  33.69  [11/18]
+    2024-12  best Calmar  21.24  [12/18]
+    2025-03  best Calmar   4.67  [13/18]
+    2025-06  best Calmar   5.39  [14/18]
+    2025-09  best Calmar   5.44  [15/18]
+    2025-12  best Calmar   4.13  [16/18]
+    2026-03  best Calmar   6.08  [17/18]
+    2026-06  best Calmar   3.44  [18/18]
+
+ranking the event panel at 4 bars/day
+    2022-03  best Calmar  13.16  [1/18]
+    2022-06  best Calmar  13.89  [2/18]
+    2022-09  best Calmar  12.30  [3/18]
+    2022-12  best Calmar  11.49  [4/18]
+    2023-03  best Calmar  33.86  [5/18]
+    2023-06  best Calmar  42.29  [6/18]
+    2023-09  best Calmar  69.00  [7/18]
+    2023-12  best Calmar  54.57  [8/18]
+    2024-03  best Calmar  33.86  [9/18]
+    2024-06  best Calmar  21.90  [10/18]
+    2024-09  best Calmar  21.89  [11/18]
+    2024-12  best Calmar  13.93  [12/18]
+    2025-03  best Calmar   2.86  [13/18]
+    2025-06  best Calmar   9.03  [14/18]
+    2025-09  best Calmar   3.96  [15/18]
+    2025-12  best Calmar   1.94  [16/18]
+    2026-03  best Calmar   1.21  [17/18]
+    2026-06  best Calmar  -0.04  [18/18]
+
+                          book    Shp    Clm   realDD   bootDD  P>20%     full    1st h    2nd h    vs V7  worse half
+        V7 as deployed (clock)   2.15   7.00   -12.3%   -18.1%    33%    168.8%    166.6%    218.9%
+       event 3/day stack alone   1.49   1.79   -30.9%   -25.9%    85%     32.9%     35.5%     72.7%   -135.9      -146.2
+       event 4/day stack alone   1.56   3.59   -28.0%   -36.1%    99%     67.5%    119.5%     34.9%   -101.4      -184.0
+        V7 + event 3/day stack   2.08   4.56   -16.0%   -18.2%    35%     97.9%     82.6%    229.2%    -70.9       -84.0
+        V7 + event 4/day stack   2.07   5.57   -18.1%   -22.2%    66%    115.8%    204.5%     86.7%    -53.0      -132.2
+
+correlation and the S102c admission bar, full stack against full stack
+  bars/day   rho vs V7   ev Sharpe   needs  clears
+         3       0.403        1.49    1.45     YES
+         4       0.410        1.56    1.46     YES
+
+done: event stack
