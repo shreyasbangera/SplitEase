@@ -4305,3 +4305,120 @@ log: a full-sample improvement that does not hold in both halves.
 than for want of data:** at 675 effective events the achievable AUC is ~0.537, that is worth ~9
 points at the gate, and 9 points is noise. It would take a materially stronger classifier — not more
 trades — to matter, and the sample says one is not there.
+
+## S111 — Sizing by predicted excursion: the right target, and still nothing
+
+S110 predicted whether a trade would win. S103 had already said that was the wrong question — the
+gate is a *drawdown* constraint, and a trade's contribution to drawdown is its adverse excursion.
+There was also a reason to expect more: direction is close to unpredictable, which is why AUC 0.537
+was the ceiling, whereas **excursion is a volatility quantity and volatility is the most predictable
+object in finance**.
+
+Maximum adverse excursion measured per trade on the execution grid, in units of the stop distance,
+so it is already ATR-normalised and anything left is information ATR does not carry:
+
+| | p10 | p25 | **p50** | p75 | p90 | p99 | above 1.0 R |
+|---|---|---|---|---|---|---|---|
+| MAE in R | 0.04 | 0.09 | **0.19** | 0.36 | 0.62 | 1.04 | 1.9% |
+
+**A correction to this file's own premise, made before anything was built on it.** The first draft
+asserted that excursion and outcome are "close to unrelated on this book". They are not:
+rho(MAE_R, P&L) = **−0.655**, winners averaging 0.133 R against losers' 0.386 R. The relationship is
+mostly mechanical — a position that runs far against you and then exits on signal has by then lost
+money — so it is not a prediction, but the claim as written was wrong. What S103 established is
+narrower and survives: the trades that dominated the *deepest episodes* were ones that eventually
+paid.
+
+**The residual predictability is real.** With no model at all, the mean MAE of the last 20 trades
+that had already *closed* — sorting by entry time and shifting would use trades still open, which is
+up to three weeks of look-ahead dressed as a trailing average — correlates **+0.164** with the next
+trade's, decaying to +0.036 at a 200-trade window. Volatility clustering, surviving the ATR
+normalisation.
+
+### And it is worth nothing
+
+| book | N | PF | Sharpe | Calmar | realDD | P>20% | at −20% | vs V7 | worse half |
+|---|---|---|---|---|---|---|---|---|---|
+| **V7 unsized** | 1,697 | 3.17 | 2.15 | 7.00 | −12.3% | 33% | **168.8%** | — | — |
+| size ~ 1/trailing 10 | 1,629 | 2.82 | 2.04 | 4.86 | −13.5% | 19% | 110.5% | −58.3 | −87.0 |
+| size ~ 1/trailing 20 | 1,633 | 2.75 | 2.10 | 5.68 | −9.9% | 11% | **142.8%** | −26.0 | −38.9 |
+| size ~ 1/trailing 50 | 1,622 | 2.94 | 2.16 | 5.86 | −10.1% | 8% | 144.0% | −24.8 | −48.9 |
+| size ~ 1/modelled (ridge) | 1,614 | 3.06 | 2.21 | 6.68 | −10.1% | 10% | 170.8% | +2.0 | −29.5 |
+| **shuffled multiplier (control)** | | | | | | | **142.8%** | **−26.0** | |
+
+**The control settles it exactly.** A randomly permuted multiplier with the same dispersion reads
+142.8% — *identical* to the trailing-20 rule it was permuted from. The +0.164 ordering contributes
+nothing; the entire effect of the trailing rule is the dispersion of the multiplier, not where it is
+applied. The ridge variant's +2.0 is inside the noise band and −29.5 in its worse half.
+
+The apparent risk improvement is also not one. Every variant runs a median multiplier of 0.74–0.82,
+so the book is simply 20–25% smaller, and P(drawdown > 20%) falling from 33% to 8–11% is size
+reduction rather than shape. `at_gate` rescales it all away, which is why it does.
+
+**Recorded as closed.** The cross-sectional risk-model idea — size the individual bet before it is
+placed, rather than overlay the equity curve (S34, S94), cap the account after the fact (S105), or
+change how trades end (S104) — is the last distinct shape of intervention available at the
+denominator, and it is worth nothing beyond the ATR normalisation the book already has. **ATR is a
+sufficient risk model for this book.**
+
+## S112 — What size actually respects a 20% drawdown limit, and a 24% revision to this log's headline
+
+Every "at the gate" figure in this log, the deployed **179.0% at −19.99%** included, is a *single
+realised path*. The book was run at 14.4% risk, the worst drawdown that particular sequence of
+trades happened to produce was −19.99%, and that was recorded as meeting the brief.
+
+S103 is the reason to distrust it: V7's maximum drawdown is a three-day mark-to-market excursion on
+a position that went on to make money. Nothing about that episode is a property of the strategy.
+
+### Three methods, two of which are wrong, and the reasoning that separates them
+
+**The 5-day block bootstrap** says the deployed size is indefensible — P(drawdown worse than 20%) =
+**97%** at 14.4% risk, median max drawdown −30.2%, and even at 8% risk P = 33%.
+
+**A rolling-window check on the real series, in its real order, says the opposite:** at every risk
+level, **0%** of rolling 180/365/540-day windows breach 20%. *This test is worthless and it was
+written before that was noticed.* A rolling-window maximum can never exceed the full-sample
+maximum, so it is incapable of detecting an unlucky path by construction. It answers a different
+question — whether drawdowns near the maximum are *typical* — and the answer there is useful: at 8%
+risk the median 365-day window already contains a −10.2% drawdown against a full-sample −12.3%, so
+the realised maximum is representative rather than freakish.
+
+**The block-length sweep settles it.** The bootstrap's weakness is specific: 5-day blocks chop apart
+the recoveries that S103 showed dominate this book's drawdowns, manufacturing losing runs the real
+process never produces. Lengthening the block repairs exactly that, and the two risk levels behave
+completely differently:
+
+| risk | 5d | 10d | 20d | 40d | 60d | 90d | realised |
+|---|---|---|---|---|---|---|---|
+| 6.0% | 9% | 5% | 4% | 3% | 2% | 0% | −9.6% |
+| **8.0% — deployed** | 33% | 23% | 18% | 17% | 11% | **3%** | −12.3% |
+| 10.0% | 67% | 53% | 48% | 46% | 38% | 25% | −14.8% |
+| **14.4% — the headline** | 98% | 95% | 94% | 93% | 92% | **88%** | −20.0% |
+
+**At 8% risk the 33% figure is largely an artefact** — it decays by a factor of ten as blocks
+lengthen. **At 14.4% it is not** — 88% even at 90-day blocks, which preserve nearly all of the
+recovery dynamics. The conclusion is robust in exactly the place it matters.
+
+### The honest gate
+
+Solving for the size whose *median* max drawdown is −20%, using the most generous block length
+tested:
+
+| risk | CAGR | realised DD | median DD (90d blocks) | P(>20%) |
+|---|---|---|---|---|
+| **8.0% — what the live bot runs** | 86.2% | −12.3% | −14.3% | **3%** |
+| 10.0% | 114.2% | −14.8% | −17.7% | 26% |
+| **11.4%** | **135%** | — | **−20.0%** | ~50% |
+| 12.0% | 142.8% | −17.1% | −20.9% | 59% |
+| **14.4% — the 179% headline** | 178.8% | −20.0% | −25.1% | **87%** |
+
+> **The honest headline is ~135% at a −20% median drawdown, not 179%. A 24% revision downward**,
+> and that is on the most favourable assumption tested; shorter blocks put it lower.
+
+**The deployed 8% setting is sound** — median max drawdown −14.3%, P(worse than 20%) 3% at 90-day
+blocks and 11–18% at more conservative ones. Nothing here argues for changing it. What it argues
+against is sizing *up* to 14.4% on the belief that this is where the 20% limit binds: at that size
+the limit is breached on ~88% of paths, and the −19.99% on record is the favourable one.
+
+**Effect on the brief.** The target was 1.7× away against the 179% headline. Against the honest
+135% it is **2.2× away**. Nothing in S110, S111 or anything before them closes a gap that size.

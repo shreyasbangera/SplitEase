@@ -1,0 +1,17 @@
+target excursion = median MAE_R = 0.192 R; multiplier clipped to [0.5, 2.0]
+
+                            book      N    PF    Shp    Clm  realDD P>20%     full    1st h    2nd h    vs V7  worse half
+                      V7 unsized   1697  3.17   2.15   7.00   -12.3%    33%    168.8%    166.6%    218.9%
+            size ~ 1/trailing 10   1629  2.82   2.04   4.86   -13.5%    19%    110.5%    106.1%    131.9%    -58.3       -87.0
+                                   multiplier: median 0.82 p10 0.50 p90 1.58, covers 100% of trades
+            size ~ 1/trailing 20   1633  2.75   2.10   5.68    -9.9%    11%    142.8%    127.7%    180.0%    -26.0       -38.9
+                                   multiplier: median 0.79 p10 0.50 p90 1.29, covers 100% of trades
+            size ~ 1/trailing 50   1622  2.94   2.16   5.86   -10.1%     8%    144.0%    117.7%    206.5%    -24.8       -48.9
+                                   multiplier: median 0.74 p10 0.50 p90 1.10, covers 100% of trades
+       size ~ 1/modelled (ridge)   1614  3.06   2.21   6.68   -10.1%    10%    170.8%    196.1%    189.4%     +2.0       -29.5
+                                   multiplier: median 0.75 p10 0.50 p90 1.05, covers 82% of trades
+
+control: a RANDOM multiplier with the same dispersion, 3 draws
+             shuffled multiplier                                     142.8%                      -26.0   (draws: 113, 141, 174)
+
+done: excursion sizing
