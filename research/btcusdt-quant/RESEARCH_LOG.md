@@ -4517,3 +4517,65 @@ Calmar of roughly 7, levered further up a dial that S94 established is close to 
 the edge improved. **The brief was never impossible — it was priced in drawdown, and the original
 20% limit is what put it out of reach.** Stated plainly so the choice is the owner's and is made
 with the tail in view rather than the median alone.
+
+## S114 — A different edge at last: futures-only carry, and why there is none
+
+Everything since S45 has been one edge — five crowding/flow signals netted into a directional
+position — and the experiments that claimed to change direction did not: S110 filtered V7's trades,
+S111 resized them, S112 measured them, S113 swept V7's grid, S108 put V7's own signals on
+differently shaped bars. This is a different edge.
+
+    long the front quarterly future, short the perp, equal notional.
+
+Delta-neutral in BTC. The position receives the perp's funding and pays the quarterly's basis as it
+converges at expiry, so its return is **funding minus basis** and nothing in it forecasts BTC.
+Both legs are BTCUSDT futures, so it stays inside the single-instrument scope. S5 built the *spot*
+version and rejected it on trade count and CAGR while recording Sharpe 5–6.7; the futures-only
+version has never been built, and it avoids S5's largest cost — no USDT borrow on a levered spot leg.
+
+### The pre-registered estimate was wrong, in the unhelpful direction
+
+The estimate written into the file before running it: basis runs ~6.3% annualised, typical perp
+funding ~11%, so net carry ~4–5% gross and ~3% after costs — a real edge far too small to be a book.
+
+**Measured, the carry is 0.2%.**
+
+| funding minus basis, annualised | median | mean | positive | p5 | p95 |
+|---|---|---|---|---|---|
+| | **+0.2%** | +1.3% | **52% of hours** | −11.5% | +16.4% |
+
+Not small — *absent*. And the book loses even in its cheapest possible form, held continuously with
+only the 23 expiry rolls the trade cannot avoid:
+
+| book | CAGR | MaxDD | Sharpe | round turns |
+|---|---|---|---|---|
+| always on, roll only, 1× | **−1.6%** | −12.8% | −0.06 | 23 |
+| always on, roll only, 3× | −7.0% | −35.2% | −0.15 | 23 |
+| always on, roll only, 5× | −15.2% | −55.5% | −0.24 | 23 |
+| timed on carry > 0, 3× | −90.0% | −100.0% | −11.22 | 1,259 |
+| timed on carry > 8%, 3× | −54.9% | −98.7% | −4.76 | 418 |
+| reverse (short qtr / long perp), 3× | −90.1% | −100.0% | −12.19 | 1,261 |
+
+The timed variants are destroyed by churn — a zero-mean carry crossed 1,259 times at 32 bps a round
+turn is 40% of equity in fees — but the always-on row is the one that matters, and it is negative
+before any timing rule is applied.
+
+### Why, and it generalises
+
+**Perp funding and quarterly basis are two prices of the same thing.** Both are what leveraged longs
+pay to be long, on the same venue, under the same margin regime, quoted against the same index.
+Arbitrage holds them together, and the residual is 0.2% a year — less than one round turn.
+
+S5's spot-versus-perp version earns Sharpe 5–6.7 for exactly the reason this one earns nothing:
+**spot is a genuinely different instrument.** It requires capital rather than margin, it carries
+borrow cost, and it cannot be shorted freely. That friction is the spread. Between two futures on
+one exchange there is no friction, so there is no spread.
+
+**Recorded as a clean negative with a general lesson: a carry trade needs two instruments with
+genuinely different funding or capital treatment. Two contracts on the same venue do not qualify,
+however different their expiries.**
+
+*(First implementation was also wrong — it added returns and costs to equity instead of compounding
+them, so the account passed through zero and kept trading, printing −100% CAGR against a −3,483%
+drawdown. That is a bankrupt account still placing orders, not a result. Fixed to compound, with a
+liquidation stop, before anything above was read.)*
