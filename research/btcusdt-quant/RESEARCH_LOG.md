@@ -4166,3 +4166,83 @@ with **no phase and no length at all** — 90.3% against 109.6% on matched fixed
 18% loss where the clock neighbours lost 66–94%. *The edge is not an artefact of the clock.* That is
 the strongest defence V7 has ever had, and it is the first genuinely good news in this log since
 the trend gate in S84.
+
+## S109 — One selection rule, two samplings, opposite signs
+
+S108e killed the event-bar candidate by giving it V7's quarterly machinery: Sharpe 2.21 → 1.49,
+86.4% → 32.9%. The diagnosis was that trailing Calmar is a **maximum over 200 cells** and the event
+panel's training Calmars run 42–69 against the clock panel's 3–40, so more of that maximum is noise.
+
+That makes a prediction, and it is not about event bars: **if the selection is mostly noise, the
+right number of configurations to hold is large.** S86 swept k over {1,3,5,8,12} and stopped at 12
+because 3 won. It never asked what happens at 200 — which is the same as not selecting at all.
+
+Every (quarter, configuration) return series was cached once per panel, so every k is exact and
+free. Judged at the −20% gate.
+
+| k held | clock panel | event 3/day | event 4/day |
+|---|---|---|---|
+| top-1 | 126.3% | 27.0% | 72.0% |
+| **top-3 (V7's choice)** | **167.4%** | 27.6% | 64.6% |
+| top-12 | 145.9% | 28.7% | 63.8% |
+| top-50 | 122.4% | 46.4% | **80.7%** |
+| top-200 = no selection at all | 110.0% | **57.8%** | 69.6% |
+
+| against a random draw of the same size | clock | event 3/day |
+|---|---|---|
+| top-3 vs random-3 | **+3.6 sd** | **−1.9 sd** |
+| top-12 vs random-12 | +2.7 sd | −4.6 sd |
+| top-50 vs random-50 | +1.4 sd | −4.7 sd |
+
+**The same rule is strongly positive on one sampling of the same five signals and strongly negative
+on another.** On the event panel the ranking is not merely uninformative — it is *anti*-informative,
+worse than choosing at random by 2 to 5 sd. Selecting the highest trailing Calmar on a panel whose
+training scores are inflated is **selecting for overfitting**, and doing less of it helps every
+time: the gate reading climbs monotonically from 27.6% at three configurations to 57.8% at all two
+hundred.
+
+**Two things are established as a side effect.** V7's k = 3 is a genuine interior optimum, now swept
+to 200 rather than stopping at 12, and it beats random-3 by 3.6 sd — the strongest validation the
+blend width has had. And the general law: **a selection rule is not portable across samplings.**
+Bar formation and selection rule cannot be tested separately; changing one invalidates the other.
+
+### S109b — the repaired sleeve, and the line closes
+
+Removing the selection genuinely repairs the event sleeve: 27.6% → 57.8%, Sharpe 1.22 → 1.80. It is
+still not enough.
+
+| book | Sharpe | Calmar | realDD | P>20% | at −20% | 1st half | 2nd half | vs V7 | worse half |
+|---|---|---|---|---|---|---|---|---|---|
+| **V7 (clock top-3)** | 2.19 | 7.09 | −13.5% | 40% | **167.4%** | 182.9% | 220.7% | — | — |
+| event 3/day, no selection | 1.80 | 2.97 | −22.2% | 76% | 57.8% | 76.8% | 56.2% | −109.6 | −164.6 |
+| V7 + event 3/day, no sel | **2.29** | 6.32 | −13.0% | **31%** | 149.0% | 166.4% | 148.5% | **−18.4** | −72.2 |
+| V7 + event 3/day, top-50 | 2.25 | 6.43 | −12.5% | 29% | 153.4% | 136.5% | 194.7% | −14.0 | −46.3 |
+| V7 + event 4/day, no sel | 2.15 | 6.41 | −14.5% | 45% | 144.7% | 259.5% | 113.2% | −22.7 | −107.5 |
+
+**Every blend loses at the gate, and every blend is far worse in its worse half.**
+
+### A correction to S102c, which this log stated too strongly
+
+S108 recorded event bars as "the first sleeve ever to clear the admission bar", and S102c's bar was
+presented as the test a candidate must pass. The repaired sleeve clears it — Sharpe 1.80 at ρ =
+0.526 needs 1.64 — and the bar's prediction comes true exactly: **blended Sharpe rises, 2.19 →
+2.29**, and P(drawdown > 20%) falls from 40% to 31%.
+
+And the gate reading falls, 167.4% → 149.0%.
+
+**S102c's bar is a Sharpe criterion, and the brief's gate is a Calmar statement.** A weaker sleeve
+with genuine decorrelation raises Sharpe and cuts drawdown-probability, while cutting CAGR faster
+than it cuts the realised drawdown — so Calmar, and therefore the gate, falls. *Passing the
+admission bar is necessary, not sufficient.* It was stated as though it were both.
+
+### Where the event-bar line ends
+
+**Negative:** event bars cannot beat V7 or usefully augment it. The best blend is −14.0 at the gate
+and −46.3 in its worse half, and the sleeve alone reaches 57.8% against 167.4%.
+
+**Positive, and it is the larger result.** S101 and S102 had left the deployed book's headline
+resting on a clock grid nobody chose, every neighbour 2.4× to 10× worse, no structural defence
+standing. The edge survives a sampling with **no phase and no length at all** — an 18% loss where
+the clock neighbours lost 66–94%. V7's 179% is not an artefact of the clock. That does not move the
+number, but it substantially changes how much the number deserves to be believed, and it is the
+first good news in this log since the trend gate.

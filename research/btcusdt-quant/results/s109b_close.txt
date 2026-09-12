@@ -1,0 +1,20 @@
+                          book    Shp    Clm   realDD   bootDD  P>20%     full    1st h    2nd h    vs V7  worse half
+              V7 (clock top-3)   2.19   7.09   -13.5%   -18.9%    40%    167.4%    182.9%    220.7%
+      event 3/day no-sel alone   1.80   2.97   -22.2%   -24.1%    76%     57.8%     76.8%     56.2%   -109.6      -164.6
+      event 3/day top-50 alone   1.71   2.45   -25.3%   -24.2%    78%     46.4%     51.2%     87.2%   -121.0      -133.6
+      event 4/day no-sel alone   1.64   3.58   -23.7%   -28.3%    93%     69.6%    196.3%     29.3%    -97.8      -191.4
+      event 4/day top-50 alone   1.55   4.08   -23.0%   -33.1%    99%     80.7%    162.4%     27.2%    -86.7      -193.5
+
+       V7 + event 3/day no-sel   2.29   6.32   -13.0%   -17.6%    31%    149.0%    166.4%    148.5%    -18.4       -72.2
+       V7 + event 3/day top-50   2.25   6.43   -12.5%   -17.4%    29%    153.4%    136.5%    194.7%    -14.0       -46.3
+       V7 + event 4/day no-sel   2.15   6.41   -14.5%   -19.4%    45%    144.7%    259.5%    113.2%    -22.7      -107.5
+       V7 + event 4/day top-50   2.08   6.30   -15.7%   -21.0%    58%    139.4%    238.6%     99.9%    -28.0      -120.8
+
+the admission bar, against the repaired sleeves
+          sleeve   Sharpe   rho vs V7   needs  clears
+    3/day no-sel     1.80       0.526    1.64     YES
+    3/day top-50     1.71       0.512    1.62     YES
+    4/day no-sel     1.64       0.529    1.64      no
+    4/day top-50     1.55       0.488    1.59      no
+
+done: event line closed
