@@ -1,0 +1,40 @@
+4020 bars of 12h, 2021-03-01 -> 2026-08-31
+
+The candidates S95 left standing - stable sign in BOTH splits under
+the strict lag - re-tested for overlap and against cost.
+
+   feature   h  days       IC    NW t  eff N   spread       D1      D10   verdict
+  lvl_z120  24  12.0  +0.0380   +0.84    156    -39.9   +236.6   +196.7   not significant
+  lvl_z120   8   4.0  +0.0440   +0.96    471    +33.9    +54.1    +88.0   not significant
+     chg3d  24  12.0  -0.0435   -0.59    156   -170.5   +206.3    +35.8   not significant
+     chg5d  24  12.0  -0.0521   -0.68    156   -146.4   +242.7    +96.4   not significant
+    chg10d  24  12.0  -0.0617   -0.66    155   -139.5   +137.1     -2.4   not significant
+    chg20d  24  12.0  -0.0528   -0.04    154   +115.9    -79.6    +36.3   not significant
+    chg20d   8   4.0  -0.0233   +0.20    466    +86.0    -25.6    +60.4   not significant
+    chg10d   1   0.5  +0.0242   +0.97   3760    +19.1     +8.4    +27.5   not significant
+    chg20d   1   0.5  +0.0224   +0.62   3740    +15.8     -6.5     +9.3   neither
+  lvl_z120   1   0.5  +0.0237   +0.95   3780    +25.9     +3.0    +28.9   not significant
+
+spread, D1, D10 in bps over the horizon; cost is ~16 bps a round turn
+NW t uses 2h lags, i.e. twice the overlap it has to absorb
+
+CALIBRATION - the same test on signals already IN the book, so the
+numbers above have something to be judged against.
+
+    signal   h  days       IC    NW t  eff N   spread
+     fundz   4   2.0  -0.0209   -0.33   1004     -1.2
+     fundz  24  12.0  +0.0015   +0.33    166    +99.1
+     basis   4   2.0  -0.0076   -0.02   1004    +23.6
+     basis  24  12.0  +0.0169   +1.01    166   +272.1
+  ofi96res   4   2.0  +0.0285   +1.38   1004    +54.1
+  ofi96res  24  12.0  +0.0948   +1.63    166   +325.5
+   ofi6res   4   2.0  +0.0447   +2.45   1004   +120.0
+   ofi6res  24  12.0  +0.0740   +1.36    166   +161.2
+     ttpos   4   2.0  -0.0494   -1.73    619    -22.3
+     ttpos  24  12.0  -0.0882   -1.07    102    +62.9
+   ttvsret   4   2.0  +0.0440   +2.02    619   +129.5
+   ttvsret  24  12.0  +0.1643   +2.55    102   +690.4
+     doi24   4   2.0  +0.0558   +0.94    432    +73.1
+     doi24  24  12.0  +0.0075   -0.57     71   +146.0
+
+done: significance and cost

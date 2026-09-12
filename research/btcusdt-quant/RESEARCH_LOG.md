@@ -3002,3 +3002,159 @@ combination, payoff shape, bet count, multi-instrument, conviction, top-up, sele
 gate, leverage, and now curve shape. V7 stands at **179.0% CAGR at −19.99%**, which is **1.7× short
 of the 300% target** at the only size the 20% drawdown limit permits. No result in this log reaches
 the brief's gate, and nothing in S94 changes that.
+
+---
+
+## S95 — Macro: the source class that was never crypto, and the dilution trap it set
+
+S50 closed the source list "for real": OHLCV, taker volume, trade count, funding, open interest,
+trader positioning, quarterly futures, the coin-margined contract, tick prints, the order book, the
+volatility index, the options chain. **Every entry on that list is a Binance endpoint.** The study
+had read crypto's own plumbing twelve ways and never once looked outside it.
+
+Two facts made the gap worth closing rather than noting. The book earns **+6% in 2022** and +1% to
++3% at every risk setting on that slice — it is inert through the one year in the sample when BTC
+traded as a long-duration risk asset against rates and the dollar rather than on its own
+microstructure. And the ceiling is a *correlation* ceiling: all five deployed signals are crypto
+microstructure or positioning, so a macro read was the only candidate left whose correlation to the
+pool should be near zero.
+
+**The alignment was made punitive on purpose.** A macro series is daily and stamped with a trading
+date; the book decides on 12h bars labelled by open and acting at close. A value dated D is treated
+as unknowable until **D+1 22:00 UTC** — about 25 hours after the US cash close, and about nine hours
+of margin on top of a full day for the Fed's H.10 release. No result below can be an artefact of
+reading a print before it existed. A `prompt` alignment (~45 minutes after the close, which is the
+truth) was carried alongside as a contrast.
+
+### The screen did not decide, and S95b explains why it could not
+
+VIX, daily back to 1990, went in first. Under the strict lag the picture looked coherent: VIX
+*rising* predicted BTC weakness over ~12 days (IC −0.05 to −0.06), an elevated VIX *level*
+predicted strength over the same span (+0.038), and both held their sign across the half-split and
+the IS/OOS split. Level is fear already priced; change is fear arriving.
+
+Overlap correction killed the significance and the decile spreads contradicted the ICs:
+
+| feature | h | IC | NW t | eff N | decile spread |
+|---|---|---|---|---|---|
+| lvl_z120 | 12d | **+0.0380** | +0.84 | 156 | **−39.9 bps** |
+| chg10d | 12d | **−0.0617** | −0.66 | 155 | −139.5 bps |
+| chg20d | 12d | **−0.0528** | −0.04 | 154 | **+115.9 bps** |
+| chg10d | 12h | +0.0242 | +0.97 | 3,760 | +19.1 bps |
+
+Not one candidate reached |t| = 1, and where the rank correlation and the decile spread disagree in
+sign there is no monotone relationship to trade. But the same test run on **signals already in the
+book** is the reason the screen could not be used as a kill:
+
+| deployed signal | h | IC | NW t | spread |
+|---|---|---|---|---|
+| fundz | 2d | −0.0209 | **−0.33** | −1.2 bps |
+| basis | 2d | −0.0076 | **−0.02** | +23.6 bps |
+| ofi96_res | 2d | +0.0285 | +1.38 | +54.1 bps |
+| ofi6_res | 2d | +0.0447 | **+2.45** | +120.0 bps |
+| tt_vs_retail | 12d | +0.1643 | **+2.55** | +690.4 bps |
+
+**Three of the five signals in the deployed book are themselves indistinguishable from noise on
+this test.** This book has never worked by any single signal being strong; it works by netting five
+weak, largely uncorrelated reads, and an IC table cannot see that. So the screen was demoted to a
+filter against garbage and the decision moved to the book.
+
+### The trap: a sixth signal is also a 17% position cut
+
+In the book at 8% risk, VIX change as a sixth signal looked like the first real find in a long time:
+
+| | CAGR | MaxDD | PF | Sharpe | Calmar | OOS PF | P(DD>20%) |
+|---|---|---|---|---|---|---|---|
+| control, 5 signals | 43.7% | −17.0% | 1.85 | 1.84 | 2.57 | 1.88 | 34% |
+| **+ s_vixchg, thr 1.0** | 39.4% | **−12.0%** | **1.97** | **1.90** | **3.27** | **2.08** | **10%** |
+
+Correlation to the five-signal composite **+0.011**, against +0.39 to +0.68 for every signal
+already in the book. Out-of-sample gave up 1.5 points of CAGR against the in-sample 6.0 — the
+direction you want.
+
+**All of it was size.** The composite is an equal-weight average, so a sixth name cuts every
+existing signal from 1/5 to 1/6, and s_vixchg is non-zero on only 26% of bars: on three bars in four
+the new book is the old book at 5/6 scale. Smaller size, smaller drawdown, smaller CAGR — and no
+information required. Bisecting the risk so every row lands on the same realised −20%:
+
+| at the −20% gate | risk | CAGR | PF | Sharpe | Calmar | |
+|---|---|---|---|---|---|---|
+| 5 signals (control) | 10.24% | **71.2%** | 2.03 | 2.15 | 3.56 | |
+| 5 signals × 5/6 (**dilution control**) | 12.30% | **71.2%** | 2.03 | 2.15 | 3.56 | +0.1pt |
+| 6 signals with vixchg | 12.08% | 68.1% | 2.06 | 2.11 | 3.41 | **−3.1pt** |
+
+**The dilution control reproduces the raw control to three significant figures** — which is the
+check that the bisection is sound and that scaling the composite is exactly scaling risk. Against
+that control the VIX signal is not free, it is a cost. The split is worse: **−25.0 points** over the
+first half (82.6% → 57.7%, Sharpe 2.17 → 1.89) and −5.7 over the second.
+
+### The dollar, and the failure mode is the same one twice
+
+Closing a source class on one proxy would be sloppy, and equity volatility is not the factor most
+often argued to drive BTC. A DXY-weighted dollar index was built from the Fed's H.10 daily rates —
+all six constituents, quoted consistently as foreign units per USD, geometric weights — and run
+through the identical pipeline. Prior stated in advance, and it is the strongest prior in crypto:
+**a stronger dollar means a weaker BTC.**
+
+| at the −20% gate | risk | CAGR | PF | Sharpe | Calmar | |
+|---|---|---|---|---|---|---|
+| 5 signals (control) | 10.24% | **71.2%** | 2.03 | 2.15 | 3.56 | |
+| 6 signals with usdchg | 9.48% | 45.6% | 1.84 | 1.89 | 2.28 | **−25.6pt** |
+| 6 signals with usdlvl | 6.16% | 32.4% | 2.11 | 1.96 | 1.62 | **−38.7pt** |
+
+Worse than VIX on every measure, and **the IC sign came out opposite to the prior** — negative at
+all five horizons for the dollar-change signal, i.e. a strengthening dollar preceded BTC *strength*
+over this sample. With |t| below 0.6 everywhere that is not a discovery of an inverted relationship;
+it is the absence of one.
+
+**The year rows are what make this a finding rather than two failures**, because both proxies fail
+the same way:
+
+| year | 5 signals | × 5/6 dilution | + vixchg | + usdlvl |
+|---|---|---|---|---|
+| 2021 | 53.1% | 43.1% | 38.6% | 35.2% |
+| **2022** | **4.9%** | 5.0% | **11.2%** | **15.3%** |
+| 2023 | 116.8% | 91.6% | **64.8%** | **77.4%** |
+| 2024 | 58.7% | 46.9% | 59.8% | **23.7%** |
+| 2025 | 25.3% | 21.0% | 15.9% | **41.0%** |
+| 2026 | 64.6% | 52.2% | 51.5% | 44.1% |
+
+**Every macro read helps exactly the year the book is inert, and costs more in the years the book
+earns.** 2022 more than doubles under either signal. 2023 is where both die — the VIX spiked on the
+regional banking crisis while BTC rallied *because* of it, and that is not noise, it is BTC
+switching from risk asset to hedge against the banking system inside a single quarter. A signal
+whose sign depends on which story the market is telling is not tradeable at a fixed sign, and the
+study has no causal way to know the story in advance.
+
+### What the negative is actually worth
+
+The premise was right and it was not enough. The macro signals really are orthogonal — **+0.011 and
++0.102 against the composite, where every deployed signal sits between +0.39 and +0.68** — and
+orthogonality bought nothing, because a decorrelated signal with no edge is only a decorrelated way
+to lose money. That is worth recording as a rule: in this study, low correlation has been used as
+evidence that a candidate *could* add, and S95 is the case where it plainly could not.
+
+**The source class is closed, now including everything outside crypto that is reachable.**
+
+### The arithmetic the loop has been avoiding
+
+Two versions of this book, both measured at the −20% gate:
+
+| | window | CAGR at gate | **Sharpe** | Calmar |
+|---|---|---|---|---|
+| V1 — 5 signals, one fixed configuration | 2021-03 → 2026-08 | 71.2% | **2.15** | 3.56 |
+| V7 — quarterly selection, top-3 blend, conviction | 2022-03 → 2026-08 | **179.0%** | **2.13** | 8.95 |
+
+**The entire 2.5× improvement this study produced came with no Sharpe improvement at all.** Sharpe
+has sat at 2.15 ± 0.05 across every version, every signal set, and a six-fold range of leverage.
+What moved was Calmar, and it moved through selection, blending and conviction sizing — all three
+now measured at their optima (S86 k-curve, S86b random-blend control, S60 exponent sweep) — helped
+by a window that excludes 2021-03 → 2022-03 and a daily-marks drawdown convention the registry
+itself notes is ~2 points optimistic.
+
+So reaching 300% requires either a Sharpe this study has never produced in 95 experiments, or
+another 1.68× of Calmar-at-constant-Sharpe from a mechanism not yet found — and the three mechanisms
+that delivered it before are each at their measured optimum, with portfolio-level curve shaping
+closed by S94 and the bet-count lever closed by S55.
+
+**V7 remains at 179.0% CAGR at −19.99%, 1.7× short of the target, and S95 does not change it.**

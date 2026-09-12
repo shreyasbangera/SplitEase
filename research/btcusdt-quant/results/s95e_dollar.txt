@@ -1,0 +1,44 @@
+dollar index on the 12h grid: 100% coverage, 2021-03-01 -> 2026-08-31
+  index moved 1.8108 -> 1.9855 (+9.6%)
+
+1. IC, with the overlap correction S95b established as necessary.
+   Sign prior: POSITIVE IC, because both signals are already written
+   so that positive means buy.
+
+    signal   h  days       IC    NW t      1st      2nd   stable
+  s_usdchg   1   0.5  +0.0003   -0.25  +0.0068  -0.0051   
+  s_usdchg   2   1.0  -0.0113   -0.32  +0.0007  -0.0223   
+  s_usdchg   4   2.0  -0.0097   -0.08  +0.0071  -0.0275   
+  s_usdchg   8   4.0  -0.0134   -0.59  +0.0271  -0.0530   
+  s_usdchg  24  12.0  -0.0233   -0.58  +0.0052  -0.0533   
+  s_usdlvl   1   0.5  +0.0046   +0.68  -0.0034  +0.0032   
+  s_usdlvl   2   1.0  +0.0058   +0.77  -0.0044  +0.0005   
+  s_usdlvl   4   2.0  +0.0209   +0.87  +0.0127  +0.0136   BOTH
+  s_usdlvl   8   4.0  +0.0259   +0.69  +0.0141  +0.0225   BOTH
+  s_usdlvl  24  12.0  +0.0513   +0.75  +0.0362  +0.0548   BOTH
+
+2. AT THE -20% GATE, risk bisected for every row.
+
+           5 signals (control) | risk 10.24%  CAGR    71.2%  DD  -20.0%  PF  2.03  N  1009  Shp  2.15  Clm  3.56
+    5 signals x 5/6 (dilution) | risk 12.30%  CAGR    71.2%  DD  -20.0%  PF  2.03  N  1009  Shp  2.15  Clm  3.56   +0.1pt
+         6 signals with usdchg | risk  9.48%  CAGR    45.6%  DD  -20.0%  PF  1.84  N   968  Shp  1.89  Clm  2.28  -25.6pt
+         6 signals with usdlvl | risk  6.16%  CAGR    32.4%  DD  -20.0%  PF  2.11  N   796  Shp  1.96  Clm  1.62  -38.7pt
+
+3. CORRELATION to the five-signal composite
+
+   s_usdchg   corr +0.070   non-zero on 32.1% of bars
+   s_usdlvl   corr +0.102   non-zero on 55.8% of bars
+
+4. YEAR BY YEAR at a common 8% risk. The VIX run helped 2022 and
+   wrecked 2023; if BTC's macro sign is regime-dependent rather than
+   absent, the dollar should show the same shape.
+
+  year         5 signals   5 signals x 5/6  6 signals with u  6 signals with u
+  2021             53.1%             43.1%             44.4%             35.2%
+  2022              4.9%              5.0%              3.9%             15.3%
+  2023            116.8%             91.6%             93.3%             77.4%
+  2024             58.7%             46.9%             30.6%             23.7%
+  2025             25.3%             21.0%             11.0%             41.0%
+  2026             64.6%             52.2%             43.0%             44.1%
+
+done: the dollar
