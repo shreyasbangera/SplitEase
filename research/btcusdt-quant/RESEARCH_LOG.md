@@ -3587,3 +3587,135 @@ to be sampled on.
 **No change to the live book**, which already trades the 00:00/12:00 phase. What changes is what it
 should be expected to return, and how much confidence the 179% headline deserves — less than any
 number in this log has so far implied.
+
+## S102 — The other half of the sampling question: bar LENGTH, and the structural defence dies
+
+S101 left one defence standing. The 12h book decides at 00:00/12:00 UTC, shifting that phase by
+four hours takes the gate result from 168.8% to 16.4%, and the only argument that this was not
+luck was structural: **00:00 UTC is crypto's daily anchor**, funding settles at 00/08/16, and the
+two settlement-aligned phases were the two best of six.
+
+That argument makes a prediction, and the prediction is not about phase. If the edge lives on the
+canonical UTC grid, it should survive a change of *horizon* that keeps the anchor. **8h bars at
+00:00 are the funding grid exactly. 24h bars at 00:00 are the daily candle exactly.** Both are
+more canonical than 12h, which is not a native crypto interval at all — it is what pandas
+resamples to by default.
+
+There is also a constructive reason, and it is the stronger one. S96b established an **oracle
+ceiling of 268.9%** over the 200-config grid: with perfect foresight of next-quarter Sharpe, no
+selection rule whatever reaches 300%. The target is unreachable without enlarging the space the
+configs are drawn from, and horizon is the one axis of the data-generating grid never varied.
+
+### What was held constant
+
+A naive horizon sweep measures four things at once. Every bar-counted parameter in the pipeline is
+implicitly a wall-clock parameter, so all were rescaled by k = 12/h: flow's 480-bar z-window,
+cmpx's 6-bar difference and 120-bar window, fundz's 240-bar window, ATR's 14 bars, and the trend
+gate's EMA menu {100,150,200,300}. `btcdom` is z-scored upstream on a fixed hourly grid and needs
+none; `posn` is built once on the 4h panel at its native scaling and only *sampled* onto each
+horizon, so it is the identical wall-clock signal every time.
+
+The ATR needs a second correction the others do not. Over the same wall-clock window the average
+true range of a 6h bar is smaller than a 12h bar's, so 3×ATR would be a tighter stop in price
+terms and "shorter horizon" would be confounded with "tighter stop" — while the stop multiple is
+drawn from {2.5, 3.0} and cannot compensate. ATR is expressed in 12h-equivalent units by
+multiplying by √(12/h), **a constant fitted to nothing**, and the assumption was checked rather
+than trusted:
+
+| horizon | median raw ATR | √(12/h) rule | measured ratio | error |
+|---|---|---|---|---|
+| 6h | 1,128.2 | 1.414 | 1.430 | −1.1% |
+| 8h | 1,323.6 | 1.225 | 1.219 | +0.5% |
+| 24h | 2,314.6 | 0.707 | 0.697 | +1.4% |
+
+Within 1.4% everywhere. The rebuild was validated first: at 12h it reproduces the deployed stack
+**bit-exactly** (composite max difference 0.0, CAGR 63.5% / DD −15.6% / Sharpe 2.16 / Calmar 4.07 /
+956 trades, identical to the native path).
+
+### Stage A — three fixed configurations, no selection, risk 8%
+
+Fixed configs so nothing here can be a selection artefact. At the −20% gate:
+
+| horizon | exp 1.0, 3ATR ×2R 21d | exp 2.0, 3ATR ×2R 21d | exp 2.0, 2.5ATR ×3R 14d | Sharpe range |
+|---|---|---|---|---|
+| 6h | 46.4% | 30.6% | 33.0% | 1.13–1.40 |
+| 8h — *the funding grid* | 16.1% | 15.8% | 19.0% | 1.18–1.36 |
+| **12h — deployed** | **98.8%** | **116.9%** | **113.0%** | **2.16–2.20** |
+| 24h — *the daily candle* | 6.9% | 5.7% | 6.8% | 0.64–0.74 |
+
+**The structural defence is dead.** 8h bars anchored at 00:00 *are* the funding grid — every bar
+boundary is a settlement — and they score 16–19% against 12h's 99–117%. 24h bars at 00:00 *are*
+the daily candle, the single most canonical bar in crypto, and they score 6–7%. The anchor is not
+what makes 00:00/12:00 work. Only the specific combination of twelve-hour length **and** 00:00
+phase works.
+
+**And it is a spike, not a slope.** If the story were "these signals need more averaging", 24h
+would win; if it were "more decisions are better", 6h would. Neither. 6h beats 8h, which beats
+24h, and 12h beats all of them by 2.4× to 10×. Combined with S101, V7's headline sits on one cell
+of a two-dimensional sampling grid — length × phase — with **every adjacent cell 2.4× to 10×
+worse**: 46.4% and 17.0% either side in length, 46.3% and 16.4% either side in phase.
+
+### S102b — the constructive reading: can two bar lengths be held at once?
+
+None of these is a book worth trading alone. But the target is a *Calmar* statement, and a weak
+sleeve with a genuinely different return stream raises Calmar even while lowering the mean — the
+mechanism that made S86's top-3 blend worth holding. So the question is not whether 6h is good. It
+is whether 6h is *different*. Two prior results bracket it and disagree: S42's phase-shifted books
+correlated 0.70–0.82 (nothing to diversify), S98's disjoint-signal books 0.068.
+
+**It lands in between, and it still loses.** Correlation against 12h: 6h **0.650**, 8h 0.558, 24h
+0.556 — genuine diversification territory. Each sleeve re-simulated at risk/n and summed exactly
+as S87 blends configurations:
+
+| book | CAGR | MaxDD | Sharpe | Calmar | at −20% | vs 12h |
+|---|---|---|---|---|---|---|
+| **12h alone** | 63.5% | −12.5% | 2.16 | **5.10** | **116.9%** | — |
+| 6h + 12h | 47.6% | −10.2% | 1.91 | 4.66 | 112.8% | −4.1 |
+| 8h + 12h | 46.7% | −13.8% | 2.01 | 3.39 | 74.1% | −42.9 |
+| 12h + 24h | 38.6% | −19.0% | 1.61 | 2.03 | 41.0% | −75.9 |
+| 6h + 8h + 12h | 44.8% | −11.9% | 1.98 | 3.75 | 86.2% | −30.8 |
+| all four | 36.4% | −16.3% | 1.71 | 2.23 | 46.4% | −70.6 |
+
+Every combination loses. The diversification is real — 6h+12h cuts drawdown from −12.5% to −10.2%,
+an 18% reduction — but CAGR falls 25%, so Calmar falls too. The same pattern holds at the other
+exponent tested.
+
+### S102c — the bar a second sleeve has to clear, and an oracle bound
+
+Two sleeves at correlation ρ and Sharpes S₁, S₂ combine to beat S₁ alone only if
+
+> **S₂ > S₁ · (√(2 + 2ρ) − 1)**    [equal vol weights]
+
+That converts "blending did not help" into a threshold any candidate can be held to *before* it is
+built. Against the deployed sleeve's Sharpe 2.19:
+
+| sleeve | Sharpe | ρ vs 12h | needs | shortfall |
+|---|---|---|---|---|
+| 6h | 1.24 | 0.650 | 1.79 | **−0.55** |
+| 8h | 1.28 | 0.558 | 1.68 | −0.40 |
+| 24h | 0.64 | 0.556 | 1.68 | −1.03 |
+
+And as a standing screen for anything future: ρ=0 needs Sharpe 0.91 (41% of the incumbent's),
+ρ=0.3 needs 1.34, ρ=0.5 needs 1.61, ρ=0.8 needs 1.97 (90%). **This explains the whole run of blend
+failures in this log at once.** S42's phases needed ~1.9 and were the same book. S98's disjoint
+books needed only ~0.9 and still failed — because their edge was gone, not because of their
+correlation, exactly as S95's macro result predicted.
+
+Finally, the **oracle weight**: the best mix choosable with full hindsight over the whole sample,
+which is not tradable.
+
+| pair | best weight on the 2nd sleeve | at −20% | vs 12h |
+|---|---|---|---|
+| 12h alone | — | 132.2% | — |
+| 12h + 6h | 0.10 | 137.1% | **+4.8** |
+| 12h + 8h | 0.00 | 132.2% | +0.0 |
+| 12h + 24h | 0.00 | 132.2% | +0.0 |
+| all four | 0.10 / 0.00 / 0.00 | 137.1% | +4.8 |
+
+**Even with hindsight the whole channel is worth +4.8 points**, and 8h and 24h are given weight
+zero. The horizon axis is closed.
+
+*(Method note: `at_gate` scales daily returns and is a shape comparator, not a level estimate — it
+reads 132.2% on the 4%-risk series and 116.9% on the 8%-risk one for the same book, because the
+real risk dial compounds where a linear rescaling does not. Rows are only ever compared against
+other rows measured the same way.)*
