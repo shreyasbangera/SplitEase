@@ -3517,3 +3517,73 @@ Three corrections have accumulated and they all point the same way:
 **Read together, V7 is realistically 160–175% at a true 20% intraday drawdown gate, against a
 300% target — 1.7× to 1.9× short, slightly worse than the headline has been saying.** Nothing here
 changes what the live book should trade; it changes what it should be expected to return.
+
+---
+
+## S101 — The bar phase, and it is the most fragile thing in this study
+
+The book decides at 00:00 and 12:00 UTC. **Nobody chose that** — it is what pandas resamples to by
+default, and it has never been varied in 100 experiments. S42 tested *blending* phases and found
+cross-phase correlation 0.70–0.82, so there was nothing to diversify; it never asked the prior
+question, whether a different single phase gives a different **answer**.
+
+Every 12-hour resample in the pipeline was shifted by the same offset — the futures and spot
+aggregation, S38's cross-panel, S36's implied-vol panel and S45's 4h→12h positioning roll — and the
+quarterly rankings **recomputed** on each shifted panel, because a selection fitted on one phase and
+applied to another measures neither.
+
+| phase (UTC) | CAGR | MaxDD | Sharpe | Calmar | trades | **at −20% gate** |
+|---|---|---|---|---|---|---|
+| **00:00 / 12:00 — deployed** | 86.2% | −12.3% | **2.15** | 7.00 | 1,697 | **168.8%** |
+| 03:00 / 15:00 | 23.6% | −20.4% | 0.95 | 1.16 | 1,553 | 23.1% |
+| 04:00 / 16:00 | 22.0% | −26.9% | 0.88 | 0.82 | 1,663 | **16.4%** |
+| 06:00 / 18:00 | 30.8% | −45.5% | 0.90 | 0.68 | 1,499 | 12.9% |
+| 08:00 / 20:00 | 79.7% | −31.0% | 1.46 | 2.57 | 1,587 | 46.3% |
+| 09:00 / 21:00 | 49.7% | −27.0% | 1.16 | 1.84 | 1,754 | 35.9% |
+
+**The deployed phase is not merely the best. It is 3.65× the best alternative.** The five others
+average 26.9% at the gate against 168.8%, and their Sharpe averages **1.07** against 2.15 — the book
+does not degrade at other phases, it stops working.
+
+**The obvious excuse was tested and failed.** The first run used 3, 6 and 9-hour offsets, all of
+which are off the 4-hourly positioning grid and the 8-hourly funding grid, so the collapse could
+have been the pipeline being sampled off-grid rather than the edge being phase-bound. It was re-run
+on 4 and 8 hours, the only shifts that keep the 12h bars aligned to the data underneath. **04:00
+collapses hardest of all** (16.4%, Sharpe 0.88). Misalignment is not the explanation.
+
+**Nor is it selection noise.** The *training-window* Calmars collapse too — the last two quarters at
+the 04:00 phase score a best-of-200 Calmar of 0.53 and 0.06, against 3 to 40 at the deployed phase.
+If this were the quarterly selection getting unlucky, training Calmars would look similar and only
+the out-of-sample picks would differ. They do not. **The signal set itself degrades off the
+00:00/12:00 grid.**
+
+### What it does and does not mean
+
+There is a real structural reading. **00:00 UTC is crypto's daily anchor**: the daily candle closes
+there, funding settles at 00:00/08:00/16:00, and it is the Asia/US session boundary. A 12h bar
+starting at 00:00 splits the day into two coherent sessions; one starting at 04:00 straddles both.
+Weak support for this in the table — the two funding-settlement phases (00:00 and 08:00) are the two
+best, 168.8% and 46.3%, and the non-settlement phases are the four worst. The default was not
+arbitrary, and it required no hindsight to pick: it is the canonical grid.
+
+But the defence only goes so far, and three things cut against it.
+
+1. **The gap is far too large for a session story alone.** 168.8% against 46.3% for the other
+   settlement-aligned phase is not a small structural advantage; it is a different strategy.
+2. **Every other parameter was tuned on this phase.** Thresholds, exponent, stop, reward:risk, hold,
+   gate menu, lookback, blend width — all chosen across ~100 experiments conditioned on 00:00/12:00.
+   Even if the phase is genuinely special, the *degree* of its specialness is inflated by everything
+   fitted on top of it.
+3. **The dispersion dwarfs every other uncertainty measured.** sd 80.8 points across phases against
+   S96c's 24-point selection-noise band and S100's 2.5% execution haircut.
+
+**Recorded as the study's most serious robustness finding.** V7's headline rests on a sampling
+choice that was never deliberately made and never validated, and the result does not replicate at
+any other phase. The mean across all six phases is **50.6%** at the gate. That is not the right
+estimator — you must pick one phase and 00:00/12:00 is defensible a priori — but it is the honest
+measure of how much of the 168.8% is a property of the strategy rather than of the grid it happens
+to be sampled on.
+
+**No change to the live book**, which already trades the 00:00/12:00 phase. What changes is what it
+should be expected to return, and how much confidence the 179% headline deserves — less than any
+number in this log has so far implied.

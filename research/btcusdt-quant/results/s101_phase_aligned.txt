@@ -1,0 +1,47 @@
+V7 rebuilt from scratch on each 12h bar phase, rankings recomputed.
+
+     phase (UTC)   bars     CAGR   MaxDD    Shp    Clm  trades   at -20%
+   00:00 / 12:00   4020    86.2%  -12.3%   2.15   7.00    1697    168.8%
+    2022-03  best Calmar 6.48   [1/18 checkpointed]
+    2022-06  best Calmar 7.77   [2/18 checkpointed]
+    2022-09  best Calmar 5.66   [3/18 checkpointed]
+    2022-12  best Calmar 11.20   [4/18 checkpointed]
+    2023-03  best Calmar 3.24   [5/18 checkpointed]
+    2023-06  best Calmar 4.78   [6/18 checkpointed]
+    2023-09  best Calmar 3.98   [7/18 checkpointed]
+    2023-12  best Calmar 3.76   [8/18 checkpointed]
+    2024-03  best Calmar 9.39   [9/18 checkpointed]
+    2024-06  best Calmar 10.85   [10/18 checkpointed]
+    2024-09  best Calmar 14.44   [11/18 checkpointed]
+    2024-12  best Calmar 8.10   [12/18 checkpointed]
+    2025-03  best Calmar 1.58   [13/18 checkpointed]
+    2025-06  best Calmar 3.13   [14/18 checkpointed]
+    2025-09  best Calmar 2.87   [15/18 checkpointed]
+    2025-12  best Calmar 0.31   [16/18 checkpointed]
+    2026-03  best Calmar 0.53   [17/18 checkpointed]
+    2026-06  best Calmar 0.06   [18/18 checkpointed]
+   04:00 / 16:00   4020    22.0%  -26.9%   0.88   0.82    1663     16.4%
+    2022-03  best Calmar 12.54   [1/18 checkpointed]
+    2022-06  best Calmar 13.46   [2/18 checkpointed]
+    2022-09  best Calmar 18.19   [3/18 checkpointed]
+    2022-12  best Calmar 2.39   [4/18 checkpointed]
+    2023-03  best Calmar 1.12   [5/18 checkpointed]
+    2023-06  best Calmar 5.96   [6/18 checkpointed]
+    2023-09  best Calmar 11.28   [7/18 checkpointed]
+    2023-12  best Calmar 24.86   [8/18 checkpointed]
+    2024-03  best Calmar 60.34   [9/18 checkpointed]
+    2024-06  best Calmar 26.60   [10/18 checkpointed]
+    2024-09  best Calmar 19.66   [11/18 checkpointed]
+    2024-12  best Calmar 8.50   [12/18 checkpointed]
+    2025-03  best Calmar 2.35   [13/18 checkpointed]
+    2025-06  best Calmar 3.75   [14/18 checkpointed]
+    2025-09  best Calmar 2.80   [15/18 checkpointed]
+    2025-12  best Calmar 2.55   [16/18 checkpointed]
+    2026-03  best Calmar 4.14   [17/18 checkpointed]
+    2026-06  best Calmar 2.51   [18/18 checkpointed]
+   08:00 / 20:00   4020    79.7%  -31.0%   1.46   2.57    1587     46.3%
+
+across 3 phases at the gate: mean 77.2%  sd 80.8  range 16.4-168.8%
+deployed phase (00:00/12:00) = 168.8%, which is +1.13 sd from the mean of the 3
+
+done: bar phase
