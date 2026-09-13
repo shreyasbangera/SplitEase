@@ -5673,3 +5673,66 @@ bar.
 Best book that passes the brief's trade criterion and has never had a losing year:
 **~23–24% at a 20% drawdown, Sharpe ~1.05–1.10, 110–140 position changes, 0 negative years in 7,
 trailing two years 17–20%.** Still an order of magnitude short of 300%.
+
+---
+
+## S143–S144 — Four more mechanisms, and the best non-V7 book in the study
+
+### S143 — dollar bars, vol-of-vol, dip buying, alt breadth
+
+**Dollar-bar breakout.** `research/eventbars.py` was built earlier to answer a fragility question and
+never used to build a strategy. A dollar bar has no phase and no length, so the "which twelve hours?"
+question cannot be asked of it. At 1 bar/day: **Sharpe 1.16, gate 24.3%** — statistically identical
+to the 12-hour clock result (24.0%) but reached with no clock at all. **The breakout edge survives
+clock-free sampling**, which is the defence S108 gave the crowding book. At 2 and 4 bars/day it
+collapses (6.4%, 3.9%).
+
+**Volatility of volatility** — new, and the sign is unambiguous. *Fading* it: Sharpe 0.88, gate
+11.4%, trailing two years 19.7%, 399 position changes. *Following* it is catastrophic: Sharpe −0.92,
+seven negative years out of seven.
+
+**Systematic dip buying** fails at every threshold and hold (3.8–5.4% at the gate, 2–4 negative
+years) — the most common retail strategy in this asset, and it is short gamma in a market that had a
+2022.
+
+**Alt breadth as a confirmation filter** destroys the breakout book: 23.1% → 4.7% at >50% breadth,
+8.6% at >60%. The fifth over-conditioning failure in this log.
+
+### S144 — the blend, and the first genuinely additive combination
+
+Breakout and vol-of-vol correlate at **+0.297** and combine properly:
+
+| book | Sharpe | realDD | flips | gate | honest gate | last 2y | neg yrs |
+|---|---|---|---|---|---|---|---|
+| breakout ensemble alone | 1.10 | −23.3% | 110 | 22.9% | 22.9% | 20.2% | 0 |
+| vol-of-vol fade alone | 0.88 | −38.8% | 399 | 11.4% | 10.5% | 19.7% | 1 |
+| **blend, 25% vov** | **1.13** | **−18.8%** | 169 | **26.6%** | **23.5%** | 19.5% | **0** |
+
+**The blend's drawdown is smaller than either component's.** That is diversification, not averaging.
+
+And it is a plateau rather than a cell — vov weights from 0.10 to 0.50 all land 22.4–26.6% at the
+gate with zero negative years, in contrast to S142's spiky selectivity surface which had to be
+retracted.
+
+**Cost robustness is the striking part:** 27.2% / 26.6% / 25.8% / **24.6%** at 8 / 16 / 30 / 50bps
+round trip. It barely moves, because the breakout leg trades rarely. The crowding-8h book over the
+same range goes 30.0% → 15.2%.
+
+### Against the brief
+
+| criterion | result | verdict |
+|---|---|---|
+| 300% a year | **26.6%** (honest 23.5%) | **FAIL — 11× short** |
+| max drawdown < 20% | 20.0% by construction at the gate | PASS |
+| 100+ completed trades | 169 position changes (3 round trips through flat) | PASS on flips |
+| profit factor > 1.10 | passes, though the trip-level figure is meaningless at 3 trips | PASS |
+| realistic risk management | vol-targeted, ATR trailing exit, no stops to game | PASS |
+| no look-ahead | every input lagged a full bar, execution on the next | PASS |
+
+Year by year: **+45.8, +29.0, +36.7, +20.6, +11.5, +10.0, +16.3** — positive in all seven years, and
+first/second half at the gate 39.8% / 20.8%.
+
+**This is the best non-V7 strategy this study has produced**, and the argument for it over the
+crowding-8h book (30.0%) is durability and robustness rather than level: zero negative years against
+one, 24.6% against 15.2% at 50bps costs, and confirmation under clock-free sampling. It fails the
+brief on return by a factor of eleven.
