@@ -5128,3 +5128,85 @@ N streams each of Sharpe 2.13 at average pairwise correlation ρ reach `2.13 × 
 genuinely independent and a little better than V7. That is the quantitative form of the answer, and
 it is a far more useful statement than "not found": no allocator, no weighting rule and no amount of
 tuning substitutes for the two missing strategies.
+
+---
+
+## S125–S126 — Cross-asset, the drawdown rail, and the end of the data
+
+### A scope distinction this log had been getting wrong
+
+"Single instrument" was read throughout as a constraint on the *data*. It is a constraint on what is
+**traded**. A book holding nothing but BTCUSDT perp, deciding what to hold by watching eight other
+markets, is a single-instrument book — one position, one funding rate, one liquidation price. On
+that reading `altmetrics_1h.parquet` had been sitting unopened for the whole study: 333,000 rows of
+positioning and open interest across ADA, AVAX, BNB, DOGE, ETH, LINK, SOL, XRP, 2021-12 to 2026-08.
+
+### S125 — eight cross-sectional features, one survivor
+
+Breadth and dispersion are genuinely different objects from the level of any single series — they
+cannot be computed from BTC alone at any window length. Eight features, each lagged a full day, ICs
+against forward BTC returns with both halves reported. One kept its sign across both halves:
+**rotation** (alt top-trader positioning minus BTC's own), 5-day IC +0.0425, halves +0.0317 and
++0.0618 — *stronger* in the second half, which no other effect in this study manages.
+
+My stated mechanism was wrong, which is worth recording: I predicted rotation into alts was a
+late-cycle warning and the sign says it is a risk-appetite signal that lifts BTC.
+
+### S125b — and it is noise, established properly
+
+Three tests, because a 1-in-8 survivor against a weak bar is exactly what this log has been fooled
+by before:
+
+| horizon | non-overlapping obs | IC | 95% interval | excludes 0 |
+|---|---|---|---|---|
+| 1d | 1,330 | +0.0217 | −0.0301 to +0.0765 | no |
+| 3d | 443 | +0.0485 | −0.0421 to +0.1411 | no |
+| 5d | 266 | +0.0262 | −0.0882 to +0.1458 | no |
+| 10d | 133 | +0.0580 | −0.0981 to +0.2232 | no |
+
+Not one horizon excludes zero once the overlap is removed. And the control settles it: **36% of 200
+phase-randomised surrogates clear the same survivor bar rotation cleared** — surrogates carrying the
+real feature's autocorrelation and no relationship to returns at all. One survivor in eight is
+*fewer* than chance produces (≈2.9 expected). The screen proved nothing. The book confirms it:
+Sharpe 0.13–0.19, gate 0.9–1.7%, correlation +0.19 to V7.
+
+### S126 — the drawdown rail, and why it works only where it cannot matter
+
+The one risk technique this study kept naming and never built. Unlike S123's vol sizing it forecasts
+nothing — it responds to losses already realised, so the forecasting problem disappears. At the
+honest gate, which is set by the middle of the drawdown distribution and dragged by its tail,
+truncating that tail should buy size. Applied as a causal overlay (the weight on day *t* uses the
+drawdown as it stood at the *start* of day *t*), 24 cells per book:
+
+| book | Sharpe | no rail | best rail | |
+|---|---|---|---|---|
+| buy & hold | 0.71 | 7.8% | **11.5%** | +47% |
+| trend | 0.70 | 8.2% | **9.4%** | +15% |
+| crowding | 1.32 | 29.2% | 29.0% | no help |
+| V7 | 2.13 | 129.9% | 127.8% | no help |
+
+**The rail helps low-Sharpe books and does nothing for high-Sharpe ones**, and the mechanism is
+clear: a weak book has long deep drawdowns the rail has time to work inside, while a strong book
+recovers before the rail has paid for itself. It works precisely where it cannot move the brief.
+Recorded also as a negative result for the deployed book: adding a drawdown rail to V7 tests
+slightly *worse*, so it is not an improvement worth making live.
+
+### The last two files on disk, and the end of the data
+
+- **`tick_1m.parquet`** — microstructure (VPIN, large-vs-small imbalance, run length, size
+  concentration). **30 distinct days** of data, 1,440 rows each, scattered across three years. Not a
+  sample anything can be built or validated on. Closed by insufficiency.
+- **CM vs USDT funding differential** — 2,115 overlapping settlements. Mean **+0.000001 per 8h ≈
+  0.11% a year**. The same answer as S114's quarterly carry and for the same reason: two BTC perps
+  on one venue, arbitraged tight. No carry there either.
+
+**And no new data is reachable.** Every market data host — Binance, Deribit, Kraken, Coinbase,
+CoinGecko, CryptoCompare, Bybit — returns `EGRESS_BLOCKED` at the network proxy, for both container
+requests and tool-level fetches; GitHub returns 200, so the allowlist is deliberate. A direct
+no-proxy attempt at `data.binance.vision` reaches the host and gets **403 from Binance**, the
+familiar datacenter-IP block. Two independent walls. New data has to arrive either by changing the
+environment's network policy or by files being placed into the repo.
+
+**Every data class on this disk is now opened and measured.** Combined with S124's bound, that is
+the end of what can be established from here: the brief needs roughly three uncorrelated
+V7-quality streams, this data contains one, and no route to more data exists from this session.
