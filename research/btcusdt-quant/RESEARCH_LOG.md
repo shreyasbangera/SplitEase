@@ -4715,3 +4715,69 @@ the only way to force negative correlation is to be systematically short when th
 which on this sample loses money. **A negatively correlated complement to V7 does not exist inside
 a single directional instrument.** S102c's admission bar can therefore only ever be approached from
 the ρ > 0 side, where it demands Sharpe 1.4+ and nothing available clears it.
+
+## S117 — A standalone managed-futures book. Different edge, different architecture, own verdict.
+
+Not a sleeve, not an overlay, not a complement. A separate strategy on BTCUSDT, judged alone
+against the brief.
+
+    position = trend_sign x (target_vol / realised_vol)
+
+**No stops, no take-profits, no holding cap, no crowding signals.** Size is continuous and inverse
+to recent volatility, so the book carries the same *risk* in every regime rather than the same
+notional — it shrinks into turbulence instead of being stopped out of it. Direction is price alone,
+blended over three speeds (8/32, 16/64, 32/128 day EMA pairs).
+
+It also runs on a **longer sample** — 2020-01 rather than 2021-03, 6.7 years including the 2021 top
+and the whole 2022 bear market — because it needs no positioning or basis data.
+
+Charged: real settled funding on the perp every 8h (a long-biased perp book pays ~11.8% a year and
+a backtest omitting it is fiction), and fee + slippage on **every change in position size**, not
+just direction flips.
+
+| book | CAGR | realDD | medDD | Sharpe | Calmar | turns | **at −20%** | 1st half | 2nd half |
+|---|---|---|---|---|---|---|---|---|---|
+| buy & hold perp | 27.2% | −78.9% | −75.6% | 0.71 | 0.34 | 0 | 8.1% | 9.7% | 10.1% |
+| vol-target only, 20% | 12.2% | −34.2% | −39.1% | 0.64 | 0.36 | 30 | 7.1% | 6.8% | 7.6% |
+| vol-target only, 40% | 19.5% | −59.0% | −65.1% | 0.64 | 0.33 | 76 | 6.7% | 6.4% | 7.1% |
+| vol-target only, 60% | 23.6% | −76.0% | −81.5% | 0.66 | 0.31 | 129 | 7.7% | 7.5% | 8.0% |
+| **trend long/flat, 20%** | 13.9% | −14.7% | −20.7% | **1.00** | **0.95** | 93 | **19.2%** | 30.1% | 11.6% |
+| trend long/flat, 40% | 25.2% | −27.6% | −37.0% | 0.96 | 0.91 | 115 | 17.9% | 26.8% | 12.4% |
+| trend long/flat, 60% | 35.3% | −39.8% | −52.4% | 0.94 | 0.89 | 146 | 17.1% | 23.8% | 12.0% |
+| trend long/short, 20% | 12.5% | −20.6% | −26.5% | 0.75 | 0.61 | 140 | 12.1% | 23.3% | 6.9% |
+| trend long/short, 60% | 23.8% | −54.9% | −66.0% | 0.67 | 0.43 | 219 | 10.3% | 17.8% | 6.9% |
+
+**The prior written into the file before running it was 30–60% at the gate. The answer is 17–19%.**
+Optimistic even while trying to be pessimistic, and recorded as such.
+
+### Three results worth keeping
+
+**Volatility targeting alone is a pure scale knob.** Across a threefold range of target vol the gate
+reading is 7.1 / 6.7 / 7.7% and Sharpe is flat at 0.64–0.66. Drawdown scales with the position, so
+nothing about the *shape* improves. This is S94's finding — that leverage is a scale knob on V7 —
+arriving independently on a completely different book, and it is the general case rather than a
+V7 quirk.
+
+**The trend filter is the whole edge.** Long/flat lifts Sharpe 0.64 → 1.00, Calmar 0.36 → 0.95, and
+nearly triples the gate reading. That is the textbook single-asset trend-following result,
+reproduced here on BTC with honest funding and costs.
+
+**Shorting is a tax, not a diversifier.** Long/short is worse than long/flat at every target vol
+(12.1% against 19.2% at 20%). Being systematically short BTC across a rising sample costs more than
+the crash protection is worth — the same arithmetic that S116 showed makes a negatively correlated
+complement impossible inside one directional instrument.
+
+### Verdict
+
+**Fails the brief, and not narrowly.** 19.2% at the −20% gate against 300%, with two further
+problems at that cell: **93 turns, below the 100-trade floor**, and a first-half/second-half split
+of 30.1% against 11.6% — the trend filter earned its keep in the 2022 bear market and has been
+fading since.
+
+It is a *working* strategy: 2.4× buy-and-hold at the gate, Sharpe 1.00, and a −14.7% drawdown on an
+asset that fell 79%. It is simply not a 300% one.
+
+**What it calibrates.** This is the first clean measurement in the study of what *price information
+alone* is worth on BTCUSDT under this brief: **Sharpe ~1.0**. That is the reference point the whole
+log has lacked, and it is the honest benchmark any future strategy on this asset should be judged
+against before anything more elaborate is built.
