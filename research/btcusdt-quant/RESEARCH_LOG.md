@@ -5282,3 +5282,80 @@ historical *options* data — Deribit serves only ~15 days of volatility history
 expired-instrument chain — and options remain the single best-motivated target, because S122's
 variance risk premium (+7.3 vol points, positive every year) is the one genuinely non-directional
 premium this study has found.
+
+---
+
+## S129–S131 — The Calmar law, and V7's unexplained residual
+
+### S129 — what actually determines Calmar
+
+S124's bound rested on one claim asserted from three data points: Calmar ≈ 1.4 × Sharpe². If Calmar
+had other drivers — skew, loss clustering, drawdown duration — a book at attainable Sharpe with the
+right *shape* could reach Calmar 15, and this study would have a design target instead of a wall.
+
+332 viable books were generated across 17 signal sources (crowding, trend, reversion, on-chain,
+macro, and random controls) swept over thresholds, vol targets, vol windows and direction:
+
+    log Calmar = -0.172 + 1.532 log Sharpe        R² = 0.969
+    Calmar = 0.84 × Sharpe^1.53   →  Calmar 15 needs Sharpe 6.56
+
+**Sharpe explains 97% of Calmar and nothing else explains the rest.** Correlation of the residual
+with skew is **r = 0.005**; with kurtosis 0.025; drawdown duration is the largest at 0.221 (4.9%
+partial R²). There is no shape corner. The requirement is *worse* than S124 assumed — 6.56, not 3.27.
+
+**Except for one book.** Every strategy in this study sits between 0.70× and 1.55× of that line.
+V7 sits at **3.33×** (2.40× on the stricter bootstrap gate). That residual is the largest
+unexplained quantity in the study, and 2.4× on Calmar is 2.4× on the gate figure — worth more than
+any signal found anywhere in this log.
+
+### Three explanations tested, three killed
+
+| candidate | result |
+|---|---|
+| **shape** (S129) | skew correlates with the residual at r = 0.005. No shape variable explains it. |
+| **per-trade stops** (S130) | lift the Calmar ratio **1.03×** on real signals and **1.06×** on random ones — nothing, and indistinguishable from each other. |
+| **sample window** | the same books on V7's 2022-03+ window instead of 2021+: median ratio **0.97× either way**. |
+
+### S131 — and the mechanism S95 credits does not transfer
+
+S95 recorded that V1 (five signals, one fixed configuration) is Sharpe 2.15 at 71.2%, while V7 (the
+same signals under quarterly Calmar-ranked top-3 selection) is Sharpe 2.13 at 179.0% — *identical
+Sharpe, 2.5× the Calmar*. That is the residual, and "rank configurations quarterly on trailing
+Calmar and run the best three" is an allocation rule, not a V7 internal. It had never been applied
+to any other family here.
+
+A 72-configuration grid was built for the **crowding** family — daily, vol-targeted, no ATR stops,
+no trend gate, no 12h clock — and the same rule run over it, ranking on a window ending before each
+quarter it allocates for:
+
+| allocation | Sharpe | Calmar | gate | vs law |
+|---|---|---|---|---|
+| best single config (hindsight) | 1.34 | 1.61 | 32.2% | 1.22× |
+| equal weight, all 72, no selection | 1.10 | 0.92 | 18.3% | 0.94× |
+| random 3 per quarter, median of 8 | — | — | 16.8% | — |
+| **ranked top-3, causal** | 1.13 | 0.88 | **17.7%** | **0.87×** |
+
+**It does not transfer.** Ranked selection lands below random, below equal weight, and below the
+law. This is the fourth independent confirmation that selection in this study is anti-informative,
+alongside S106b (weights), S109 (configs) and S118b (signs).
+
+### What this means, stated carefully
+
+The law is established *within its class*: 332 books, but all of one architecture — single-signal,
+daily, vol-targeted, continuously sized. V7 is outside that class (12h, five netted signals, ATR
+stops, trend gate, quarterly blend), so the law does not automatically extend to it. What can be
+said is that **the four most plausible bridges were tested and none explains the gap**, and the one
+mechanism the log credits for it fails to reproduce on a different signal family.
+
+That is a reason for caution about V7's forward Calmar rather than proof against it, and it is
+decision-relevant because it is running live. If V7's true Calmar were on the law at Sharpe 2.13 it
+would be ≈2.7, i.e. a gate figure near 54% rather than 129–179%. The honest position is that the
+residual is real in the backtest, unexplained after four tests, and not something to size against.
+
+### The bound, restated on firmer ground
+
+Calmar 15 requires Sharpe **6.56** under a law fitted on 332 books at R² 0.969. The best stream here
+is 2.13 and its excess over the law does not reproduce. Reaching 6.56 by diversification from
+realistically-attainable Sharpe-1.3 streams would need roughly **25 uncorrelated** of them. Every
+data class on disk and every reachable external source has now been opened. The brief is not
+reachable from here, and that is now a measurement rather than a failure to search.
