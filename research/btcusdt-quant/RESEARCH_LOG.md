@@ -4908,3 +4908,135 @@ structural note on the funding premium recorded years earlier in the log.
 polishing a mechanism that has been fading since 2021. The 2021 edge was real and large; by 2025 it
 is inside the noise. Any strategy resting on published positioning and funding data should be
 assumed to be working against this decay, and sized for the recent years rather than the full sample.
+
+---
+
+## S120 — The frequency axis, and the cost floor that closes it
+
+Every book in this log so far decides at 12 hours or one day. The brief is 300% a year at a
+drawdown under 20%, which is **Calmar 15**, and nothing daily here has cleared Calmar 1.3. S103
+explained why, and the explanation is about the holding period rather than the signal: a position
+held across days is held through overnight gaps and multi-day slides, so the worst single excursion
+stays large relative to the year's return however good the direction call is. Better forecasting
+does not move that.
+
+Calmar is frequency-dependent. A book making 2,000 short, largely independent bets a year earns
+its return over a much smaller worst-path excursion than one making 200 long ones. That is the only
+structural axis in this study never touched, and 3.5 million one-minute bars from 2020-01 have been
+sitting on disk unopened.
+
+### Does intraday structure exist? Yes, overwhelmingly
+
+Spearman IC of past return against the next return at the same horizon, on the full sample:
+
+| bar | obs | IC | kind | gross bps/trade | IC 1st | IC 2nd |
+|---|---|---|---|---|---|---|
+| 1m | 3,506,029 | −0.0255 | reversal | 0.1 | −0.0299 | −0.0193 |
+| 5m | 701,212 | −0.0522 | reversal | 0.7 | −0.0651 | −0.0333 |
+| 15m | 233,742 | −0.0514 | reversal | −0.3 | −0.0500 | −0.0506 |
+| 30m | 116,873 | −0.0666 | reversal | 1.6 | −0.0734 | −0.0554 |
+| 1h | 58,437 | −0.0551 | reversal | 0.8 | −0.0498 | −0.0585 |
+| 4h | 14,608 | −0.0638 | reversal | 2.2 | −0.0702 | −0.0535 |
+
+Reversal at *every* horizon, consistent in both halves. An IC of −0.05 on 700,000 observations is
+roughly 40 standard errors — this is among the most statistically certain effects in the entire log.
+Aggressive-flow imbalance says the same thing with the same sign at every horizon.
+
+**And it is untradeable.** The gross edge is 0.1 to 2.2 basis points per trade against a round trip
+of 2 × (5bps fee + 3bps slippage) = **16 basis points**. The effect is real, it is large in
+t-statistics, and it lives entirely inside the spread. It is 10 to 100 times too small.
+
+### Measured at its strongest, it still does not clear
+
+S120b swept the trigger from the top 10% of moves down to the top 0.1%, and the hold from 1 bar to
+32, at four bar sizes — 144 cells, every one printed. Net basis points per completed trade, after
+the 16bps round trip:
+
+- Across the whole top 10% → top 1% region, **every one of 96 cells is negative**, −13 to −19bps.
+- Only the top 0.1% turns positive: 59 to 234 events over 6.7 years, 9 to 35 a year.
+- Those cells decay hard between halves: 172.8 → 27.0 at 1h, 76.1 → 11.1 at 30m, 59.2 → 14.0 at 15m.
+
+Nine trades a year fails the brief's 100-trade requirement outright, and 59 events is not a sample
+anything can be concluded from.
+
+### The book, priced at honest slippage
+
+S120c built it causally — trigger at 3.0/3.5/4.0 sigma on a trailing EWMA vol that excludes the
+trigger bar, entry at the **open after** the trigger bar rather than the close just observed, fixed
+hold, one position at a time, funding accrued, no stop. 40 configurations across 15m/30m/1h.
+
+The slippage sweep is the experiment, not a footnote. **This book deliberately trades at the worst
+moment of liquidity in the year** — it puts on risk in the middle of a cascade, when the book is
+thin and every other participant wants the same fill. The 3bps carried through the rest of this log
+is a number for calm markets and it is fiction here.
+
+| 1h, 4.0σ, hold 4 | slip 3bps | 10bps | 25bps | 50bps | 100bps |
+|---|---|---|---|---|---|
+| profit factor | 1.06 | 0.89 | 0.61 | 0.34 | 0.12 |
+| at the −20% gate | +1.1% | −3.6% | −12.9% | −26.5% | −47.8% |
+| second half | −3.7% | −7.9% | −17.0% | −30.4% | −51.1% |
+
+That is the **best cell of all forty**. Profit factor runs 0.66 to 1.06 across the rest; every
+other configuration loses money even at the fantasy 3bps. No maker rebate is assumed anywhere, and
+it would not rescue this: a resting order in a cascade is filled precisely when it is wrong.
+
+**Recorded as closed.** The frequency axis is shut by a cost floor, not by exhaustion. Intraday BTC
+reversal is one of the most statistically certain effects in this study and one of the least
+tradeable, and the two facts have the same cause — an effect that large and that persistent survives
+*because* it is smaller than the cost of arbitraging it away.
+
+### What this completes
+
+With the frequency axis closed, the census of archetypes reachable from a single directional
+instrument is complete: crowding/positioning (V7, S118, S119), trend (S117), carry (S114), and now
+intraday (S120). Every one falls short of 300% at a 20% drawdown, and the two reasons are now both
+measured rather than asserted — a **drawdown ceiling** at daily frequency, and a **cost floor**
+below it. Together they close the box.
+
+---
+
+## S121 — The scorecard: every standalone book against the brief
+
+Criteria 1 and 4 of the brief — 300% a year, drawdown under 20% — are one test, not two, because
+both are functions of position size and size is a free dial. The joint question is the only one with
+a fixed answer: **is there any size at which this book returns 300% and stays inside 20%?** A book
+reading 29% at the gate is not sized wrong; it fails at every size.
+
+Every book is measured twice. The **realised gate** scales to the drawdown of the one path that
+happened, which is what the rest of this log quotes. The **honest gate** scales to the *median*
+bootstrapped path (90-day blocks, 1,500 resamples), which is S112's correction — applied here to
+every book including the deployed one, because applying it selectively is the asymmetry this log
+exists to catch.
+
+| # | book | mechanism | Sharpe | trades | PF | gate | honest | short by |
+|---|---|---|---|---|---|---|---|---|
+| 1 | V7 (deployed) | positioning | 2.13 | 1,769 | 3.18 | 178.9% | **129.4%** | 2.3× |
+| 2 | crowding (S119) | positioning | 1.32 | 310 | 1.95 | 27.7% | **29.2%** | 10× |
+| 3 | trend (S117) | price | 0.70 | 44 | 2.27 | 11.1% | **8.3%** | 36× |
+| 4 | buy & hold | none | 0.71 | 1 | — | 6.9% | **7.8%** | 38× |
+| 5 | cascade (S120c) | liquidity | −0.34 | 395 | 0.89 | −2.0% | **−2.3%** | — |
+
+**Nothing passes.** The nearest is 2.3× short.
+
+The honest gate *raises* crowding and buy & hold slightly and *cuts V7 from 178.9% to 129.4%* —
+their realised paths happened to draw down at or worse than their medians, V7's markedly less. That
+is S112's finding reproduced by a second method. (S112 solved for the risk *parameter* at which the
+median path draws 20%, which also changes trade selection through the ATR stop; this scales the
+return series directly. The two land at 135% and 129% — consistent, not identical, and the
+difference is the method not the book.)
+
+Two rows deserve a note. **S117 registers only 44 completed trades** over 6.7 years and fails the
+100-trade criterion outright — a three-speed blended trend sign rarely goes flat or flips, so a
+continuously-sized book makes far fewer *completed* trades than its turnover suggests. **Buy & hold
+returns 7.8%** at a 20% drawdown, which is the number every other row should be read against: the
+free alternative, charged funding.
+
+### What the census now establishes
+
+Five mechanisms, built standalone, every one judged on the brief's own terms: positioning, price
+trend, carry, intraday liquidity, and holding the asset. The archetypes reachable from a single
+directional instrument on this data are exhausted, and the two binding constraints are both measured
+rather than asserted — a **drawdown ceiling** at daily frequency (S103, S112) and a **cost floor**
+below it (S120). A strategy needs Calmar 15 to satisfy this brief. Daily books here top out near
+Calmar 1.3, and the frequency axis that would raise Calmar is shut by a 16bps round trip against an
+effect worth 0.1–2.2bps.
