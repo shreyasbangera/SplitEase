@@ -5401,3 +5401,68 @@ Calmar residual is not confined to the early sample, it is still present in the 
 
 **The target is not out of reach in a good year. What it is not is a stable annual expectation
 under a hard drawdown cap** — and those two statements have been run together throughout this log.
+
+---
+
+## S133–S134 — Four more strategies, built and judged on their own
+
+Every book in this study to this point forecasts direction from a state variable. These do not.
+
+### S133.1 — Funding harvest: the coupon, not a forecast
+
+The perpetual pays a cash flow every eight hours; when funding is negative, shorts pay longs. That
+is a coupon rather than a prediction, and S118 only ever used funding as one of nine features inside
+a direction model. Traded as the carry it actually is:
+
+**The mechanism is not there, and the reason is arithmetic.** Funding averages **+11.8% a year to a
+long and is negative on only 12% of days**. There is almost nothing to collect, and the price risk
+taken to collect it swamps the coupon. Best variant Sharpe 0.30, gate 3.2%, PF 1.24; most are
+negative.
+
+### S133.2 — Seasonality: a clean demonstration of why trailing estimation matters
+
+Never tested in this log and the cheapest thing in it to check. Full-sample day-of-week means look
+striking — Mon +36.5bps, Wed +41.0, Thu −27.0 — and that number is **descriptive only**. Estimated
+on a trailing window and walked forward, the book **loses money at every window length**: Sharpe
+−0.18 to −0.71, profit factor 0.00. The pattern does not persist out of the window it was measured
+in, which is the entire reason it was estimated trailing rather than fitted.
+
+### S133.3 — Breakout: the best purely price-based book here
+
+Donchian channel with an ATR trailing exit — flat inside the range, risk only on expansion, which is
+a different payoff shape from a moving-average book.
+
+| variant | Sharpe | realDD | trades | PF | at −20% | 1st h | 2nd h |
+|---|---|---|---|---|---|---|---|
+| Donchian 20d, 2×ATR | 0.68 | −44.8% | 66 | 1.71 | 6.8% | 19% | 3% |
+| **Donchian 55d, 3×ATR** | **0.69** | −23.4% | 32 | **2.69** | **13.1%** | 24% | 8% |
+| Donchian 100d, 3×ATR | 0.60 | −25.9% | 21 | 2.93 | 8.5% | 8% | 13% |
+
+13.1% is the best figure any purely price-based book has produced here. It still **fails the
+100-trade criterion outright** at 32 completed trades, and it is 23× short of the return target.
+
+### S134 — A learned model: the one method never used
+
+Every strategy here specifies by hand how inputs combine — equal weights, a threshold, a sign chosen
+by reasoning. That assumes the relationship is linear, additive and regime-invariant. Gradient
+boosting assumes none of those. 33 features spanning crowding, price, volatility, funding, macro and
+on-chain; retrained every 90 days on a trailing 3-year window; **the 5-day label horizon purged at
+every refit**, since training on samples whose labels are not yet observable is the standard way this
+kind of backtest produces a fake equity curve.
+
+| variant | Sharpe | trades | PF | at −20% |
+|---|---|---|---|---|
+| learned, tgt 20%, no threshold | 0.03 | 1 | — | −0.2% |
+| learned, tgt 20%, threshold 0.5 | −0.04 | 130 | 1.02 | n/a |
+| learned, tgt 40%, threshold 0.5 | −0.07 | 130 | 1.00 | n/a |
+
+**Nothing.** The control is the informative part: the identical pipeline trained on **shuffled
+labels** scores −1.22 to −0.24, so the machinery is not manufacturing returns — the model genuinely
+finds no learnable 5-day signal beyond what a flat average of the same features already extracts.
+Interactions and regime-dependence, which are the whole reason to reach for a model like this, are
+not present in this feature set.
+
+### Standing
+
+Four more strategies, all built standalone and judged against the brief alone. Best of them is the
+breakout book at 13.1% with 32 trades. None passes.
