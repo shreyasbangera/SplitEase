@@ -5790,3 +5790,52 @@ compounds.
 **Recorded as the governing constraint of this study.** Return is capped by Sharpe and nothing else;
 leverage cannot buy past it, and every strategy built here has been a search for Sharpe without
 knowing it.
+
+---
+
+## S146 — Maximising Sharpe, and the final position at a 20% drawdown
+
+S145 established that Sharpe, not the drawdown limit, is the binding constraint: at Sharpe 1.41 the
+Kelly ceiling is 171% regardless of how much drawdown is permitted. So S146 searched 14 sleeve
+variants — three range-expansion lookbacks, Donchian and Keltner channels, three vol-of-vol
+constructions, exposure timing, trend, and two crowding windows — across every combination up to
+size five, ranked by **Sharpe** rather than by the gate figure used everywhere else in this log.
+
+Highest found: **Sharpe 1.58** (rex144 + crowd180 + crowd365), Kelly ceiling 250%.
+
+**With a caveat that disqualifies it as a headline.** `crowd180` and `crowd365` correlate at
+**+0.938** — that combination is the crowding signal double-weighted, not three independent sleeves,
+so the 1.58 is partly a weighting artefact. Restricting to one crowding leg gives the honest answer.
+
+### The best books under a 20% drawdown limit, one crowding leg only
+
+| book | Sharpe | gate | honest gate | flips | PF | last 2y | neg yrs |
+|---|---|---|---|---|---|---|---|
+| **rex144 + crowd365** | **1.46** | **42.6%** | **37.9%** | 458 | 32.76 | 14.6% | **0** |
+| rex89 + rex144 + vov20_40 + crowd365 | 1.23 | 34.6% | 30.9% | 248 | 77.36 | 16.5% | 0 |
+| rex144 + expos + crowd365 | 1.38 | 32.6% | 31.3% | 273 | 102.75 | 10.7% | 0 |
+| rex89+rex144+vov20_60 *(price only, no decaying leg)* | 1.15 | 30.5% | 24.0% | 194 | 219.24 | 17.0% | 0 |
+| rex144 alone | 1.10 | 26.0% | 23.8% | 80 | 5.00 | **19.3%** | 0 |
+
+**rex144 + crowd365** is the best book this study has produced outside V7:
+**42.6% at a 20% drawdown, 37.9% on the honest bootstrap gate**, 458 position changes, profit factor
+32.76, and positive in all seven years — **+22.5, +38.2, +16.3, +30.4, +10.0, +12.3, +9.6**.
+
+### Against the brief, finally
+
+| criterion | result | verdict |
+|---|---|---|
+| net yearly profit > 300% | **42.6%** (honest 37.9%) | **FAIL — 7× short** |
+| max drawdown < 20% | 20.0% by construction | PASS |
+| 100+ completed trades | 458 position changes | PASS |
+| profit factor > 1.10 | 32.76 | PASS |
+| realistic risk management | vol-targeted, ATR trailing exit, no stop-gaming | PASS |
+| no look-ahead bias | every input lagged a full bar, execution next bar | PASS |
+
+**Five of six criteria pass. The return target fails by a factor of seven, and that failure is
+arithmetic rather than a search problem:** 300% at a 20% drawdown requires Sharpe 6.58 under a law
+fitted at R² 0.969 across 332 books; the best combination of everything this study has built reaches
+1.46, and the Kelly ceiling at that Sharpe is 191% even with the drawdown limit removed entirely.
+
+The session's strategy work took the best non-V7 book from **26.6% to 42.6%** at the same constraint.
+It does not reach 300%, and nothing reachable from a single crypto perpetual with public data will.
