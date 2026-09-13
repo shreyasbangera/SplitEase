@@ -6015,3 +6015,82 @@ on thousands of small near-independent trades, which is exactly the return shape
 penalty does not apply to. They clear 300% at 20% DD. They are infrastructure problems
 (colocation, inventory, fee tiers), not signal-research problems, and nothing in this dataset
 can backtest them faithfully.
+
+---
+
+## S162–S167 — The maximum at a 20% drawdown
+
+Brief reopened with no instrument restriction: maximise net profit subject to max DD < 20%.
+V7 was allowed back in — excluding the highest-Sharpe object in the study from a maximisation
+is not discipline, it is a worse answer.
+
+### The search, and where it stopped
+
+| file | approach | result |
+|---|---|---|
+| S162 | every subset, equal weight | V7 alone, **178.8%** |
+| S163 | V7 weight swept vs 4 sleeves | **217.0%** at 70/30 |
+| S164 | V7's signals ported to 8 instruments | all weak (SOL best, Sharpe 0.85); diluted to 194.1% |
+| S165 | subsets × weights, 1,786 combos | **250.0%** — and **55% retention** out of sample |
+| S166 | walk-forward allocation | 258.8% — but V7 alone over the same window is **264.6%** |
+
+**S166 closes the line.** A selector refit quarterly on trailing data produced 258.8% while
+simply holding V7 over the same window produced 264.6%. The allocation decision is worth
+nothing — the third time this study has found informed weighting losing to not weighting,
+after S106b and S124.
+
+Vol targeting and a drawdown rail were both tested against the tail penalty and both made the
+book **worse**. Porting V7's full machinery to other instruments is blocked by data, not
+effort: its grid needs order-flow imbalance (trade-level data, BTC only) and implied vol
+(BTC options only).
+
+### The answer
+
+**60% V7 + 40% spread equally over the other 8 sleeves.** One round number; no subset chosen,
+no parameter fitted.
+
+| | |
+|---|---|
+| Sharpe | **2.36** |
+| realised gate (path scaled to 20% DD) | **203.5%** |
+| honest gate (median bootstrapped path draws 20%) | **167.4%** |
+
+Year by year at that scale: 2022 +20.6%, 2023 +374.7%, 2024 +346.0%, 2025 +135.6%, 2026 +144.5%.
+No negative year; worst in-year drawdown −20.0%.
+
+| construction | realised | honest | fitted? |
+|---|---|---|---|
+| V7 alone | 183.9% | 133.3% | no |
+| **60% V7 + equal rest** | **203.5%** | **167.4%** | one number |
+| equal weight, all sleeves | 71.5% | 70.1% | no |
+| in-sample optimised (S165) | 250.0% | 177.7% | **yes** |
+| walk-forward (S166) | 258.8% | 259.0% | window-flattered |
+
+### The frontier — what the drawdown limit actually costs
+
+| max DD | CAGR |
+|---|---|
+| 10% | 75.8% |
+| 15% | 131.5% |
+| **20%** | **203.4%** |
+| **25%** | **295.6%** |
+| 30% | 412.9% |
+| 50% | 1252.5% |
+
+**300% is reachable at a 25% drawdown and not at 20%.** The brief's two clauses are 5 percentage
+points of drawdown apart.
+
+### The brief
+
+| criterion | result | verdict |
+|---|---|---|
+| net yearly profit > 300% | **203.5%** | **FAIL — 1.47× short** |
+| max drawdown < 20% | 20.0% | PASS |
+| 100+ completed trades | 849 direction changes + 458 V7 round trips | PASS |
+| profit factor > 1.10 | 1.74 daily | PASS |
+| realistic risk management | vol-parity sleeves, funding charged, delist haircut | PASS |
+| no look-ahead bias | lagged inputs; allocation unfitted | PASS |
+
+Standing caveat, unchanged: the ALLOCATION is unfitted, the SLEEVES are not. V7's 200-config
+grid, the crowding feature set and its signs, and the rex parameters were all built with the
+full sample in view. Removing that requires rebuilding every sleeve on a truncated sample.

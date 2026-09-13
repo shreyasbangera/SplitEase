@@ -1,0 +1,14 @@
+{
+ "wv": 0.5,
+ "combo": [
+  "carry",
+  "lowvol",
+  "tailmom",
+  "btc_rex_crowd",
+  "BNB_crowd",
+  "XRP_crowd"
+ ],
+ "gate": 249.97367212507996,
+ "sharpe": 2.4396584777131487,
+ "oos": 370.95506727781515
+}
