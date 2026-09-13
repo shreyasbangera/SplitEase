@@ -4649,3 +4649,69 @@ a spot leg, options data, or any new data source — and all four are currently 
 by the egress policy. Further candidate-generation inside this space is not research; it is a lottery
 with a 24-point noise band and a growing chance of a false positive that survives one control and
 fails the next.
+
+## S116 — The gate was not the obstacle, and the reason generalises
+
+S115 found six trend sleeves all correlating positively with V7 and blamed **the trend gate**: S84
+bolted it on to stop V7 shorting into melt-ups, it works by suppressing shorts above a long moving
+average, and that makes V7 partly trend-aligned by construction. If so, the gate stands in the way
+of its own replacement — and a gate is a *veto* that earns nothing in a melt-up, where a trend
+sleeve beside an ungated book would be paid for taking that side.
+
+Testable directly: restrict the quarterly selection to the 40 no-gate configurations — the same
+rule on a smaller menu, nothing refit — and see whether the correlation turns negative.
+
+### First, a correction to how this log has been measuring correlation
+
+V7's returns start 2022-03, after the selection's 12-month lookback. The trend sleeves start
+2021-03. Three ways of comparing them give three different answers:
+
+| alignment | EMA50 | EMA100 | EMA200 | DC20 | DC40 | DC60 |
+|---|---|---|---|---|---|---|
+| **date intersection — correct** | **+0.413** | **+0.388** | **+0.246** | **+0.311** | **+0.252** | **+0.197** |
+| zero-filled union — *S115's method* | +0.382 | +0.364 | +0.231 | +0.287 | +0.232 | +0.184 |
+| positional `[:n]` — *this file's first draft* | −0.007 | −0.009 | −0.016 | +0.005 | −0.014 | +0.004 |
+
+The positional version lines V7's 2022 up against trend's 2021 and drives everything to zero. It
+looked like a clean negative result and was a year of misalignment. S115's zero-filled union adds a
+year of (0, r) pairs and biases toward zero too, but only mildly: **its conclusion stands and its
+numbers were understated by about 0.03.**
+
+### The gate explains about a fifth of it
+
+| sleeve | ρ vs **gated** V7 | ρ vs **ungated** V7 | change |
+|---|---|---|---|
+| EMA50 | +0.413 | +0.354 | −0.059 |
+| EMA100 | +0.388 | +0.308 | −0.080 |
+| EMA200 | +0.246 | +0.157 | −0.089 |
+| DC20 | +0.311 | +0.235 | −0.076 |
+| DC40 | +0.252 | +0.175 | −0.077 |
+| DC60 | +0.197 | +0.128 | −0.069 |
+
+Removing the gate moves correlation by **0.06 to 0.09** and leaves every sleeve firmly positive.
+The diagnosis was directionally right and quantitatively nowhere near sufficient.
+
+### And the gate is earning its keep
+
+| book | CAGR | realDD | medDD | Sharpe | Calmar | at −20% | 1st half | 2nd half | vs V7 | worse half |
+|---|---|---|---|---|---|---|---|---|---|---|
+| **V7 (gated) — incumbent** | 86.2% | −12.3% | −14.3% | 2.15 | **7.00** | **168.8%** | 166.6% | 218.9% | — | — |
+| V7 ungated, top-3 of 40 | 83.1% | −16.7% | −15.1% | 2.21 | 4.99 | 106.8% | 199.0% | 111.4% | **−62.1** | −107.5 |
+| ungated + EMA100 *(best swap)* | 78.1% | −20.7% | −24.2% | 1.76 | 3.77 | 74.5% | 129.6% | 62.2% | −94.3 | −156.7 |
+| ungated + DC40 *(worst)* | 46.7% | −31.4% | −35.4% | 1.32 | 1.49 | 27.4% | 31.5% | 24.4% | −141.4 | −194.5 |
+
+Taking the gate off costs **62 points** and is worse in both halves. The selection uses it in
+**36 of 54** top-three picks, so it is chosen, not imposed. Every swap then loses a further 30 to 80
+points on top.
+
+### The structural reason, which is the useful part
+
+The residual correlation is not a V7 artefact. **Both books were net long a market that rose over
+the sample**, and shared market exposure is most of what is left once the gate is accounted for.
+
+That generalises badly for this whole line of enquiry: within one instrument, any two *profitable*
+directional books measured over a rising sample will correlate positively through shared beta, and
+the only way to force negative correlation is to be systematically short when the other is long —
+which on this sample loses money. **A negatively correlated complement to V7 does not exist inside
+a single directional instrument.** S102c's admission bar can therefore only ever be approached from
+the ρ > 0 side, where it demands Sharpe 1.4+ and nothing available clears it.
