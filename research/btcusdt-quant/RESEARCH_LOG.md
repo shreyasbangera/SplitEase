@@ -5736,3 +5736,57 @@ first/second half at the gate 39.8% / 20.8%.
 crowding-8h book (30.0%) is durability and robustness rather than level: zero negative years against
 one, 24.6% against 15.2% at 50bps costs, and confirmation under clock-free sampling. It fails the
 brief on return by a factor of eleven.
+
+---
+
+## S145 — The Kelly ceiling: the arithmetic that should have been run first
+
+Scaling the best new book toward 300% does not work, and the way it fails is the finding. CAGR peaks
+at **94.1%** and then *falls*: 84.6% at twice that size, 11.2% at four times, −68.2% beyond. That is
+volatility drag past the Kelly point — extra leverage destroys compound growth because losses
+compound multiplicatively.
+
+Which gives the law that actually governs this brief, and it is not Calmar:
+
+        maximum achievable CAGR  =  exp(Sharpe² / 2) − 1
+
+At Sharpe 1.13 that predicts 89%; the observed peak was 94%. They agree.
+
+| Sharpe | max CAGR | |
+|---|---|---|
+| 1.10 | 83% | breakout alone |
+| 1.13 | 89% | breakout + vov blend (S144) |
+| **1.41** | **171%** | **breakout + crowding — the best Sharpe in this study ex-V7** |
+| **1.67** | **303%** | **what 300% requires** |
+| 2.13 | 866% | V7 |
+
+### This splits the brief into two different problems
+
+- **300% CAGR with drawdown unconstrained** needs **Sharpe 1.67**. That is *near*: the best
+  combination here is 1.41, an 18% shortfall, and V7 clears it outright — which is why V7 actually
+  printed +391.8% in 2023 and +326.2% in 2024.
+- **300% CAGR at a 20% drawdown** needs **Sharpe 6.56** (S129's law). That is hopeless and has now
+  been measured from several directions.
+
+The two constraints in the brief are not jointly satisfiable by anything reachable. At Sharpe 1.41,
+reaching even 147% requires a −82% drawdown and P(DD>50%) of 100%.
+
+### And every development pass in this study optimised the wrong objective
+
+The "gate" figure used throughout — CAGR at a fixed 20% drawdown — is Calmar. **Sharpe was reported
+in every table and was never once the objective.** Ranking the same sleeve combinations by Sharpe
+instead gives a different answer: breakout + crowding (1.41) tops the list, while the blend that won
+on the gate (S144) ranks ninth at 1.14. A book selected for Calmar is selected for shallow
+drawdowns; a book selected for Sharpe is selected for consistency, and consistency is what
+compounds.
+
+| combination | Sharpe | max CAGR | realDD | last 2y | neg yrs |
+|---|---|---|---|---|---|
+| **breakout + crowding** | **1.41** | **171%** | −11.1% | 13.7% | 0 |
+| vovfade + exposure + crowding | 1.36 | 153% | −14.2% | 13.9% | 0 |
+| all four | 1.34 | 145% | −12.7% | 14.9% | 0 |
+| breakout + vovfade *(S144's winner)* | 1.14 | 91% | −21.0% | 20.4% | 0 |
+
+**Recorded as the governing constraint of this study.** Return is capped by Sharpe and nothing else;
+leverage cannot buy past it, and every strategy built here has been a search for Sharpe without
+knowing it.
