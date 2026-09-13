@@ -6328,3 +6328,67 @@ best cell on a flat plateau; a fitted parameter sits on a spike, not a table.
 Separately: **max drawdown is −23.2% to −24.6% at every k** when run at the full 14.4%. Not 20%.
 That independently confirms the V7 docs (98% chance of exceeding 20% at 14.4% risk) and the
 −24.0% measured for 2025. At the live 8% setting it scales to roughly −13%.
+
+---
+
+## S173 — Is cmpx still alive? Yes. It is the only one that is.
+
+S172 put `cmpx` at the top of V7's dependency list — removing it cut the book from 117.4% to
+42.7%. The hypothesis was that it would also be the most perishable: it is built on
+`z(3-day change in log(coin-margined perp / USDT-margined perp))`, and coin-margined open
+interest has been shrinking for years. **The hypothesis was wrong, and usefully so.**
+
+### 1. The data feed is healthy
+
+| year | coverage | median \|return\| | zero-move bars |
+|---|---|---|---|
+| 2021 | 100% | 41.5bp | 0.0% |
+| 2023 | 99% | 16.5bp | 0.1% |
+| 2025 | 100% | 20.2bp | 0.0% |
+| 2026 | 100% | 19.9bp | 0.1% |
+
+The coin-margined contract is still actively quoted. No staleness, no forward-fill artefacts.
+
+### 2. cmpx is the only signal improving
+
+Single-signal books, full period against 2024-01 onward:
+
+| signal | full Sharpe | **2024+ Sharpe** | 2024+ CAGR | direction |
+|---|---|---|---|---|
+| flow | 1.08 | **0.46** | +9.0% | decaying, −57% |
+| **cmpx** | 0.69 | **1.13** | **+33.9%** | **improving, +64%** |
+| btcdom | 0.28 | **−0.35** | −10.1% | loses money |
+| fundz | −0.02 | **−0.84** | −23.1% | loses money |
+| posn | 1.17 | 0.83 | +25.9% | decaying, −29% |
+
+The decay S172 detected is in **flow and posn**, not cmpx. cmpx has gone from the second-worst
+of the five to the best.
+
+### 3. The losing signals are drawdown hedges, not dead weight
+
+`fundz` (Sharpe −0.84) and `btcdom` (−0.35) lose money standalone. But leave-one-out measured on
+**2024+ only**:
+
+| removed | Δ Sharpe | Δ CAGR | Δ maxDD |
+|---|---|---|---|
+| flow | −0.11 | −29.3pp | −2.6pp |
+| **cmpx** | **−0.95** | **−128.7pp** | −13.4pp |
+| btcdom | −0.38 | −34.7pp | −1.6pp |
+| fundz | −0.45 | −37.2pp | **−11.9pp** |
+| posn | −0.23 | −34.6pp | −6.0pp |
+
+**Every removal still hurts, including the two that lose money on their own.** Dropping `fundz`
+widens max drawdown by 11.9 percentage points. Its average correlation to the other four is
+**−0.019** — it is a hedge, not a return source. The five-signal set is a diversified ensemble
+in which some members exist to cut drawdown, not to make money.
+
+### Verdict
+
+**Do not touch the signal set.** Every one of the five earns its place on both the full sample
+and recent data, which also retires the S172 worry that the set looked full-sample-selected —
+it survives the same test on a period it was not selected on.
+
+The thing to watch is `flow` and `posn`, which have lost half and a third of their standalone
+Sharpe. And the keystone is `cmpx`: removing it costs 0.95 Sharpe and 128.7pp of CAGR on recent
+data. If the coin-margined contract ever does go quiet, that is the failure that matters — so
+monitor `cm_1h` coverage and zero-move share as an operational alarm.
