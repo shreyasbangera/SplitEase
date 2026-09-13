@@ -5931,3 +5931,87 @@ ones raises Sharpe by sqrt-of-nothing worth having.
 300% at a 20% drawdown needs Sharpe **6.58**. The best combination of everything — single
 instrument and portfolio, five near-uncorrelated sleeves, 683 coins, six years — reaches **1.60**.
 Even with the drawdown limit removed entirely, the Kelly ceiling at that Sharpe is 231%.
+
+---
+
+## S160–S161 — Delta-neutral carry, and a correction to the impossibility claim
+
+### The claim I made was too strong, and here is the correction
+
+S158 asserted 300% at a 20% drawdown needs Sharpe 6.58. That number came from an empirical
+law, `Calmar = 0.84 × Sharpe^1.53`, fitted across 332 books **built in this study**. It is a
+regularity of the strategies I happened to build, not a constraint on strategies.
+
+From theory: log equity with drift `g` and vol `v` has `P(maxDD > d) = exp(−2gd/v²)`. Solving
+for 300% CAGR at a 20% drawdown gives **Sharpe ≈ 2.0** for a median outcome, **≈ 3.1** for 90%
+confidence. Sharpe 2–3 is reachable. **300% at 20% DD is not mathematically impossible.**
+
+But the idealised formula assumes well-behaved returns. Measured against the actual path of the
+best book here:
+
+| | vol | CAGR at a 20% maxDD |
+|---|---|---|
+| idealised (GBM, Sharpe 1.51) | 68% | 122% |
+| **the real path** | — | **42.6%** |
+
+**Ratio 2.9×.** That is the cost of fat tails and volatility clustering, and it is why "Sharpe 2
+is enough" holds only for strategies whose returns are near-Gaussian. Crypto directional books
+are not.
+
+### The carry sleeve was measured wrong
+
+Decomposing it: the edge was never the ranking.
+
+| component | return | vol | Sharpe |
+|---|---|---|---|
+| funding leg | +74.3%/yr | 10.8% | **+6.90** |
+| price leg | −35.6%/yr | 58.8% | −0.60 |
+| total | +38.7%/yr | 57.7% | +0.67 |
+
+Cross-sectional funding spread between deciles runs **+148.2%/yr**, positive on 79% of days. A
+Sharpe-11 edge buried under price noise six times its size.
+
+**But it cannot be hedged cross-sectionally.** Beta neutralisation takes price vol from 41.0%
+to 36.3% — it removes 11%, because the residual is idiosyncratic. You cannot hedge one altcoin
+with a different altcoin.
+
+### The exact hedge: cash and carry (long spot, short perp)
+
+After fixing a bug that put 16.4% vol into what should be a hedged leg (5,207 cells had one
+leg's return missing; `fillna(0)` turned hedged pairs into naked positions), the basis leg
+carries **1.01% vol** — genuinely delta-neutral. And the economics are dead:
+
+| | |
+|---|---|
+| funding available in the top-20% slice | +25.8%/yr |
+| funding actually captured | +9.6%/yr |
+| costs | −10.4%/yr |
+| **net** | **−0.7%/yr** |
+
+Year by year: 2021 **+35.7%**, 2022 −8.0%, 2023 −4.8%, 2024 +2.2%, 2025 −9.5%, 2026 −13.2%.
+**The classic crypto carry trade paid in 2021 and has been arbitraged away since.** Universe
+mean funding is +6.6%/yr and turnover costs exceed it.
+
+### The measured frontier for the best book (Sharpe 1.51)
+
+| max drawdown | CAGR |
+|---|---|
+| 20% | 37.8% |
+| 30% | 59.8% |
+| 50% | 111.7% |
+| 70% | 175.9% |
+
+**Kelly ceiling at Sharpe 1.51 is 214%** — this book cannot reach 300% at *any* leverage or
+drawdown. Sharpe 1.67 is the hard floor for 300% at any drawdown whatsoever.
+
+### What is and is not ruled out
+
+Ruled out, on evidence: daily-bar directional and cross-sectional factor books on public
+OHLCV + funding data, across 683 coins and six years, top out near Sharpe 1.6.
+
+**Not** ruled out: strategies that are simultaneously high-Sharpe and well-behaved — market
+making, cross-exchange arbitrage, latency-sensitive liquidity provision. These run Sharpe 5–15
+on thousands of small near-independent trades, which is exactly the return shape the 2.9× tail
+penalty does not apply to. They clear 300% at 20% DD. They are infrastructure problems
+(colocation, inventory, fee tiers), not signal-research problems, and nothing in this dataset
+can backtest them faithfully.

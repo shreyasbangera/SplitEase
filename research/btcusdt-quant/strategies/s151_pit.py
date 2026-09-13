@@ -69,7 +69,12 @@ def _read_zip(p):
                                ).tz_localize(None).normalize()
     for c in ("open", "high", "low", "close", "quote_volume"):
         d[c] = pd.to_numeric(d[c], errors="coerce")
-    return d[["open", "high", "low", "close", "quote_volume"]]
+    # Binance switched these files from millisecond to microsecond stamps in
+    # 2025 and a handful of rows carry the other unit, which the max-based
+    # sniff above mis-classifies and lands in 1970. Anything outside the
+    # exchange's actual lifetime is a parse artefact, not data.
+    d = d[(d.index >= "2017-01-01") & (d.index <= "2030-01-01")]
+    return d[["open", "high", "low", "close", "quote_volume"]] if len(d) else None
 
 
 def build(cache=f"{D}/pit_panel.parquet", rebuild=False, min_bars=120,
