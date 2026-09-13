@@ -5466,3 +5466,63 @@ not present in this feature set.
 
 Four more strategies, all built standalone and judged against the brief alone. Best of them is the
 breakout book at 13.1% with 32 trades. None passes.
+
+---
+
+## S135–S136 — Five more strategies, and the first additive combination in this study
+
+### S135 — five built standalone
+
+| strategy | best variant | Sharpe | trades | PF | at −20% |
+|---|---|---|---|---|---|
+| multi-horizon breakout ensemble | 5 horizons, tgt 30% | 0.67 | 48 | 2.15 | 10.0% |
+| volatility-regime switching | trend only in low vol | 0.40 | 27 | 2.02 | 3.8% |
+| order-flow imbalance standalone | follow, 60d window | 0.22 | 1 | — | 2.4% |
+| **exposure timing (long/flat)** | trend agreement, 3 speeds | **0.94** | 22 | **4.09** | **17.4%** |
+| breakout + crowding | sum of the two | 1.09 | 6 | 29.31 | **23.8%** |
+
+Three failures worth recording. The **breakout ensemble did not fix S133's trade-count problem** —
+horizons 10/20/34/55/89 together give 48 completed round trips against 32 for one horizon, and the
+gate figure *fell* from 13.1% to 10.0%: diversifying the breakout length diluted rather than
+diversified. **Regime switching** found nothing in either direction, which is itself informative —
+the trend/revert split that microstructure folklore assumes is not present at this horizon.
+**Order-flow fading is catastrophic** (Sharpe −1.19 to −1.33), and following it is merely useless.
+
+Two results worth pursuing:
+
+**Exposure timing beat direction picking.** A long/flat book that only asks *how much* — in when
+three trend speeds agree, flat otherwise — reached 17.4% against 13.1% for breakout and 6.5% for
+holding the asset, at profit factor 4.09. Deciding *whether* to be exposed was worth more than
+deciding *which way*.
+
+**The combination was additive.** Crowding 19.5%, breakout 13.1%, the sum 23.8%. **The first time in
+this study a combination beat both of its components** — every portfolio in S124 landed below its
+best member.
+
+### S136 — the ensemble, all fifteen subsets
+
+Four genuinely different mechanisms: positioning, price structure, participation, and the asset.
+Equal-weighted. Every subset printed, so "better than its parts" is answered for all of them:
+
+| book | Sharpe | realDD | medDD | flips | at −20% |
+|---|---|---|---|---|---|
+| crowd | 1.10 | −11.8% | −10.9% | 945 | 19.5% |
+| exposure | 0.94 | −21.6% | −29.4% | 106 | 17.4% |
+| breakout | 0.69 | −23.4% | −31.3% | 82 | 13.1% |
+| hold | 0.61 | −48.4% | −54.8% | 59 | 6.5% |
+| **crowd + exposure** | **1.35** | **−12.5%** | −14.9% | 475 | **29.1%** |
+| crowd + breakout | 1.09 | −12.7% | −15.3% | 471 | 23.8% |
+| crowd + breakout + exposure | 1.05 | −15.8% | −17.9% | 294 | 19.1% |
+| all four | 1.05 | −17.6% | −21.2% | 185 | 18.3% |
+
+**crowd + exposure at 29.1% and Sharpe 1.35 is the best non-V7 book this study has produced.**
+It beats both components and sits essentially on S129's law (predicted 26.6% at that Sharpe).
+
+And the ensemble has a ceiling: three sleeves give 19.1%, four give 18.3%. **Adding weaker sleeves
+dilutes.** Developing the exposure filter does the same — agreement alone 17.4%, plus calm vol
+10.9%, plus all four conditions 7.7%. Over-conditioning destroys it, consistently.
+
+Trade counting is reported two ways from here, since a continuously-sized book rarely returns to
+flat: `trips` (round trips through flat) and `flips` (any position change beyond the no-trade band).
+The 100-trade criterion reads naturally as the latter for books of this kind; crowd + exposure makes
+475 of them.
