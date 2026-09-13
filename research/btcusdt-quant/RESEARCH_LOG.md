@@ -6434,3 +6434,45 @@ is the breakout family at Sharpe 1.08; V7 is ~2.0. **Nothing in this dataset bea
 remaining upside is not another signal** — it is running V7 against a decay-adjusted expectation,
 accepting more drawdown for more return along the measured frontier, or acquiring data this study
 does not have.
+
+---
+
+## S175 — The standing order book carries nothing either
+
+S174 killed minute *flow* for a principled reason: flow is a transient, traded out within
+seconds. **Depth is a state, not an event** — how much size rests on each side and how fast the
+book thickens away from mid. A state persists, which is the property a daily-horizon signal
+needs and the one flow lacks. It had never been tested on more than 250 days, because that is
+all `book_1m.parquet` holds.
+
+Fetched Binance's `bookDepth` archive: **1,348 days, 2023-01 → 2026-09, 2,880 snapshots a day**,
+notional resting size at ±1% to ±5% from mid. 11 features — imbalance at 1%, 5% and total, near-
+versus-far imbalance, intraday imbalance volatility and autocorrelation, total depth, bid and ask
+book slope, slope asymmetry, intraday depth volatility.
+
+| strongest | IC1d | t |
+|---|---|---|
+| imb5 | +0.0607 | **2.14** |
+| imbT | +0.0568 | 2.01 |
+| imb_near_far | −0.0433 | −1.53 |
+| slope_bid | +0.0378 | 1.33 |
+
+**Nothing cleared |t| = 2.5.** The two closest are 5%-depth imbalance at 2.14 and 2.01 — and
+across 11 features × 3 horizons = 33 tests, roughly 1.5 results above |t| = 2 are expected from
+noise alone. No surrogate control was needed.
+
+### The search is closed
+
+175 experiments across: daily and 12-hour price families (trend, breakout, Donchian, Keltner,
+vol-of-vol, reversal, momentum); cross-sectional factors over a survivorship-free 683-coin
+universe (low-vol, carry, reversal, momentum, illiquidity, dispersion, skew); funding, basis,
+cash-and-carry; on-chain, macro, cross-asset positioning; options and variance risk premium;
+machine learning; minute-resolution microstructure; and now 3.7 years of the standing order book.
+
+**Best independent book: the breakout family at Sharpe 1.08. V7 is ~2.0.** Nothing in this data
+beats it, and the two most recent files explain why the remaining candidates fail rather than
+merely recording that they did: microstructure information decays faster than it can be traded
+at these costs, and the standing book is not informative about direction at a one-day horizon.
+
+What is left is not a signal. It is either an execution edge (market making, which needs
+queue-position simulation and carries real fidelity risk), or running V7 better.
