@@ -4843,3 +4843,68 @@ at every level of the hierarchy it has been tried.*
 *(The first implementation of the sign matrix assigned with `signs[c].iloc[i] = v`, which under
 pandas 3 copy-on-write writes to a temporary and is silently discarded. Every sign stayed zero, no
 position was ever opened, and the entire table printed 0.0% with no error at all. Rebuilt in numpy.)*
+
+## S119 — Developing the crowding book, and finding out why development does not help
+
+S118 was a first draft — nine features signed by reasoning, averaged flat, windows and a vol target
+picked out of the air, rebalanced daily because daily was convenient. This develops it properly
+across the three levers that were defaulted rather than chosen: **selectivity** (a dead band below
+which the book holds nothing at all), **decision horizon**, and the **standardisation and volatility
+windows**. Swept together, because they interact.
+
+### Two bugs of mine, and a false positive worth recording
+
+**The panel was not trimmed.** `build()` returned the raw frame from 2021-01, where most features
+are still NaN, so every variant was partly measured over a period its own signal could not be
+computed in. The baseline read Sharpe 0.65 against the 1.18 S118 had measured on the identical book.
+
+**And then the units.** `stats_of` computes years as `len(returns)/365.25` and annualises by
+`sqrt(365.25)` — both assume a *daily* series. Handed 250 weekly bars it reads 4.8 years as 0.68,
+which inflates CAGR enormously and Sharpe by √7. The horizon sweep therefore produced this:
+
+| weekly variant | as first printed | after putting every frequency on one clock |
+|---|---|---|
+| threshold 0.20 | **349.8%** at the gate, 1st half **4696.7%** | **24.0%**, 1st half 73.8% |
+| threshold 0.00 | 333.4%, Sharpe 2.83 | 23.4%, Sharpe 1.06 |
+
+**A book that appeared to clear the 300% brief was a units error**, and the only reason it was caught
+is that a 4696% half-sample is not a number a real strategy produces. Every decision frequency is
+now re-expressed on a daily index before it is scored.
+
+### The development pass itself
+
+| variant | Sharpe | Calmar | realDD | trades | PF | exposure | at −20% | 1st half | 2nd half |
+|---|---|---|---|---|---|---|---|---|---|
+| S118 draft, daily, no threshold | 1.18 | 0.47 | −17.3% | 1 | — | 98% | 15.3% | 61.0% | 3.0% |
+| daily, threshold 0.10 | 1.19 | 1.02 | −9.2% | 212 | 2.05 | 66% | 21.5% | 72.8% | 6.2% |
+| daily, threshold 0.50 | 1.02 | 1.18 | −5.6% | 186 | 1.98 | 22% | 23.4% | 85.6% | 1.6% |
+| 2-day, threshold 0.30 | 0.99 | 0.97 | −7.6% | 181 | 1.84 | 44% | 20.0% | 83.3% | −1.1% |
+| weekly, threshold 0.20 | 1.12 | 1.16 | −7.7% | 56 | 3.26 | 54% | 24.0% | 73.8% | 15.8% |
+| **zwin 365d, vol halflife 32d** | **1.32** | **1.27** | **−7.2%** | 304 | 1.96 | 42% | **27.7%** | 133.4% | 5.3% |
+
+Selectivity is a real lever — it takes Calmar from 0.47 to 1.0–1.3 and drawdown from −17% to −6%,
+exactly as basic risk management should. But the best cell after a full development pass reads
+**27.7%**, against the 28.9% S118's first draft already had. *Development bought nothing.*
+
+### Why: the edge has expired
+
+Every single variant shows the same split — a first half of 73–133% and a second half of roughly
+zero. Year by year, on the best cell:
+
+| 2021 | 2022 | 2023 | 2024 | 2025 | 2026 |
+|---|---|---|---|---|---|
+| **+21.9%** | +14.9% | +10.3% | +5.2% | **+0.8%** | +1.5% |
+
+**Monotonic decay to nothing**, while exposure stays flat at 33–48% of days. The book has not
+stopped trading; it has stopped being paid.
+
+This is the cleanest measurement of decay in this log, because there is no selection machinery
+anywhere in this book to confound it — no quarterly ranking, no config grid, no gate. Just nine
+public crowding series, equal-weighted, held when they agree. **The decay is in the input data
+class itself**, and it confirms as a direct measurement what S72 inferred indirectly and the
+structural note on the funding premium recorded years earlier in the log.
+
+**Recorded as closed, and for the useful reason:** further development of a crowding book is
+polishing a mechanism that has been fading since 2021. The 2021 edge was real and large; by 2025 it
+is inside the noise. Any strategy resting on published positioning and funding data should be
+assumed to be working against this decay, and sized for the recent years rather than the full sample.
