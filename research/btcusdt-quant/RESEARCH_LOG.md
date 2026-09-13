@@ -5526,3 +5526,92 @@ Trade counting is reported two ways from here, since a continuously-sized book r
 flat: `trips` (round trips through flat) and `flips` (any position change beyond the no-trade band).
 The 100-trade criterion reads naturally as the latter for books of this kind; crowd + exposure makes
 475 of them.
+
+---
+
+## S137–S140 — Four more mechanisms, the 8-hour clock, and the one book that has not decayed
+
+### S137 — leverage quadrant, basis shape, faster crowding, risk parity
+
+**Leverage build vs flush.** Price and open interest as a quadrant, which an additive average of the
+two cannot express. Forward 10-day returns by quadrant: flush +0.63%, newshort +0.58% (the only one
+stable across halves), squeeze +0.60% (sign flips), build −0.18% (sign flips). Best book 4.6% at
+Sharpe 0.53 — real structure, too small to trade.
+
+**Basis term structure as sentiment** rather than as carry. Nothing, and the reason is structural:
+the annualised basis is **negative on only 2% of days**, so there is almost no variation to trade.
+Fading rich basis is catastrophic (Sharpe −0.37, PF 0.00).
+
+**Risk parity across sleeves** — mixed, and it *hurt* the best pair (15.8% against 29.1% for equal
+signal weight). No adoption.
+
+**Faster crowding** was the lead: daily Sharpe 0.77 / 7.5%, 12-hourly 1.08 / 11.1%, **8-hourly 1.12
+/ 16.5%**. Monotonic.
+
+### S138 — the frequency result, tested against its three failure modes
+
+| frequency | turnover | rt 8bps | rt 16bps | rt 30bps | rt 50bps |
+|---|---|---|---|---|---|
+| hourly | 5010 | n/a | n/a | n/a | n/a |
+| 4-hourly | 2197 | 1.6% | n/a | n/a | n/a |
+| **8-hourly** | 665 | 21.1% | **16.5%** | 9.2% | 0.9% |
+| 12-hourly | 531 | 13.8% | 11.1% | 7.0% | 2.0% |
+| daily | 269 | 8.6% | 7.5% | 5.7% | 3.2% |
+
+The edge is real but **not free**: 8-hourly beats daily at 8, 16 and 30bps and **loses at 50**.
+Clock phase (S101's trap) clears it — all eight offsets of the 8h grid land 13.5% to 21.6%, median
+16.6%, sd 2.5 — while 4-hourly is dead at every phase. The sweet spot is specifically eight hours,
+**which is the funding settlement interval**: the clock matches when information actually arrives.
+
+Combined with the exposure sleeve: **Sharpe 1.46, −15.1% drawdown, 30.0% at the gate**, and 23.5% at
+double the cost assumption. The best non-V7 book this study has produced.
+
+### S139 — and the year-by-year kills the headline
+
+| 2020 | 2021 | 2022 | 2023 | 2024 | 2025 | 2026 |
+|---|---|---|---|---|---|---|
+| 55.2% | 26.2% | 4.4% | 33.2% | 34.5% | **−4.6%** | **+6.2%** |
+
+The 30.0% is earned in 2020–2024. **The last two years are flat to negative.** The 8-hour clock did
+not rescue the crowding edge; it extracted more from the window in which that edge existed.
+Development changes nothing: selectivity is worth 0.6pp, a third sleeve dilutes to 23.4%, and costs
+take it to 15.2% at 50bps.
+
+### S140 — the durability test, and the one book that passes it
+
+Net return by year, every mechanism at the same risk:
+
+| book | 2022 | 2023 | 2024 | 2025 | 2026 | last 2y ann. |
+|---|---|---|---|---|---|---|
+| crowding | 12.6% | 17.4% | 9.0% | 1.1% | 7.4% | 4.7% |
+| exposure timing | −6.8% | 34.5% | 39.0% | −10.2% | −1.6% | 4.4% |
+| **breakout** | 3.7% | 12.6% | 15.9% | **6.5%** | **5.2%** | **16.9%** |
+| buy & hold | −38.9% | 79.4% | 61.8% | −12.6% | −10.6% | 1.7% |
+
+Everything in this study except breakout is living off 2020–2024. So the development went there, across
+four channel families — Donchian, Bollinger, Keltner and range-expansion — since "breakout" is not
+one thing.
+
+**`range-exp 89`** — a breakout of the 89-day range percentile — is the most durable book found anywhere
+in this study:
+
+| 2020 | 2021 | 2022 | 2023 | 2024 | 2025 | 2026 |
+|---|---|---|---|---|---|---|
+| +65.4% | +3.9% | +18.2% | +24.5% | +8.1% | **+5.1%** | **+14.5%** |
+
+**Positive in all seven years**, 12.5% at the gate, Sharpe 0.80, PF 2.41, 106 position changes (so it
+clears the 100-trade criterion on the flips reading), and **19.9% annualised over the trailing two
+years — accelerating rather than decaying**, while the asset itself fell 12.6% and 10.6%.
+
+Two further negatives worth recording. A **volatility-expansion filter hurts it** (19.9% → 6.0%),
+the fourth over-conditioning failure in this log. And **combining breakout variants dilutes**, exactly
+as combining horizons did in S135: rex89 alone 19.9%, best pair 17.9%, five-way 14.6%.
+
+**The consistent structural finding across S135, S136, S139 and S140 is that combination dilutes in
+this data.** The single exception was crowding + exposure, two genuinely different mechanisms — and
+that one has since decayed.
+
+### Standing
+
+Best by headline: crowding-8h + exposure, 30.0% at the gate, with its last two years flat.
+Best by durability: **range-exp 89, 12.5% at the gate and still paying.** Neither reaches the brief.
