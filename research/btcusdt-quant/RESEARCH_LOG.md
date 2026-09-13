@@ -5359,3 +5359,45 @@ is 2.13 and its excess over the law does not reproduce. Reaching 6.56 by diversi
 realistically-attainable Sharpe-1.3 streams would need roughly **25 uncorrelated** of them. Every
 data class on disk and every reachable external source has now been opened. The brief is not
 reachable from here, and that is now a measurement rather than a failure to search.
+
+---
+
+## S132 — What is actually possible: the risk frontier
+
+The brief asks for two things at once — 300% a year **and** a drawdown under 20% — and the useful
+output is not a pass/fail but the **exchange rate between them**. Bet size is the dial, and Sharpe is
+flat at ~2.15 down the entire column because size cannot create edge, only choose where on the line
+you sit. Drawdown probabilities from a 90-day block bootstrap over 4,000 resampled paths:
+
+| risk | CAGR | Sharpe | median DD | P(DD>20%) | P(DD>30%) | P(DD>50%) |
+|---|---|---|---|---|---|---|
+| 4% | 41% | 2.19 | −7.4% | 0% | 0% | 0% |
+| 6% | 61% | 2.12 | −11.1% | 0% | 0% | 0% |
+| 8% | 86% | 2.15 | −14.3% | 3% | 0% | 0% |
+| 10% | 114% | 2.16 | −17.6% | 25% | 0% | 0% |
+| 12% | 143% | 2.15 | −20.8% | 59% | 2% | 0% |
+| **14.4% (deployed)** | **179%** | 2.13 | −24.9% | **88%** | 15% | 0% |
+| 18% | 247% | 2.15 | −30.2% | 100% | 51% | 0% |
+| 22% | **332%** | 2.15 | −35.8% | 100% | **83%** | 2% |
+
+**300% is reachable — at 22% risk**, where a drawdown past 30% is the expected case rather than a
+tail. A genuine 20% drawdown cap is respected at 8–10%, and buys 86–114% a year. The combination is
+what does not exist, and S129's law says why: it needs Sharpe 6.56 and the best stream here is 2.13.
+
+### And the edge is not dead — a distinction this log had been blurring
+
+The standalone crowding book decayed to nothing (S119). **V7 did not.** Net return by calendar year:
+
+| | 2022 | 2023 | 2024 | 2025 | 2026 (part) |
+|---|---|---|---|---|---|
+| V7 | +2.7% | **+391.8%** | **+326.2%** | +108.3% | +125.9% |
+| crowding | +14.9% | +10.2% | +4.0% | +0.8% | +1.5% |
+| trend | +2.0% | +18.3% | +35.7% | −10.9% | +4.6% |
+| buy & hold | −65.7% | +136.5% | +96.2% | −11.0% | −11.9% |
+
+V7 cleared 300% in **two of its four full years**, and the trailing twelve months ran 121.8% at
+Sharpe 1.89 with a −18.9% maximum drawdown. That also tempers S129's caution: the unexplained
+Calmar residual is not confined to the early sample, it is still present in the most recent year.
+
+**The target is not out of reach in a good year. What it is not is a stable annual expectation
+under a hard drawdown cap** — and those two statements have been run together throughout this log.
