@@ -6094,3 +6094,63 @@ points of drawdown apart.
 Standing caveat, unchanged: the ALLOCATION is unfitted, the SLEEVES are not. V7's 200-config
 grid, the crowding feature set and its signs, and the rex parameters were all built with the
 full sample in view. Removing that requires rebuilding every sleeve on a truncated sample.
+
+---
+
+## S168–S169 — A second strategy to run beside a live V7
+
+Constraint changed: V7 is live and untouched. The question is no longer "what is the best book"
+but "what is the best SEPARATE book to deploy beside it". That makes correlation to V7 as
+important as standalone return — a new book that moves with V7 adds leverage to a bet already on.
+
+### Best V7-free book (S168)
+
+**70% btc_rex_crowd + 30% across carry, low-vol, tail-momentum, rex panel.**
+Sharpe 1.73, **54.4%** at a realised 20% drawdown (honest gate 50.6%), 6.1 years, no negative year.
+
+**But its correlation to V7 is +0.377 — the highest pair in the study**, and structurally so:
+`btc_rex_crowd` is half `crowd365`, which reads the same crowd positioning data V7 reads.
+It is not diversification, it is more of the same bet.
+
+### Splitting the crowding half out (S169)
+
+| strategy | Sharpe | gate @20% | rho to V7 |
+|---|---|---|---|
+| crowd365 | 1.04 | 16.1% | **+0.446** ← the duplicate |
+| **rex144** | 1.08 | 24.8% | **+0.139** |
+| rex_avg | 1.07 | 21.7% | +0.141 |
+| expos | 0.94 | 17.2% | +0.199 |
+| trend | 0.73 | 11.6% | +0.139 |
+| tailmom | 0.58 | 4.7% | +0.064 |
+| lowvol | 0.56 | 5.2% | −0.051 |
+| carry | 0.53 | 4.6% | −0.071 |
+
+Best combinations under |rho| ≤ 0.20:
+
+| subset | Sharpe | realised | honest | rho V7 |
+|---|---|---|---|---|
+| rex144 + rex89 | 1.12 | **31.4%** | 26.6% | +0.146 |
+| **carry + rex144 + rex89 + tailmom** | **1.39** | 27.4% | **30.8%** | **+0.110** |
+
+The four-way book has the higher Sharpe, the higher *honest* gate and the lower correlation; the
+two-way wins only on the realised path. The four-way is the better object.
+
+### The honest problem: the breakout edge has decayed too
+
+rex144+rex89 year by year at the 20% scale: 2020 **+50.5%**, 2021 +44.0%, 2022 +32.3%,
+2023 +32.0%, 2024 **+9.7%**, 2025 **+10.3%**, 2026 +15.1%. Measured only on the V7 overlap
+window (2022-03 onward) the book returns **19.4%**, not 31.4%. Same decay S119 found in the
+crowding data, in a different signal family.
+
+### Effect on the whole account
+
+| split | Sharpe | realised | honest |
+|---|---|---|---|
+| 100% V7 (today) | 2.13 | 178.8% | 129.4% |
+| **90% V7 / 10% new** | 2.17 | **184.9%** | 134.2% |
+| 80% V7 / 20% new | 2.19 | 164.5% | 132.0% |
+| 70% V7 / 30% new | 2.17 | 144.4% | 122.7% |
+| 100% new | 0.80 | 19.4% | 16.6% |
+
+A ~10% sleeve of the uncorrelated book slightly *improves* the account. Anything larger reduces
+CAGR in exchange for less dependence on one strategy — a risk decision, not a return one.
