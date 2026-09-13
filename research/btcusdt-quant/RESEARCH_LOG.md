@@ -6299,3 +6299,32 @@ third of the 2023–24 rate, consistent with S119's finding that the crowding fa
 Two candidate improvements fall out of the sweep — top-1 instead of top-3, and a 24-month
 lookback instead of 12 — but picking the best cell of a sweep is precisely the fitting this file
 exists to detect. They are candidates for a walk-forward test, not recommendations.
+
+### S172b — correction to S172's k-sweep
+
+S172 built each config's stream at a fixed 4.8% risk (= 14.4%/3) and summed the top k, so total
+risk scaled with k: 4.8% at k=1, 14.4% at k=3, up to **57.6% at k=12**. V7's actual rule is
+top-k at *risk/k* — total stays 14.4%. Every other test in S172 ran at k=3 and is unaffected;
+only the k row was confounded.
+
+Rebuilt with per-config risk = 0.144/k:
+
+| k | per-config | Sharpe | CAGR | maxDD | gate @20% |
+|---|---|---|---|---|---|
+| 1 | 14.40% | 1.98 | 150.8% | −24.5% | 114.1% |
+| 2 | 7.20% | 1.95 | 148.6% | −24.6% | 111.8% |
+| **3 (V7)** | **4.80%** | 1.99 | 150.8% | −24.0% | **117.4%** |
+| 5 | 2.88% | 1.94 | 149.1% | −23.2% | **121.4%** |
+| 8 | 1.80% | 1.99 | 152.0% | −23.6% | 120.8% |
+| 12 | 1.20% | 2.03 | 155.1% | −24.5% | 116.8% |
+
+**The full range is 111.8%–121.4%: k barely matters.** The confounded version spanned
+92.5%–123.1% and made k=1 look clearly best — almost all of that spread was the engine's
+`max_lev=10` cap biting at 57.6% risk.
+
+This **strengthens** S172's verdict rather than weakening it. V7's k=3 sits within 4pp of the
+best cell on a flat plateau; a fitted parameter sits on a spike, not a table.
+
+Separately: **max drawdown is −23.2% to −24.6% at every k** when run at the full 14.4%. Not 20%.
+That independently confirms the V7 docs (98% chance of exceeding 20% at 14.4% risk) and the
+−24.0% measured for 2025. At the live 8% setting it scales to roughly −13%.
