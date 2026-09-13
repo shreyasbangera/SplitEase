@@ -5615,3 +5615,61 @@ that one has since decayed.
 
 Best by headline: crowding-8h + exposure, 30.0% at the gate, with its last two years flat.
 Best by durability: **range-exp 89, 12.5% at the gate and still paying.** Neither reaches the brief.
+
+---
+
+## S141–S142 — Developing the durable book, and a claim I had to retract
+
+### S141 — five levers on range-expansion
+
+| lever | result |
+|---|---|
+| **pyramiding** | **hurts badly.** 0 adds: −31.2% drawdown, 0 negative years. 2 adds: −64.1% drawdown, 2 negative years, gate 12.5% → 10.1%. |
+| **asymmetry** | a trap. Halving shorts raises the full-sample gate 12.5% → 16.4% and drops trailing-two-year 19.9% → 14.4%, because **the shorts are what earned the 2025–26 money** while the asset fell. |
+| **exit multiple** | non-monotonic (1.5x bad, 3x good, 4x bad, 6x good) — the shape of noise. |
+| **trigger percentile** | looked like the find: 0.90 → 0.95 roughly doubled the gate at every lookback tested. |
+
+### S142 — and the trigger result does not survive finer sampling
+
+S141 called the selectivity result "a family effect rather than a lucky cell" on the strength of
+three sample points (0.80 / 0.90 / 0.95). **That was wrong, and finer sampling shows it:**
+
+| N | q=0.85 | 0.90 | 0.93 | 0.95 | 0.97 | 0.98 | peak | steps rising |
+|---|---|---|---|---|---|---|---|---|
+| 34 | 8.9% | 4.3% | 7.4% | 8.4% | 25.1% | **39.8%** | 0.98 | 4/5 |
+| 55 | 9.0% | 9.2% | 12.0% | 15.3% | 18.9% | **25.8%** | 0.98 | 5/5 |
+| 89 | 10.1% | 12.5% | **27.2%** | 23.1% | 18.1% | 14.4% | 0.93 | 2/5 |
+| 144 | 14.1% | 13.8% | **27.4%** | 26.0% | 23.4% | 16.6% | 0.93 | 1/5 |
+| 233 | 14.9% | 19.4% | 13.5% | 20.2% | **23.7%** | 18.6% | 0.97 | 3/5 |
+
+The surface is spiky, **the peak location moves with the lookback**, and only 1 of 5 steps rises at
+N=144. A real selectivity effect improves smoothly and then falls away as the sample thins. This
+does not. The 26.0% was a lucky peak, and coarse sampling made five noisy curves look like one
+family. **Recorded as a retraction**: the correct reading of S141's trigger sweep is noise.
+
+### What does survive: averaging over the noisy surface
+
+Combining the q=0.95 books across lookbacks averages out the spikiness rather than betting on one
+cell of it:
+
+| book | Sharpe | realDD | flips | gate | last 2y | neg yrs | 100+ trades |
+|---|---|---|---|---|---|---|---|
+| N=144, q=0.95 alone *(the lucky peak)* | 1.10 | −20.6% | 80 | 26.0% | 19.3% | 0 | no |
+| **q=0.95, N ∈ (55, 89, 144)** | 1.10 | −23.3% | **110** | **22.9%** | 20.2% | **0** | **yes** |
+| q=0.95, N ∈ (34,55,89,144,233) | 1.02 | −23.3% | 132 | 20.1% | 20.6% | 0 | yes |
+| **12h bars, N≈89d, q=0.95** | 1.05 | −21.8% | **140** | **24.0%** | 16.6% | **0** | **yes** |
+
+Note this is the **first case in this study where combining did not dilute** — S135, S136, S139 and
+S140 all found the opposite. The difference is that here the components are equally good and the
+thing being averaged away is parameter noise rather than signal.
+
+And the clock has a different optimum from the crowding book: **12-hourly is the sweet spot for
+breakout** (24.0%), while 8-hourly collapses (4.2%, Sharpe 0.54, two negative years). Crowding
+preferred 8h because that is the funding interval; breakout has no such anchor and prefers a slower
+bar.
+
+### Standing
+
+Best book that passes the brief's trade criterion and has never had a losing year:
+**~23–24% at a 20% drawdown, Sharpe ~1.05–1.10, 110–140 position changes, 0 negative years in 7,
+trailing two years 17–20%.** Still an order of magnitude short of 300%.
