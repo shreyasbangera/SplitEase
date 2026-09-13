@@ -5040,3 +5040,91 @@ rather than asserted — a **drawdown ceiling** at daily frequency (S103, S112) 
 below it (S120). A strategy needs Calmar 15 to satisfy this brief. Daily books here top out near
 Calmar 1.3, and the frequency axis that would raise Calmar is shut by a 16bps round trip against an
 effect worth 0.1–2.2bps.
+
+---
+
+## S122–S124 — The volatility leg, and the ceiling
+
+### S122 — a leg this study wrote off on the wrong file
+
+S114 named the three sources of return available on one instrument — **direction, carry,
+volatility** — measured carry at 0.2% a year, and recorded volatility as unreachable because
+"this study has five months of options." That was `opt_1h.parquet`, 158 days, correctly noise.
+But `bvol_1m.parquet` holds **1.66 million minutes of implied volatility from 2023-06 to 2026-09**:
+1,178 days, 26 missing. The volatility leg was never opened; it was written off on the wrong file.
+
+**The variance risk premium is real and large.** Implied 51.8% against forward realised 44.5% —
+**+7.3 vol points**, positive on 75% of days, and positive in every year: +9.61, +8.79, +7.38,
++2.22. It cannot be harvested directly from here — the premium accrues to the option seller and
+there is no options venue in scope — so the value has to come from what implied vol *forecasts*.
+
+**The directional readings do not survive.** The premium-predicts-returns relation (IC +0.031 to
++0.045 overall) runs +0.056 to +0.13 in the first half and −0.027 to −0.237 in the second, and the
+vol-spike capitulation signal does the same. Both rejected.
+
+**But implied vol forecasts volatility far better than anything this study uses.** Forecasting
+realised vol over the next 30 days:
+
+| forecaster | corr | MAE | corr 1st | corr 2nd |
+|---|---|---|---|---|
+| trailing EWMA 32d — *what every book here sizes off* | **0.082** | 12.46% | **−0.327** | 0.175 |
+| trailing 30d window | 0.255 | 12.96% | 0.107 | 0.321 |
+| **implied vol** | **0.409** | 12.15% | 0.437 | 0.287 |
+| half implied, half EWMA | 0.297 | **11.65%** | 0.183 | 0.244 |
+
+The estimator underneath every strategy in this log is close to useless, and *anti*-predictive
+across the first half.
+
+### S123 — and it does not help, which is the interesting part
+
+Three books × three sizing rules, on the 3.1-year implied-vol window. Implied-vol sizing cut
+drawdown in every single case — always-long −53.4%→−48.6%, trend −36.5%→−33.4%, crowding
+−7.1%→−6.9% — and cut return by more. At the gate it is **6% to 25% worse in all nine cells**.
+
+A forecast five times better at predicting volatility produced a *worse* book. **Forecast accuracy
+and Calmar are not the same objective.** The gate rewards shrinking before losses, not shrinking
+before volatility, and those coincide less than the sizing literature assumes.
+
+### S124 — the ceiling, and a units bug that nearly published itself
+
+Enough one-lever-at-a-time. At the gate the brief is **Calmar 15**, and across this study Calmar
+tracks ≈1.4 × Sharpe², so the brief needs **Sharpe ≈ 3.27** against V7's 2.13. The only route to a
+53% Sharpe gain without a better signal is combining imperfectly correlated streams.
+
+**First it printed nonsense.** Streams were normalised with `R/R.std()` — unit variance *per day*,
+returns of order 1.0. `at_gate` bisects over [0.2, 6.0], cannot scale below 0.2, overflows, and
+returns `dd = nan`, which the bisection then silently compares against. It reported a 2182.9%
+oracle and a 311.6% equal-weight book — *a combination reading higher than its best constituent at
+a lower Sharpe*, which is impossible and is what gave it away. The fix is a one-line guard now in
+the file: **refuse to report a gate figure unless the achieved drawdown really is −20%.**
+
+Corrected, on the 4.5-year date intersection:
+
+| combination | Sharpe | at −20% |
+|---|---|---|
+| V7 alone | 2.13 | 179.0% |
+| equal weight, all five streams | 1.30 | 24.1% |
+| equal weight, positive streams only | 1.64 | 43.0% |
+| **ORACLE max-Sharpe, full-sample hindsight** | **2.22** | 155.8% |
+| ORACLE, long-only hindsight | 2.15 | 153.2% |
+
+**Combining every stream this study has produced, with weights chosen by looking at the answer,
+raises Sharpe from 2.13 to 2.22 — 4%.** Not a weighting problem: average pairwise correlation is
+only +0.08. The problem is that there is one good stream and four weak ones (Sharpe 0.38–0.96 on
+the common window), and the oracle puts 67–80% on V7 accordingly.
+
+### What would actually reach it
+
+N streams each of Sharpe 2.13 at average pairwise correlation ρ reach `2.13 × √(N/(1+(N−1)ρ))`:
+
+| ρ | N=1 | N=2 | N=3 | N=4 | N=5 |
+|---|---|---|---|---|---|
+| 0.0 | 2.13 | 3.02 | **3.69** | **4.27** | **4.77** |
+| 0.1 | 2.13 | 2.88 | **3.37** | **3.74** | **4.03** |
+| 0.2 | 2.13 | 2.75 | 3.12 | **3.37** | **3.55** |
+| 0.3 | 2.13 | 2.65 | 2.92 | 3.09 | 3.21 |
+
+**The brief requires roughly three uncorrelated V7-quality strategies**, or two if they are
+genuinely independent and a little better than V7. That is the quantitative form of the answer, and
+it is a far more useful statement than "not found": no allocator, no weighting rule and no amount of
+tuning substitutes for the two missing strategies.
