@@ -6154,3 +6154,62 @@ crowding data, in a different signal family.
 
 A ~10% sleeve of the uncorrelated book slightly *improves* the account. Anything larger reduces
 CAGR in exchange for less dependence on one strategy — a risk decision, not a return one.
+
+---
+
+## S170–S171 — Does V7's machinery transfer? No.
+
+Target raised to 150% at a 20% drawdown from a book that is not V7. The best non-V7 book is
+Sharpe 1.73 and more searching will not close that, so the attempt was structural instead:
+**V7's edge is not its signal.** The raw crowding composite is Sharpe 1.32; wrapped in V7's
+machinery it is 2.13 — a 60% lift from the wrapper. That wrapper had never been pointed at
+anything else.
+
+### S170 — the whole wrapper, copied
+
+Fed the breakout signal into V7's 12h grid with its fixed stop/target/hold exit.
+
+    rex144 raw (12h, stop/target)     Sharpe -0.08,  gate -1.0%
+    rex144 wrapped                    Sharpe  0.36,  gate  5.0%
+
+Against Sharpe 1.08 for the *same signal* on daily bars with an ATR trailing exit. The signal
+did not survive the translation, and the reason is structural: **a breakout's edge is letting a
+move run, and a fixed take-profit at 2–3× the stop cuts exactly the tail it exists to capture.**
+V7's crowding signal is a mean-reverting fade, which wants the opposite exit. The exit structure
+is part of the strategy, not packaging.
+
+### S171 — only the transferable half
+
+Kept the breakout in the structure it works in (daily, ATR trail) and applied only V7's
+*selection* machinery: a 240-configuration grid (5 lookbacks × 4 quantiles × 3 trail widths ×
+4 trend gates), ranked quarterly on trailing 12-month Calmar, top-k blend.
+
+| top k held | Sharpe | gate @20% | hold-everything baseline | lift |
+|---|---|---|---|---|
+| 1 | 0.39 | 3.7% | 4.7% | −1.1pp |
+| **3** | **0.61** | **6.7%** | 4.7% | **+2.0pp** |
+| 12 | 0.54 | 6.0% | 4.7% | +1.3pp |
+| 40 | 0.44 | 5.1% | 4.7% | +0.3pp |
+
+**Selection beats holding everything by 2.0 percentage points.** Against the ~60% Sharpe lift the
+same machinery gives the crowding signal, that is nothing. The wrapper is specific to what it
+wraps.
+
+### The arithmetic on 150%
+
+Calmar against Sharpe, fitted across this study's own seven books:
+
+    Calmar = 1.01 x Sharpe^2.36
+
+150% at a 20% drawdown is Calmar 7.5, which needs **Sharpe 2.34**.
+
+| available | Sharpe | gate @20% | drawdown needed for 150% |
+|---|---|---|---|
+| S168 best (rho +0.377 to V7) | 1.73 | 54.4% | **44%** |
+| btc_rex_crowd alone | 1.60 | 42.6% | 56% |
+| best genuinely uncorrelated | 1.39 | ~31% | unreachable |
+| V7 (running) | 2.13 | 178.8% | — |
+
+**150% at a 20% drawdown from a non-V7 book is not reachable with this data.** It needs Sharpe
+2.34; six years of testing produced exactly one thing above 1.8, and it is the book already
+running. The same target is available today at a 44% drawdown.
