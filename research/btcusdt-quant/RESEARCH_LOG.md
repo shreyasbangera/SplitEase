@@ -4781,3 +4781,65 @@ asset that fell 79%. It is simply not a 300% one.
 alone* is worth on BTCUSDT under this brief: **Sharpe ~1.0**. That is the reference point the whole
 log has lacked, and it is the honest benchmark any future strategy on this asset should be judged
 against before anything more elaborate is built.
+
+## S118 — Crowding inputs through a managed-futures architecture. A third standalone strategy.
+
+Two things were established independently: **S117** says price alone on BTCUSDT is worth Sharpe 1.0
+under a vol-targeted, continuously-sized, stopless architecture; **V7** says crowding data is worth
+Sharpe 2.15 under a thresholded, ATR-stop-sized, quarterly-selected one. Nobody had crossed them.
+
+This is the crowding inputs under S117's architecture, and it is neither book: **no thresholds** (a
+0.9-sigma read is not discarded and a 1.1 is not treated as a 3), **no conviction exponent**, **no
+stops** (sized to volatility, never stopped out), **no quarterly selection** — so none of S96c's
+24-point noise band and neither oracle bound applies, both being statements about a selector this
+book does not have — and **daily rather than 12h**, so no clock phase to be fragile about.
+
+Nine raw published series, not V7's five engineered signals: top-trader position and account ratios,
+retail account ratio, their log gap, taker buy/sell ratio, 7-day open-interest change, funding,
+annualised front-quarterly basis, BTC dominance. Each z-scored on a trailing 180 days, lagged a
+full day, clipped at 2, and **equal-weight averaged with nothing fitted** — the choice S106b's
+result argues for. Funding and costs charged as in S117.
+
+| book | CAGR | realDD | medDD | Sharpe | Calmar | turns | **at −20%** | 1st half | 2nd half |
+|---|---|---|---|---|---|---|---|---|---|
+| crowding L/S, target vol 20% | 9.4% | −7.6% | −7.6% | **1.18** | 1.22 | 672 | 25.7% | 57.6% | 9.8% |
+| crowding L/S, 40% | 17.9% | −18.1% | −15.3% | 1.13 | 0.99 | 1256 | 19.9% | 62.6% | 4.4% |
+| crowding L/S, 80% | 35.0% | −34.2% | −29.6% | 1.11 | 1.02 | 1602 | 19.7% | 64.0% | 3.6% |
+| **crowding LONG-ONLY, 20%** | 6.9% | −5.1% | −6.5% | 1.09 | **1.36** | 308 | **28.9%** | 59.9% | 11.8% |
+| crowding long-only, 60% | 16.0% | −20.2% | −22.4% | 0.89 | 0.79 | 913 | 15.9% | 45.2% | 1.4% |
+
+**Sharpe 1.1–1.2, best cell 28.9% at the gate.** Better than S117's price-only 19.2%, so the
+crowding inputs are worth roughly +0.15 of Sharpe over price alone *under this architecture* —
+against the +1.15 they are worth under V7's. And every cell decays hard between halves (57.6% →
+9.8%), consistent with the log's standing finding that the funding premium is decaying.
+
+### S118b — letting the data choose the signs makes it seven times worse
+
+An IC check said three of my nine sign assumptions were wrong (`tt_pos`, `taker` and `basis` all
+had negative IC as signed) and that `btc_dom` flips between halves. The wrong fix is to flip them
+after seeing that — S113 turned an in-sample +9.9 into a causal −48.8 exactly that way. So the
+signs were instead set by a **trailing 365-day IC**, refreshed every 30 days, with features below
+|IC| 0.01 sitting out: nine low-dimensional binary choices, each decidable on the day it applies.
+
+| | Sharpe | at −20% | 1st half | 2nd half |
+|---|---|---|---|---|
+| **fixed signs — reasoned a priori** | **1.15** | **23.1%** | 67.2% | 9.8% |
+| causal signs — trailing IC | 0.36 | 3.5% | −4.5% | 16.8% |
+| *random signs, 20 draws* | — | *median −2.4%, mean −0.7, sd 3.2, **max 6.0*** | — | — |
+
+**Data-chosen signs land barely above random and seven times below reasoned ones.** The a-priori
+book at 23.1% is far outside the random control's entire range; the causally-chosen one at 3.5% sits
+inside it.
+
+So the IC diagnostic that condemned three of my signs was itself the unreliable measurement. Those
+ICs are 0.01–0.04 — flipping a sign on that evidence is noise-chasing, and a feature's next-day rank
+correlation is not the quantity a vol-targeted book with a no-trade band actually earns from.
+
+**This is S109's law a third time, on a third kind of selection.** Config selection went
+anti-informative on the event panel; weight selection had no persistence in S106b; sign selection is
+no better than random here. *On this data, selecting on trailing performance loses to not selecting,
+at every level of the hierarchy it has been tried.*
+
+*(The first implementation of the sign matrix assigned with `signs[c].iloc[i] = v`, which under
+pandas 3 copy-on-write writes to a temporary and is silently discarded. Every sign stayed zero, no
+position was ever opened, and the entire table printed 0.0% with no error at all. Rebuilt in numpy.)*
