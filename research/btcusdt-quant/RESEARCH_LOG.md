@@ -6213,3 +6213,89 @@ Calmar against Sharpe, fitted across this study's own seven books:
 **150% at a 20% drawdown from a non-V7 book is not reachable with this data.** It needs Sharpe
 2.34; six years of testing produced exactly one thing above 1.8, and it is the book already
 running. The same target is available today at a 44% drawdown.
+
+---
+
+## S172 — Holding V7 to the standard everything else was held to
+
+V7 is the book with live capital on it and the one this whole study benchmarks against, and it
+had never been through a surrogate control, an out-of-sample split or a robustness sweep. Its
+quarterly config selection IS causal (18 quarters from 2022-03, each ranking on the preceding
+twelve months). What was never tested is everything the selection was handed: the grid ranges,
+the five-signal set (annotated in source with the full sample span), and the architecture.
+
+**Reconstruction note:** rebuilding V7 by slicing full-sample config streams rather than
+re-running each window with a fresh equity base gives **117.4%** at a 20% drawdown, against the
+published **178.8%**. The difference is compounding across segment resets. The conservative
+figure is used throughout below.
+
+### 1. Random grid halves — is the specific grid doing the work?
+
+200 random halves of the 200-config grid: median **87.8%**, 5th pct 65.6%, 95th pct 121.6%. The
+full grid sits at the **89th percentile**. A full grid naturally beats a half one (bigger
+selection pool, more diversification), so that is not damning — but the spread says the result
+swings **±30% on grid composition alone**.
+
+### 2. Leave one signal out — was the five-signal set chosen by looking?
+
+| dropped | Sharpe | gate @20% | Δ |
+|---|---|---|---|
+| none (V7) | 1.99 | 117.4% | — |
+| flow | 1.85 | 87.9% | −29.5pp |
+| posn | 1.64 | 82.6% | −34.8pp |
+| fundz | 1.78 | 75.7% | −41.7pp |
+| btcdom | 1.64 | 57.8% | −59.6pp |
+| cmpx | 1.37 | **42.7%** | **−74.7pp** |
+
+**Removing any one of the five costs 25–64% of the gate.** A set that had not been chosen on the
+full sample would sometimes *improve* on removal; none does. That is consistent with selection,
+and it also means the book is fragile — one decayed or broken feed costs a third to two-thirds.
+
+### 3. Architecture sweep — peak or plateau?
+
+| top k | lookback | reselect | gate @20% |
+|---|---|---|---|
+| **1** | 12 | 3 | **123.1%** |
+| 3 (V7) | 12 | 3 | 117.4% |
+| 5 | 12 | 3 | 98.5% |
+| 12 | 12 | 3 | 100.0% |
+| 3 | 6 | 3 | 86.4% |
+| 3 | 18 | 3 | 91.4% |
+| 3 | **24** | 3 | **140.2%** |
+| 3 | 12 | 1 | 121.8% |
+| 3 | 12 | 6 | 36.3% |
+
+**This is the test V7 passes cleanly.** Its choices are not the maximum — top-1 beats top-3, and
+a 24-month lookback beats 12 by 23 percentage points. A fitted architecture sits on its peak;
+this one sits on a plateau slightly below it. The (3, 12, 3) design was not tuned to the answer.
+
+### 4. Decay — the finding that matters
+
+Rolling 12-month return through the live period:
+
+| window ending | trailing 12m |
+|---|---|
+| 2023-03 | 17.1% |
+| 2023-09 | 31.7% |
+| 2024-03 | 387.6% |
+| 2024-09 | **828.1%** |
+| 2025-03 | 174.2% |
+| 2025-09 | 123.5% |
+| 2026-03 | 100.8% |
+
+**First-half median 273.7%; second-half median 108.2% — a 60% decline.** Year by year:
+2022 +1.7%, 2023 +278.2%, 2024 +287.8%, 2025 **+86.3%**, 2026 +126.5%.
+
+And 2025's in-year drawdown was **−24.0%**, above the 20% limit, on the unscaled stream.
+
+### Verdict
+
+V7's *architecture* is sound — it is not sitting on a fitted peak, which is the single most
+common way a backtest lies. Its *signal set* shows the fingerprints of full-sample selection and
+is fragile to any one input. And its edge has roughly halved: it is currently running at about a
+third of the 2023–24 rate, consistent with S119's finding that the crowding family decays
+(21.9% in 2021 → 0.8% by 2025).
+
+Two candidate improvements fall out of the sweep — top-1 instead of top-3, and a 24-month
+lookback instead of 12 — but picking the best cell of a sweep is precisely the fitting this file
+exists to detect. They are candidates for a walk-forward test, not recommendations.
