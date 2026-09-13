@@ -4579,3 +4579,73 @@ however different their expiries.**
 them, so the account passed through zero and kept trading, printing −100% CAGR against a −3,483%
 drawdown. That is a bankrupt account still placing orders, not a result. Fixed to compound, with a
 liquidation stop, before anything above was read.)*
+
+## S115 — V7's opposite, and the structural argument for it was wrong
+
+With spot off the table the instrument is one futures contract, and a futures contract offers
+exactly three sources of return: **direction, carry, volatility**. S114 measured the perp-quarterly
+carry at 0.2% a year — absent. Volatility needs options and this study has five months of them,
+already recorded as noise. So what remains must be directional.
+
+That is not immediately a dead end, because every directional experiment here has been the *same*
+direction. Four of V7's five signals are crowding measures: it is a **fade-the-crowd** book, its
+worst episode (S84) was *29 shorts into the strongest trend of the sample*, and the trend gate was
+bolted on afterwards to stop that bleeding. A trend **sleeve** was never built.
+
+S4 built a trend book and rejected it on Calmar 0.97 — correct as a *standalone*, and decided years
+before S102c gave this study a way to judge a partner. The bar for a partner collapses with
+correlation:
+
+| ρ vs V7 | +0.4 | +0.2 | 0.0 | −0.2 | −0.3 | −0.4 | −0.5 |
+|---|---|---|---|---|---|---|---|
+| Sharpe required | 1.45 | 1.18 | 0.89 | 0.57 | **0.39** | **0.21** | **0.00** |
+
+**The prediction written into the file: "a trend book is the first candidate with a structural
+reason to correlate negatively."** Six textbook rules, spans fixed in advance, every one reported:
+
+| sleeve | trades | CAGR | MaxDD | Sharpe | ρ vs V7 | needed | clears |
+|---|---|---|---|---|---|---|---|
+| EMA50 | 278 | 14.0% | −48.3% | 0.51 | **+0.382** | 1.43 | no |
+| EMA100 | 189 | 33.4% | −48.5% | 0.81 | +0.364 | 1.40 | no |
+| EMA200 | 124 | 16.6% | −49.0% | 0.56 | +0.231 | 1.22 | no |
+| DC20 | 130 | 3.5% | −62.6% | 0.32 | +0.287 | 1.30 | no |
+| DC40 | 96 | 2.0% | −60.2% | 0.29 | +0.232 | 1.23 | no |
+| DC60 | 78 | 9.4% | −52.1% | 0.43 | +0.184 | 1.16 | no |
+
+**Every correlation is positive, +0.18 to +0.38. The prediction was wrong and is recorded as wrong.**
+
+The reason is in V7's own construction. It is not a pure crowding book — **it carries a trend gate**
+that suppresses shorts above a long moving average, which makes it partly trend-aligned by design.
+S84's fix is exactly what removed the negative correlation this file was hoping to exploit. On top
+of that, both books are long a market that rose over the sample, so their shared beta dominates
+whatever contrarian structure remains.
+
+The blends are correspondingly awful — every one loses 129 to 148 points and is worse in both halves:
+
+| book | Sharpe | Calmar | at −20% | vs V7 | worse half |
+|---|---|---|---|---|---|
+| **V7 alone** | 2.15 | 7.00 | **168.8%** | — | — |
+| V7 + EMA100 *(best)* | 1.43 | 2.09 | 39.5% | −129.3 | −142.7 |
+| V7 + DC40 *(worst)* | 1.12 | 1.11 | 20.9% | −147.9 | −186.6 |
+
+### Where this leaves the search
+
+Direction, carry and volatility is not a rhetorical list — it is what a futures contract *is*, and
+with spot and other instruments excluded it is the whole space:
+
+| source | status |
+|---|---|
+| carry (perp vs quarterly) | **0.2% a year — absent** (S114) |
+| volatility | no data — five months of options, recorded as noise |
+| direction, crowding family | V7 — ~110 experiments, bounded by two oracles |
+| direction, trend family | S4 (Calmar 0.97) and S115 (Sharpe 0.29–0.81, ρ positive) |
+| direction, short-horizon reversal | closed from two sides — order-book information 0.16 bps, maker fill edge 1.6 bps against 3.6 bps of cost |
+| direction, breakout / squeeze | S14, S24 — rejected |
+| direction, macro | S95 — negative |
+| direction, machine-learned | S6, S110, S111 — closed |
+
+**The space is enumerated, not merely unexplored.** What would reopen it is a different instrument,
+a spot leg, options data, or any new data source — and all four are currently ruled out by scope or
+by the egress policy. Further candidate-generation inside this space is not research; it is a lottery
+with a 24-point noise band and a growing chance of a false positive that survives one control and
+fails the next.
