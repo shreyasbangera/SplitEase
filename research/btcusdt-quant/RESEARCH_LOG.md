@@ -5839,3 +5839,95 @@ fitted at R² 0.969 across 332 books; the best combination of everything this st
 
 The session's strategy work took the best non-V7 book from **26.6% to 42.6%** at the same constraint.
 It does not reach 300%, and nothing reachable from a single crypto perpetual with public data will.
+
+---
+
+## S147–S159 — A portfolio of cryptos
+
+The single-instrument line closed on arithmetic, not on a failure to search, so the
+constraint that was relaxed was the instrument count. This is the portfolio attempt, built
+from scratch rather than adapted.
+
+### The universe was rebuilt, because the one on disk was a lie
+
+The 16-coin panel used through S146 is 16 coins **that still exist in 2026**. LUNA, FTT, SRM,
+ANC and every other delisted name is absent. Binance's archive keeps delisted contracts, so
+the universe was rebuilt from it: **855 USDT perpetuals ever listed → 683 with usable
+history → median 80 tradeable names a day**, including 23 contracts that die in sample.
+Real 8-hourly funding was fetched for all of it.
+
+**Survivorship bias runs the opposite way from the textbook here.** A dying coin is violently
+volatile and expensive to hold, so the validated factors are all SHORT it. Removing the
+corpses removes the profitable side. On the honest universe the low-vol book runs Sharpe 1.27
+against 0.41 on the survivor panel, and a gate of 15.4% against 3.7%.
+
+### What survived, and what the surrogate control killed
+
+| factor | t (best horizon) | surrogate p | verdict |
+|---|---|---|---|
+| vol30 / vol90 | 14.08 / 13.65 | 0.000 | **real** — low-volatility wins |
+| carry (funding) | 2.30–2.47 | 0.010 | **real** — cross-sectional carry |
+| rev3/5/10, srev3/5 | 3.7–4.5 | 0.01–0.03 | real on RANK, worthless in dollars |
+| mom7/30/90 | −4.6 to −4.8 | 0.000 | real on RANK, sign reverses in dollars |
+| amihud (illiquidity) | 8.56 | **1.000** | **killed** — surrogates score higher |
+
+Breadth genuinely compounds the signal: the low-vol IC carries t = 5.73 across 16 names,
+8.40 across 52, and **14.08 across 80**.
+
+### The finding that matters more than any book here
+
+**A rank IC is not a tradeable edge when the payoff is skewed.** Sorting on the 5-day return:
+
+| | mean/day | median/day | skew |
+|---|---|---|---|
+| decile 1 (biggest losers) | **−6.0bp** | 0.0bp | +0.31 |
+| decile 10 (biggest winners) | **+21.8bp** | 0.0bp | **+1.51** |
+
+Both medians are zero. The rank IC measures the middle, where losers do outperform; the money
+is entirely in the right tail, where winners keep winning. A long-D1/short-D10 book built on
+that positive rank IC loses **27.8bp a day**. This invalidates the screening statistic used in
+S147, S149 and S155 — not their arithmetic, their choice of statistic. Excluding dying coins
+and winsorising both make it worse, so it is not a corpse artefact.
+
+Second: **volatility drag governs everything**. The universe averages +6.8bp/day and compounds
+at **−11.9%** at 85.7% vol. An equal-weighted altcoin basket converts positive average returns
+into losses.
+
+### Two haircuts I got wrong before getting one right
+
+- **symmetric daily return cap (S152)** — the book *improved* as the cap tightened, because a
+  symmetric cap refunds losses as well as confiscating gains. A hindsight stop-loss, not a haircut.
+- **blanket asymmetric gain cap (S153)** — collapsed the book to Sharpe −1.20 by confiscating
+  every large favourable move anywhere while leaving every adverse one. It measured the
+  asymmetry of the test, not a real constraint.
+- **targeted delisting haircut (S154)** — gains zeroed only in a dying contract's final 10 days.
+  Costs Sharpe 0.34 → 0.26. **Nothing here depends on looting corpses.**
+
+### The result
+
+| book | Sharpe | gate @ realised 20% DD | honest (bootstrap) gate |
+|---|---|---|---|
+| **BTC single instrument alone** | **1.60** | **42.6%** | 42.6% |
+| BTC + carry | 1.55 | 35.3% | 44.0% |
+| BTC + carry + low-vol | 1.61 | 31.7% | 35.3% |
+| portfolio sleeves only | 0.80 | 7.4% | 8.6% |
+
+Sleeve correlations are genuinely near zero (average +0.004, worst +0.345), which is exactly the
+condition S124 said was required. It is not enough: the portfolio sleeves run at Sharpe ~0.5
+against the single-instrument book's 1.51, and combining a good stream with weak uncorrelated
+ones raises Sharpe by sqrt-of-nothing worth having.
+
+**The portfolio of cryptos does not beat one instrument.** 42.6% at a 20% drawdown stands.
+
+| criterion | result | verdict |
+|---|---|---|
+| net yearly profit > 300% | **42.6%** | **FAIL — 7.0× short** |
+| max drawdown < 20% | 20.0% | PASS |
+| 100+ completed trades | 458 | PASS |
+| profit factor > 1.10 | 1.35 daily | PASS |
+| realistic risk management | vol target, 5% name cap, funding, delist haircut | PASS |
+| no look-ahead bias | lagged inputs, point-in-time universe | PASS |
+
+300% at a 20% drawdown needs Sharpe **6.58**. The best combination of everything — single
+instrument and portfolio, five near-uncorrelated sleeves, 683 coins, six years — reaches **1.60**.
+Even with the drawdown limit removed entirely, the Kelly ceiling at that Sharpe is 231%.
