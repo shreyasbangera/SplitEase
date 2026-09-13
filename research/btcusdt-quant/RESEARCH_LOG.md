@@ -6392,3 +6392,45 @@ The thing to watch is `flow` and `posn`, which have lost half and a third of the
 Sharpe. And the keystone is `cmpx`: removing it costs 0.95 Sharpe and 128.7pp of CAGR on recent
 data. If the coin-margined contract ever does go quiet, that is the failure that matters — so
 monitor `cm_1h` coverage and zero-move share as an operational alarm.
+
+---
+
+## S174 — Minute microstructure carries nothing at a daily horizon
+
+The last genuinely unexploited data in the study: `fut_1m` (3.5m rows, 6.7 years of 1-minute
+bars with taker buy volume — i.e. signed order flow) and `bvol_1m` (1.66m rows, 3.2 years of
+1-minute implied vol). V7 reads order flow and IV but only as 12-hour aggregates, which destroys
+the *shape* of flow within the window.
+
+22 features built from minute bars and traded daily — the asymmetry being tick-level information
+content at daily-book costs: order-flow mean/dispersion/skew/autocorrelation, dollar-weighted
+flow, volume concentration, realised vol, **bipower jump fraction**, signed jumps, semivariance
+ratio, the 1m/15m **signature ratio**, minute skew and kurtosis, trade intensity and its
+autocorrelation, minute-scale Amihud, close-vs-VWAP, and four IV features.
+
+**Not one cleared |t| = 2.5. The maximum across all 22 at 1, 5 and 20 days was |t| = 1.39.**
+
+| strongest | IC1d | t | IC5d | t | IC20d | t |
+|---|---|---|---|---|---|---|
+| iv_vov | +0.0435 | 1.39 | +0.0040 | 0.06 | +0.0579 | 0.40 |
+| iv_range | +0.0401 | 1.28 | +0.0146 | 0.21 | +0.0465 | 0.32 |
+| n_trades | +0.0129 | 0.62 | +0.0550 | 1.18 | +0.0881 | 0.94 |
+| ofi_mean | +0.0000 | 0.00 | +0.0282 | 0.60 | +0.0247 | 0.26 |
+
+No surrogate control was needed — nothing survived the first screen.
+
+**The economic reading is the useful part.** Microstructure information decays in seconds to
+minutes. Aggregate a day of it and trade tomorrow and it is gone, because it has already been
+arbitraged into the price. That is exactly what S120 found from the other direction — the
+intraday edge is real at 0.1–2.2bps and dies against a 16bps round trip. Together the two files
+close the question: **the microstructure edge exists, lives at a horizon where costs eat it, and
+does not survive aggregation to a horizon where they do not.**
+
+### Where this leaves the search
+
+174 experiments. Daily and 12-hour price signals, cross-sectional factors across 683 coins,
+carry, basis, on-chain, macro, options, and now minute microstructure. The best independent book
+is the breakout family at Sharpe 1.08; V7 is ~2.0. **Nothing in this dataset beats V7, and the
+remaining upside is not another signal** — it is running V7 against a decay-adjusted expectation,
+accepting more drawdown for more return along the measured frontier, or acquiring data this study
+does not have.
