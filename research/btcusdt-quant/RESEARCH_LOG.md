@@ -6519,25 +6519,42 @@ the stop at the trade rather than re-deriving it from the current close.  This i
 measured against THIS repo's webapp/; the deployed laptop copy has already proven
 to differ in several places and must be checked before acting on it.
 
-## S178b - the fix: the stop belongs to the trade
+## S179 - replay the ACTUAL bot code.  S178 was wrong; this supersedes it.
 
-Anchoring to the position's average entry price was the obvious stateless fix and
-it does nothing - Sharpe 1.01 against the bug's 0.99.  As the bot resizes into a
-trade the average entry drifts toward the current price, so the stop chases
-anyway.  The level has to be remembered; there is no stateless version.
+S178 was a reimplementation, and it had a bug.  Line 175 reset a sleeve's stop
+only when its quantity hit exactly zero; with resizing on, a sleeve flips long to
+short in one step and never touches zero, so the new short kept the old long's
+stop - sitting BELOW the market, where the hit test fires instantly and "closes"
+the short 5% below price.  A phantom gain, out of nowhere, inflating every
+anchored number.  Sharpe 2.77 was an artifact; so was Sharpe 0.99 for the bot.
 
-`webapp/anchors.py` stores one record per sleeve label, mirroring the ladder
-actually resting on the exchange.  The strategy stays stateless and untouched -
-`engine.plan_orders` overrides the freshly-derived levels with the remembered
-ones, and only `engine.execute` writes, so a dry run can read but never corrupt.
+s179_replay.py imports webapp.engine and webapp.strategies.v7 and calls
+plan_orders() and execute() once per 12h bar.  Only load_panels() (data plumbing)
+and the broker (a replay venue implementing webapp/broker/base.py) are mine.
 
-An anchor is void when the account is flat, the side flipped, price has already
-reached the stop or the target, or the quarterly reselection changed the label.
+  2022-03 -> 2026-08          CAGR    maxDD   medDD   Shp    PF   stops  targets
+  OLD  8%    re-derived      122.6   -24.9   -20.0   2.57  2.16     39        0
+  NEW  8%    anchored        138.4   -23.5   -19.5   2.74  2.27     29       45
+  OLD 14.4%  re-derived      316.1   -39.6   -34.4   2.64  1.92     39        0
+  NEW 14.4%  anchored        370.7   -37.9   -33.7   2.79  2.06     29       45
 
-  tests/anchors.py         15 checks on the rules
-  tests/anchors_engine.py  end to end: the stop stays at 80,869.8 while price
-                           runs 1,500 against the short, where the old code
-                           would have re-placed it at 82,364.8
+The mechanism is not the stop.  It is the TARGET: at 3R it sits 7.5 ATR out and
+was re-placed every 12h, so in 4.5 years it was never once reached.  Anchoring
+lets it work - 45 hits - while stop-outs fall from 39 to 29.  The fix is a strict
+improvement on every measure at both risk settings, but a modest one.
 
-Measured effect at 8% risk: CAGR 32.7% -> 173.5%, median drawdown -32.9% ->
--18.7%, Sharpe 0.99 -> 2.77.
+Three different numbers have now been quoted for the same strategy, and they are
+three different things:
+  86.2% @8%, 179.0% @14.4%   engine/core.py - a TRADE simulator, correct for the
+                             rules it simulates, which the deployment does not
+                             implement
+  32.7% @8%, Sharpe 0.99     S178.  Wrong, see above.
+  122.6% @8%, 316.1% @14.4%  the deployed code, replayed.  The authority.
+
+The replay sizes off MARKED equity, as decisions.jsonl shows the laptop does;
+engine/core.py sizes off realised-only equity.  That alone lifts both return and
+drawdown, and is part of why (1) and (3) differ.
+
+Not independently validated: the Replay broker and bar clock, ~80 lines written
+for this.  A fault there moves OLD and NEW together, so the comparison is robust
+and the absolute levels carry the risk.
