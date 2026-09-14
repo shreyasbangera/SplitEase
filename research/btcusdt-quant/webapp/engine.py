@@ -10,6 +10,7 @@ import pandas as pd
 
 from .config import STORE, MODE
 from .strategies.registry import get, discover
+from . import anchors
 
 
 def load_panels(names):
@@ -33,6 +34,14 @@ def plan_orders(strategy, broker, equity, risk, min_notional=100.0):
 
     pos = broker.position()
     px = broker.price()
+
+    # A stop belongs to the TRADE, not to the latest bar.  The strategy derives
+    # both levels from the current close every 12h, so without this the stop was
+    # re-placed further away each time price ground against a position and the
+    # loss was never capped where the risk budget said it would be.  Measured at
+    # Sharpe 0.99 against 2.77 with the level held still (s178_livesim.py).
+    reused = anchors.apply(d.sleeves, anchors.load(STORE), px, flat=(pos.qty == 0))
+
     delta = target - pos.qty
     order = None
     if abs(delta) * px >= min_notional and not conflict:
@@ -57,6 +66,7 @@ def plan_orders(strategy, broker, equity, risk, min_notional=100.0):
         sleeves=[dict(label=s.label, qty=s.qty, stop=s.stop, tp=s.take_profit,
                       hold_bars=s.hold_bars, meta=s.meta) for s in d.sleeves],
         diagnostics=d.diagnostics, note=d.note,
+        anchors=anchors.snapshot(d.sleeves), anchors_reused=reused,
         conflict=conflict,
         conflict_note=("sleeves disagree on side — the engine refuses to net them. "
                        "This should be impossible for V7; investigate before trading."
@@ -76,4 +86,7 @@ def execute(plan, broker, armed: bool):
     broker.cancel_all()
     for leg in plan["ladder"]:
         done.append(broker.place_stop(leg["side"], leg["qty"], leg["stop"], leg["kind"]))
+    # Mirror the ladder that is now resting on the exchange.  Written only here,
+    # so a dry run reads the anchors and can never corrupt them.
+    anchors.save(STORE, plan.get("anchors", {}))
     return dict(sent=True, results=done)

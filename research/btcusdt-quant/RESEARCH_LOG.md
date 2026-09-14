@@ -6518,3 +6518,26 @@ So the deployed edge is not the measured edge, and the fix is one line - anchor
 the stop at the trade rather than re-deriving it from the current close.  This is
 measured against THIS repo's webapp/; the deployed laptop copy has already proven
 to differ in several places and must be checked before acting on it.
+
+## S178b - the fix: the stop belongs to the trade
+
+Anchoring to the position's average entry price was the obvious stateless fix and
+it does nothing - Sharpe 1.01 against the bug's 0.99.  As the bot resizes into a
+trade the average entry drifts toward the current price, so the stop chases
+anyway.  The level has to be remembered; there is no stateless version.
+
+`webapp/anchors.py` stores one record per sleeve label, mirroring the ladder
+actually resting on the exchange.  The strategy stays stateless and untouched -
+`engine.plan_orders` overrides the freshly-derived levels with the remembered
+ones, and only `engine.execute` writes, so a dry run can read but never corrupt.
+
+An anchor is void when the account is flat, the side flipped, price has already
+reached the stop or the target, or the quarterly reselection changed the label.
+
+  tests/anchors.py         15 checks on the rules
+  tests/anchors_engine.py  end to end: the stop stays at 80,869.8 while price
+                           runs 1,500 against the short, where the old code
+                           would have re-placed it at 82,364.8
+
+Measured effect at 8% risk: CAGR 32.7% -> 173.5%, median drawdown -32.9% ->
+-18.7%, Sharpe 0.99 -> 2.77.
