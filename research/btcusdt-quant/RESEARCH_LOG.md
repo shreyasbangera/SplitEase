@@ -6476,3 +6476,45 @@ at these costs, and the standing book is not informative about direction at a on
 
 What is left is not a signal. It is either an execution edge (market making, which needs
 queue-position simulation and carries real fidelity risk), or running V7 better.
+
+## S178 - the backtest does not describe the deployed bot
+
+Two different machines were being compared all along.  `engine/core.py` is a TRADE
+simulator: open at the signal, freeze the quantity and the stop, exit on stop,
+target, flat signal, reversal or the holding cap.  `webapp/` is a TARGET simulator:
+every 12h recompute the wanted position from CURRENT conviction, trade the
+difference, and cancel and re-place the whole stop ladder against the CURRENT
+price.  It never applies the holding cap - `hold_bars` is set on the Sleeve and
+nothing reads it.
+
+`s178_livesim.py` reimplements both on the same bars, costs and quarterly
+selection.  Validation (`... check`) runs one config under backtest rules against
+engine/core.py on the same config: -0.6, -2.2, -5.3pp of CAGR - consistently a
+little conservative, which cancels when variants are compared inside it.  At k=3
+the control lands on CAGR 79.1% / DD -11.5% / Sharpe 2.14 against the real
+backtest's 86.2% / -12.3% / 2.15.
+
+                                  risk 8%                     risk 14.4%
+                          CAGR     DD    Shp  PF      CAGR     DD    Shp  PF
+  BACKTEST rules          79.1  -11.5   2.14 3.48    166.3  -20.0   2.16 3.42
+  + rolling stop only     79.7  -12.7   2.04 3.61    165.3  -22.8   2.06 3.58
+  + resizing only        173.5  -26.3   2.77 2.31    459.2  -43.2   2.79 2.28
+  THE BOT (both)          32.7  -28.8   0.99 1.49     54.1  -48.4   0.99 1.41
+
+Neither change is harmful alone.  Rolling the stop is neutral (2.14 -> 2.04).
+Resizing to live conviction is a large IMPROVEMENT (2.14 -> 2.77), which is the
+same effect the engine's disabled `add_max` top-up was written for - its comment
+notes 37% of trades see their own signal at least double while held.
+
+The two together are what destroys it: Sharpe 0.99, profit factor 1.41, drawdown
+more than doubled.  The mechanism is an interaction, not a cost.  ("resizing only"
+takes MORE trades - 4257 vs 3770 - at Sharpe 2.77, so it is not fees.)  Resizing
+makes the position large exactly when conviction is high; a stop re-anchored to
+the current price every 12h retreats as price grinds against that large position,
+so the loss is never capped where the risk budget said it would be.  Fixed stop:
+the package is closed at the level the size was computed from.
+
+So the deployed edge is not the measured edge, and the fix is one line - anchor
+the stop at the trade rather than re-deriving it from the current close.  This is
+measured against THIS repo's webapp/; the deployed laptop copy has already proven
+to differ in several places and must be checked before acting on it.
